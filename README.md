@@ -44,7 +44,7 @@ To release a new gem version:
 > gem_release 1.0.0
 ```
 
-## .csv importer
+## CSV Importer
 
 Extend a class from `Effective::CSVImporter` to quickly build a csv importer.
 
@@ -101,6 +101,8 @@ def normalize(column, value)
   end
 end
 ```
+
+Override `before_import()` or `after_import()` to run code before or after the import.
 
 ## License
 
