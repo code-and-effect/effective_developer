@@ -1,0 +1,118 @@
+#!/usr/bin/env ruby
+
+# Helper script to release a new ruby gem version.
+
+# To print the current gem version:
+# > gem_release
+
+# To release a new gem version:
+# > gem_release 1.0.1
+
+# All files must be committed
+# The old version should still be present in version.rb
+
+# This script will:
+# 1. write the given new version to ./lib/gem_name/version.rb
+# 2. commit version.rb with a tag and a message
+# 3. git push origin master
+# 4. gem build and gem push to rubygems
+
+class GemRelease
+  def execute!(args)
+    @args = args
+
+    # Check for all the errors.
+
+    if args.length > 1
+      puts('Invalid arguments')
+      exit
+    end
+
+    if uncommitted_files.length > 0
+      puts 'Unable to proceed, the following files must be committed:'
+      puts(uncommitted_files)
+      exit
+    end
+
+    if gem_name.nil?
+      puts 'Unable to proceed, a .gemspec file must be present in current directory'
+      puts "Please run gem_release from a gem's root directory"
+      exit
+    end
+
+    if current_version.nil?
+      puts "Unable to read gem's VERSION constant"
+      puts "Please make sure .#{gem_version_file.gsub(Dir.pwd, '')} is present and correct"
+      exit
+    end
+
+    # Done error checking.
+
+    if next_version.nil?
+      puts "Current version is: #{current_version}"
+      exit
+    end
+
+    # Release a new gem version
+    if next_version.nil? == false
+      unless confirm("Releasing #{gem_name} #{next_version} (press y to continue)")
+        puts('aborted')
+        exit
+      end
+
+      write_next_version
+
+      `git add #{gem_version_file}`
+      `git commit -m 'Version #{next_version}'`
+
+      `git tag -a #{next_version} -m 'Version #{next_version}'`
+      `git push origin master --tags`
+
+      puts `gem build #{gem_name}.gemspec`
+      puts `gem push #{gem_name}-#{next_version}.gem`
+    end
+  end
+
+  private
+
+  VERSION_REGEX = /VERSION\s?=\s?('|")(.*)('|")/
+
+  def uncommitted_files
+    @uncommitted ||= `git status --porcelain`
+  end
+
+  def gem_name
+    @gem_name ||= (Dir.glob('*.gemspec').first.gsub('.gemspec', '') rescue nil)
+  end
+
+  def gem_version_file
+    File.join(Dir.pwd, 'lib', gem_name, 'version.rb')
+  end
+
+  def gem_version_file_contents
+    @gem_version_file_contents ||= (File.read(gem_version_file) rescue '')
+  end
+
+  def current_version
+    matched = gem_version_file_contents.match(VERSION_REGEX)
+    matched.length == 4 ? matched[2] : nil
+  end
+
+  def next_version
+    @args.first
+  end
+
+  def confirm(message)
+    print(message + ' ')
+    STDIN.gets.chomp.downcase == 'y'
+  end
+
+  def write_next_version
+    File.open(gem_version_file, 'w') do |file|
+      file.puts gem_version_file_contents.gsub(current_version, next_version)
+    end
+  end
+
+end
+
+GemRelease.new().execute!(ARGV)
