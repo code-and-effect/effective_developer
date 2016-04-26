@@ -18,9 +18,7 @@ Run the bundle command to install it:
 bundle install
 ```
 
-## Developer tools
-
-### gem_release
+## gem_release
 
 A command line shell script that quickly bumps the version of any ruby gem.
 
@@ -44,6 +42,64 @@ To release a new gem version:
 
 ```console
 > gem_release 1.0.0
+```
+
+## .csv importer
+
+Extend a class from `Effective::CSVImporter` to quickly build a csv importer.
+
+Put your importer in `lib/csv_importers/users_importer.rb` and the data in `lib/csv_importers/data/users.csv`.  Both filenames should be pluralized.
+
+A rake command will be dynamically created `rake import:users`.
+
+### Required Methods
+
+The importer requires two instance methods be defined:
+
+- `def columns` a hash of names to columns.  The constants `A` == 0, `B` == 1, upto `AT` == 45 are defined to work better with spreadsheets.
+- `def process_row` will be run for each row of data.  Any exceptions will be caught and logged as errors.
+
+Inside the script, there are a few helpful functions:
+
+- `col(:email)` will return the normalized value in that column.
+- `last_row_col(:email)` will return the normalized value for this column in the previous row.
+- `raw_col(:email)` will return the raw value in that column
+
+```ruby
+module CsvImporters
+  class UsersImporter < Effective::CSVImporter
+    def columns
+      {
+        email: A,
+        first_name: B,
+        last_name: C,
+        admin?: D
+      }
+    end
+
+    def process_row
+      User.new(email: col(:email), first_name: col(:first_name), last_name: col(:last_name), admin: col(:admin?)).save!
+    end
+
+  end
+end
+```
+
+When using `col()` or `last_row_col()` helpers, the value is normalized.
+
+- Any column that ends with a `?` will be converted into a boolean.
+- Any column that ends with `_at` will be converted into a DateTime.
+- Any column that ends with `_on` will be converted into a Date.
+- Override `def normalize` to add your own.
+
+```ruby
+def normalize(column, value)
+  if column == :first_name
+    value.upcase
+  else
+    super
+  end
+end
 ```
 
 ## License

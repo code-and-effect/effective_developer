@@ -3,6 +3,7 @@ namespace :pg do
   #
   # bundle exec rake pg:pull
   # bundle exec rake pg:pull[staging]
+  desc 'Pulls a newly captured backup from heroku (--remote heroku by default) and calls pg:load'
   task :pull, [:remote] => :environment do |t, args|
     args.with_defaults(:remote => 'heroku')
 
@@ -29,6 +30,7 @@ namespace :pg do
   #
   # bundle exec rake pg:load => Will replace the current database with latest.dump
   # bundle exec rake pg:load[something.dump] => Will replace the current database with latest.dump
+  desc 'Loads a postgresql .dump file into the development database (latest.dump by default)'
   task :load, [:file_name] => :environment do |t, args|
     args.with_defaults(:file_name => 'latest.dump')
     db = ActiveRecord::Base.configurations
@@ -47,6 +49,7 @@ namespace :pg do
 
   # bundle exec rake pg:save => Will dump the database to latest.dump
   # bundle exec rake pg:save[something.dump] => Will dump the database to something.dump
+  desc 'Saves the development database to a postgresql .dump file (latest.dump by default)'
   task :save, [:file_name] => :environment do |t, args|
     args.with_defaults(:file_name => 'latest.dump')
     db = ActiveRecord::Base.configurations

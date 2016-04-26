@@ -74,7 +74,7 @@ module Effective
       elsif column.ends_with?('_on')  # Date
         Time.zone.parse(value).beginning_of_day rescue nil
       else
-        value.presence
+        value.presence || ''.freeze
       end
     end
 
