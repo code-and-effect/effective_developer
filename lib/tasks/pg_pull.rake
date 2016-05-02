@@ -63,4 +63,33 @@ namespace :pg do
     end
   end
 
+  desc 'Clones the production (--remote heroku by default) database to staging (--remote staging by default)'
+  task :clone, [:source_remote, :target_remote] => :environment do |t, args|
+    args.with_defaults(:source_remote => 'heroku', :target_remote => 'staging')
+    db = ActiveRecord::Base.configurations[Rails.env]
+
+    puts "=== Cloning remote '#{args.source_remote}' to '#{args.target_remote}'"
+
+    Bundler.with_clean_env do
+      unless system("heroku pg:backups capture --remote #{args.source_remote}")
+        puts "Error capturing heroku backup"
+        exit
+      end
+
+      url = (`heroku pg:backups public-url --remote #{args.source_remote}`).chomp
+
+      unless (url || '').length > 0
+        puts "Error reading public-url from remote #{args.source_remote}"
+        exit
+      end
+
+      unless system("heroku pg:backups restore '#{url}' DATABASE_URL --remote #{args.target_remote}")
+        puts "Error cloning heroku backup"
+        exit
+      end
+    end
+
+    puts 'Cloning database complete'
+  end
+
 end
