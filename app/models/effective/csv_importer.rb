@@ -70,9 +70,9 @@ module Effective
       if column.ends_with?('?')  # Boolean
         ::ActiveRecord::ConnectionAdapters::Column::TRUE_VALUES.include?(value)
       elsif column.ends_with?('_at')  # DateTime
-        Time.zone.parse(value) rescue nil
+        parse_datetime(column, value)
       elsif column.ends_with?('_on')  # Date
-        Time.zone.parse(value).beginning_of_day rescue nil
+        parse_datetime(column, value).beginning_of_day
       else
         value.presence || ''.freeze
       end
@@ -125,6 +125,14 @@ module Effective
         end
 
       "\e[#{code}m#{text}\e[0m"
+    end
+
+    def parse_datetime(col, value)
+      begin
+        Time.zone.parse(value)
+      rescue => e
+        error("Unable to Time.zone.parse('#{value}'). Override parse_datetime() to parse your own time, something like:\n#{' ' * 6}def parse_datetime(col, value)\n#{' ' * 8}Time.strptime(value, '%m/%d/%Y %H:%M:%S').in_time_zone\n#{' ' * 6}end")
+      end
     end
 
   end
