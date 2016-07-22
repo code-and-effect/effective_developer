@@ -18,7 +18,7 @@ Run the bundle command to install it:
 bundle install
 ```
 
-To use with any gem, add the following folder to your `PATH` (edit your ~/.bashrc or ~/.profile):
+To use the command line scripts, add the following to your `PATH` (edit your ~/.bashrc or ~/.profile):
 
 ```console
 export PATH="$PATH:$HOME/effective_developer/bin"
