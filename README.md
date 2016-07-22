@@ -18,19 +18,19 @@ Run the bundle command to install it:
 bundle install
 ```
 
+To use with any gem, add the following folder to your `PATH` (edit your ~/.bashrc or ~/.profile):
+
+```console
+export PATH="$PATH:$HOME/effective_developer/bin"
+```
+
 ## gem_release
 
 A command line shell script that quickly bumps the version of any ruby gem.
 
 It checks for any uncommitted files, updates the gem's `version.rb` with the given version, makes a single file `git commit` with a tag and message, then runs `git push origin master`, `gem build` and `gem push` to rubygems.
 
-To use with any gem, add the following folder to your `PATH` (~/.bashrc or ~/.profile):
-
-```console
-export PATH="$PATH:$HOME/effective_developer/bin"
-```
-
-Once included in your `PATH`, `gem_release` should be run from the root directory of any ruby gem.
+`gem_release` should be run from the root directory of any ruby gem.
 
 To print the current gem version:
 
@@ -43,6 +43,23 @@ To release a new gem version:
 ```console
 > gem_release 1.0.0
 ```
+
+## gitsweep
+
+A command line script to delete any git branch that has already been merged into master & develop
+
+```console
+> gitsweep
+```
+
+## BFG Repo-Cleaner
+
+A command line script that calls [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) to remove sensitive data from the git repository history.
+
+```console
+> bfg --delete-files id_rsa.pub
+```
+
 
 ## CSV Importer
 
