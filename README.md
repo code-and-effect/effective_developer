@@ -4,7 +4,7 @@ This is a small gem with some developer quality of life scripts.
 
 ## Getting Started
 
-Add to your Gemfile:
+To use the included rails helpers and rake tasks in your current rails project, add to the Gemfile:
 
 ```ruby
 group :development
@@ -18,11 +18,19 @@ Run the bundle command to install it:
 bundle install
 ```
 
-To use the command line scripts, add the following to your `PATH` (edit your ~/.bashrc or ~/.profile):
+To use the included command line scripts in any directory, clone this repo:
+
+```console
+git clone git@github.com:code-and-effect/effective_developer.git
+```
+
+and add the following to your `PATH` (edit your ~/.bashrc or ~/.profile):
 
 ```console
 export PATH="$PATH:$HOME/effective_developer/bin"
 ```
+
+# Shell scripts
 
 ## gem_release
 
@@ -60,6 +68,55 @@ A command line script that calls [BFG Repo-Cleaner](https://rtyley.github.io/bfg
 > bfg --delete-files id_rsa.pub
 ```
 
+# Rake scripts
+
+## Reset Pk Sequence
+
+If you ever run into the error `duplicate key violates unique constraint (id) error`, run this script:
+
+```ruby
+rake reset_pk_sequence
+```
+
+This makes sure that the autoincremented (postres) Pk sequence matches the correct `id` value.
+
+## pg:pull
+
+Creates a new backup on heroku, downloads that backup to latest.dump, and then calls pg:load
+
+```ruby
+rake pg:pull
+rake pg:pull[staging]
+```
+
+## pg:load
+
+Drops and re-creates the local database then initializes database with the contents of latest.dump
+
+```ruby
+rake pg:load
+rake pg:load[something.dump]
+```
+
+## pg:save
+
+Saves the development database to a postgresql .dump file (latest.dump by default)
+
+```ruby
+rake pg:save
+rake pg:save[something.dump]
+```
+
+## pg:clone
+
+Clones the production (--remote heroku by default) database to staging (--remote staging by default)
+
+```ruby
+rake pg:clone
+rake pg:clone[origin,staging]
+```
+
+# Rails Helpers
 
 ## CSV Importer
 

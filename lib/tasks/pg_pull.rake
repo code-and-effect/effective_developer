@@ -29,7 +29,7 @@ namespace :pg do
   # Drops and re-creates the local database then initializes database with latest.dump
   #
   # bundle exec rake pg:load => Will replace the current database with latest.dump
-  # bundle exec rake pg:load[something.dump] => Will replace the current database with latest.dump
+  # bundle exec rake pg:load[something.dump] => Will replace the current database with something.dump
   desc 'Loads a postgresql .dump file into the development database (latest.dump by default)'
   task :load, [:file_name] => :environment do |t, args|
     args.with_defaults(:file_name => 'latest.dump')
