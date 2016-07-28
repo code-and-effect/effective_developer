@@ -127,9 +127,21 @@ module Effective
       "\e[#{code}m#{text}\e[0m"
     end
 
-    def parse_datetime(col, value)
+    def parse_first_name(column, value = nil)
+      value ||= col(column)
+      value.to_s.split(' ')[0]
+    end
+
+    def parse_last_name(column, value = nil)
+      value ||= col(column)
+      value.to_s.split(' ')[1..-1].try(:join, ' ')
+    end
+
+    def parse_datetime(column, value = nil)
+      value ||= col(column)
+
       begin
-        Time.zone.parse(value)
+        Time.zone.parse(value.to_s)
       rescue => e
         error("Unable to Time.zone.parse('#{value}'). Override parse_datetime() to parse your own time, something like:\n#{' ' * 6}def parse_datetime(col, value)\n#{' ' * 8}Time.strptime(value, '%m/%d/%Y %H:%M:%S').in_time_zone\n#{' ' * 6}end")
       end

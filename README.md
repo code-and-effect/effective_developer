@@ -1,6 +1,6 @@
 # Effective Developer
 
-This is a small gem with some developer quality of life scripts.
+This gem contains some developer quality of life scripts and rails helpers.
 
 ## Getting Started
 
@@ -78,7 +78,7 @@ If you ever run into the error `duplicate key violates unique constraint (id) er
 rake reset_pk_sequence
 ```
 
-This makes sure that the autoincremented (postres) Pk sequence matches the correct `id` value.
+This makes sure that the autoincremented (postgresql) Pk sequence matches the correct `id` value.
 
 ## pg:pull
 

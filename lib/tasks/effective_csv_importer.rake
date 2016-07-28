@@ -21,6 +21,8 @@ namespace :import do
     desc "Import #{importer} from #{csv_file}"
 
     task importer => :environment do
+      require "#{Rails.application.root}/#{file}"
+
       klass = "CsvImporters::#{importer.classify.pluralize}Importer".safe_constantize
       raise "unable to constantize CsvImporters::#{importer.classify.pluralize}Importer for #{file}" unless klass
 
