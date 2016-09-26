@@ -78,12 +78,26 @@ Exports all database tables to individual .csv files.
 rake export:csv
 ```
 
-## csv:import::table
+## csv:import::foos
 
-Where table is the name of a model.  Dynamically created rake task when a `/lib/csv_importers/posts.rb` file is present.
+Where table is the name of a model.  Dynamically created rake task when a `/lib/csv_importers/foos.rb` file is present.
 
 ```ruby
-rake csv:import:table
+rake csv:import:foos
+```
+
+## csv:import::scaffold
+
+Scaffolds an `Effective::CSVImporter` file for each .csv file in `/lib/csv_importers/data/*.csv`
+
+```ruby
+rake csv:import:scaffold
+```
+
+or
+
+```ruby
+rake csv:import:scaffold[users]
 ```
 
 ## reset_pk_sequence
