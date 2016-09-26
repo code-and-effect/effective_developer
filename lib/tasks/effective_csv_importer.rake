@@ -10,15 +10,19 @@
 
 # rake csv:import:posts (one task created per model)
 # rake csv:import:all
+# rake csv:import:scaffold
+# rake csv:import:scaffold[users]
+# rake csv:export
 
 namespace :csv do
   namespace :import do
+    # Create a rake task to import each csv file
     Dir['lib/csv_importers/*.rb'].each do |file|
       importer = file.sub('lib/csv_importers/', '').sub('_importer.rb', '')
       csv_file = "lib/csv_importers/data/#{importer}.csv"
       next unless File.exists?(csv_file)
 
-      # rake csv:import:foo - Create a rake task to import this file
+      # rake csv:import:foo
       desc "Import #{importer} from #{csv_file}"
 
       task importer => :environment do
@@ -31,7 +35,7 @@ namespace :csv do
       end
     end
 
-    # rake csv:import:all - Run all importers in alphabetical order (kind of naive)
+    # rake csv:import:all
     desc 'Import all from /lib/csv_importers/*.rb'
 
     task :all => :environment do
@@ -44,16 +48,21 @@ namespace :csv do
       end
     end
 
-    # rake csv:scaffold - Creates a placeholder importer for each /lib/csv_importers/data/*.csv file
+    # rake csv:scaffold
+    # rake csv:scaffold[users]
     desc 'Scaffold a Effective::CSVImporter for each /lib/csv_importers/data/*.csv file'
 
-    task :scaffold => :environment do
+    task :scaffold, [:file_name] => :environment do |t, args|
+      args.with_defaults(file_name: 'all')
+
       require 'csv'
 
       generator = ERB.new(File.read(File.dirname(__FILE__) + '/../generators/effective_developer/csv_importer.rb.erb'))
 
       Dir['lib/csv_importers/data/*.csv'].each do |file|
         csv_file = file.split('/').last.gsub('.csv', '')
+
+        next if (Array(args.file_name) != ['all'] && Array(args.file_name).include?(csv_file) == false)
 
         klass = csv_file.classify.pluralize
         columns = CSV.open(file, 'r') { |csv| csv.first }
@@ -63,7 +72,6 @@ namespace :csv do
         end
       end
     end
-
   end
 
   # rake csv:export
