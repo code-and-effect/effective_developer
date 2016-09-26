@@ -55,7 +55,7 @@ class GemRelease
 
     # Release a new gem version
     if next_version.nil? == false
-      unless confirm("Releasing #{gem_name} #{next_version} (press y to continue)")
+      unless confirm("Releasing #{gem_name} #{next_version} (press y to continue): ")
         puts('aborted')
         exit
       end

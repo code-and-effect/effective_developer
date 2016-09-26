@@ -18,7 +18,7 @@ Run the bundle command to install it:
 bundle install
 ```
 
-To use the included command line scripts in any directory, clone this repo:
+To use the included command line shell scripts in any directory, clone this repo:
 
 ```console
 git clone git@github.com:code-and-effect/effective_developer.git
@@ -70,7 +70,23 @@ A command line script that calls [BFG Repo-Cleaner](https://rtyley.github.io/bfg
 
 # Rake scripts
 
-## Reset Pk Sequence
+## csv:export
+
+Exports all database tables to individual .csv files.
+
+```ruby
+rake export:csv
+```
+
+## csv:import::table
+
+Where table is the name of a model.  Dynamically created rake task when a `/lib/csv_importers/posts.rb` file is present.
+
+```ruby
+rake csv:import:table
+```
+
+## reset_pk_sequence
 
 If you ever run into the error `duplicate key violates unique constraint (id) error`, run this script:
 
