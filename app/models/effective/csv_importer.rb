@@ -58,9 +58,13 @@ module Effective
 
       rows.map do |row|
         if attributes.all? { |column, value| row[columns[column]] == value }
-          columns.inject({}) { |retval, (column, index)| retval[column] = row[columns[column]]; retval }
+          columns.inject({}) { |retval, (column, index)| retval[column] = row[index]; retval }
         end
       end.compact
+    end
+
+    def where!(attributes)
+      where(attributes).presence || raise("csv row with #{attributes} not found")
     end
 
     def find(attributes)
