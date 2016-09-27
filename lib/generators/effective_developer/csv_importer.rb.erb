@@ -2,7 +2,7 @@ module CsvImporters
   class <%= klass %>Importer < Effective::CSVImporter
     def columns
       {<% columns.each_with_index do |column, index| %>
-        <%= column %>: <%= (('A'..'AT').to_a[index] || index) %><%= ',' unless (index+1) == columns.length %><% end %>
+        <%= column %>: <%= (letters[index] || index) %><%= ',' unless (index+1) == columns.length %><% end %>
       }
     end
 

@@ -31,7 +31,7 @@ namespace :csv do
         klass = "CsvImporters::#{importer.classify.pluralize}Importer".safe_constantize
         raise "unable to constantize CsvImporters::#{importer.classify.pluralize}Importer for #{file}" unless klass
 
-        klass.new(csv_file).import!
+        klass.new().import!
       end
     end
 
@@ -58,6 +58,7 @@ namespace :csv do
       require 'csv'
 
       generator = ERB.new(File.read(File.dirname(__FILE__) + '/../generators/effective_developer/csv_importer.rb.erb'))
+      letters = ('A'..'AZ').to_a
 
       Dir['lib/csv_importers/data/*.csv'].each do |file|
         csv_file = file.split('/').last.gsub('.csv', '')
@@ -84,7 +85,7 @@ namespace :csv do
     FileUtils.mkdir_p(path) unless File.directory?(path)
 
     (ActiveRecord::Base.connection.tables - ['schema_migrations']).each do |table|
-      records = ActiveRecord::Base.connection.exec_query("SELECT * FROM #{table}")
+      records = ActiveRecord::Base.connection.exec_query("SELECT * FROM #{table} ORDER BY id")
 
       CSV.open(path + "#{table}.csv", 'wb') do |csv|
         csv << records.columns
