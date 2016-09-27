@@ -88,6 +88,14 @@ module Effective
         value.to_f
       elsif column.ends_with?('_to_s')
         value.to_s
+      elsif column.ends_with?('_to_a')
+        if ['[]', '{}'].include?(value)
+          []
+        elsif value.starts_with?('{') && value.ends_with?('}')
+          YAML::load(value).keys.select { |str| str.to_s.present? }
+        else
+          YAML::load(value).to_a.select { |str| str.to_s.present? }
+        end
       elsif column == 'id' || column.ends_with?('_id')
         value.present? ? value.to_i : nil
       else

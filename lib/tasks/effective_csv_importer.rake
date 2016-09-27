@@ -50,7 +50,7 @@ namespace :csv do
 
     # rake csv:scaffold
     # rake csv:scaffold[users]
-    desc 'Scaffold a Effective::CSVImporter for each /lib/csv_importers/data/*.csv file'
+    desc 'Scaffold an Effective::CSVImporter for each /lib/csv_importers/data/*.csv file'
 
     task :scaffold, [:file_name] => :environment do |t, args|
       args.with_defaults(file_name: 'all')
