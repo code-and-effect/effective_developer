@@ -212,9 +212,6 @@ Override `before_import()` or `after_import()` to run code before or after the i
 
 MIT License.  Copyright [Code and Effect Inc.](http://www.codeandeffect.com/)
 
-Code and Effect is the product arm of [AgileStyle](http://www.agilestyle.com/), an Edmonton-based shop that specializes in building custom web applications with Ruby on Rails.
-
-
 ## Contributing
 
 1. Fork it
