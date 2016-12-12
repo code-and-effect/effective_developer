@@ -8,7 +8,10 @@ module Effective
 
       source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
 
-      argument :actions, type: :array, default: ['crud'], banner: 'index show'
+      argument :actions, type: :array, default: ['crud'], banner: 'action action'
+      class_option :skip_routes, type: :boolean, desc: "Don't add routes to config/routes.rb."
+
+      check_class_collision suffix: 'Controller'
 
       def parse_actions
         if @actions == ['crud']
@@ -22,6 +25,9 @@ module Effective
         puts "Create controller"
         template 'controllers/controller.rb', "app/controllers/#{file_name}_controller.rb"
       end
+
+      #hook_for :template_engine, :test_framework, :helper, :assets
+
     end
   end
 end

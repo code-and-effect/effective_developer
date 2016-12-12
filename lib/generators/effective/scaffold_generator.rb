@@ -3,42 +3,41 @@
 module Effective
   module Generators
     class ScaffoldGenerator < Rails::Generators::NamedBase
-      include Rails::Generators::ResourceHelpers
-
       desc 'Creates an Effective Scaffold'
 
-      argument :name, type: :string, default: nil
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
-
-      #class_option :migration, type: :boolean, default: true
+      class_option :actions, type: :array, default: ['crud'], desc: 'Included actions', banner: 'index show'
 
       source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
 
       def create_migration
-        Rails::Generators.invoke('migration', ["create_#{file_name.pluralize}"] + attributes_as_arguments)
+        Rails::Generators.invoke('effective:migration', [name] + invoked_attributes)
       end
 
       def create_model
-        template 'models/model.rb', File.join('app/models', class_path, "#{file_name}.rb")
+        Rails::Generators.invoke('effective:model', [name] + invoked_attributes)
       end
 
       def create_routes
-        Rails::Generators.invoke('resource_route', [name])
+        Rails::Generators.invoke('effective:route', [name] + invoked_actions)
       end
 
       def create_controller
-        Rails::Generators.invoke('effective:controller', [name])
+        Rails::Generators.invoke('effective:controller', [name] + invoked_actions)
+      end
+
+      def create_views
+        Rails::Generators.invoke('effective:view', [name] + invoked_actions)
       end
 
       protected
 
-      # Used by the migration template to determine the parent name of the model
-      def parent_class_name
-        options[:parent] || 'ApplicationRecord'
+      def invoked_attributes
+        @invoked_attributes ||= attributes.map { |att| "#{att.name}:#{att.type}" }
       end
 
-      def attributes_as_arguments
-        attributes.map { |att| "#{att.name}:#{att.type}" }
+      def invoked_actions
+        @invoked_actions ||= Array(options.actions).flat_map { |arg| arg.gsub('[', '').gsub(']', '').split(',') }
       end
 
 

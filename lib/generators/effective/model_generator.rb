@@ -8,10 +8,15 @@ module Effective
 
       source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
 
-      argument :attributes, type: :array, default: [], banner: 'field[:type][:index] field[:type][:index]'
+      argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
-      hook_for :orm, required: true, desc: 'ORM to be invoked' do |invoked|
-        binding.pry
+      def create_model
+        template 'models/model.rb', File.join('app/models', class_path, "#{file_name}.rb")
+      end
+
+      # Used by the migration template to determine the parent name of the model
+      def parent_class_name
+        options[:parent] || 'ApplicationRecord'
       end
 
     end
