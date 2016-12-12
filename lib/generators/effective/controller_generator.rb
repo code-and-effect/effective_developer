@@ -1,27 +1,35 @@
-# rails generate effective:controller Thing [action action] [options]
-# rails generate controller NAME [action action] [options]
+# rails generate effective:controller NAME [action action] [options]
 
 module Effective
   module Generators
     class ControllerGenerator < Rails::Generators::NamedBase
-      desc "Creates an Effective controller in your app/controllers folder."
+      include Helpers
 
       source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
 
-      argument :actions, type: :array, default: ['crud'], banner: 'index show'
+      desc 'Creates a controller in your app/controllers folder.'
 
-      def parse_actions
-        if @actions == ['crud']
-          @actions = %w(index new create show edit update destroy)
-        else
-          @actions = Array(@actions).flat_map { |arg| arg.gsub('[', '').gsub(']', '').split(',') }
+      argument :actions, type: :array, default: ['crud'], banner: 'action action'
+      class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
+
+      attr_accessor :attributes
+
+      def initialize(args, *options)
+        if options.kind_of?(Array) && options.second.kind_of?(Hash)
+          self.attributes = options.second.delete(:attributes)
         end
+
+        super
+      end
+
+      def assign_actions
+        @actions = invoked_actions
       end
 
       def create_controller
-        puts "Create controller"
-        template 'controllers/controller.rb', "app/controllers/#{file_name}_controller.rb"
+        template 'controllers/controller.rb', File.join('app/controllers', class_path, "#{file_name}_controller.rb")
       end
+
     end
   end
 end

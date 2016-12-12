@@ -1,32 +1,39 @@
-# rails generate effective:controller Thing [action action] [options]
-# rails generate controller NAME [action action] [options]
+# rails generate effective:view NAME [index show] [options]
 
 module Effective
   module Generators
-    class ControllerGenerator < Rails::Generators::NamedBase
-      desc "Creates an Effective controller in your app/controllers folder."
-
+    class ViewGenerator < Rails::Generators::NamedBase
+      include Helpers
       source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
 
-      argument :actions, type: :array, default: ['crud'], banner: 'action action'
-      class_option :skip_routes, type: :boolean, desc: "Don't add routes to config/routes.rb."
+      desc 'Creates one or more views in your app/views folder.'
 
-      check_class_collision suffix: 'Controller'
+      argument :actions, type: :array, default: ['crud'], banner: 'index show'
+      class_option :attributes, type: :array, default: [], desc: 'Included form attributes, otherwise read from model'
 
-      def parse_actions
-        if @actions == ['crud']
-          @actions = %w(index new create show edit update destroy)
-        else
-          @actions = Array(@actions).flat_map { |arg| arg.gsub('[', '').gsub(']', '').split(',') }
+      attr_accessor :attributes
+
+      def initialize(args, *options)
+        if options.kind_of?(Array) && options.second.kind_of?(Hash)
+          self.attributes = options.second.delete(:attributes)
+        end
+
+        super
+      end
+
+      def create_views
+        (invoked_actions & available_actions).each do |action|
+          filename = "#{action}.html.haml"
+
+          template "views/#{filename}", File.join('app/views', file_path, filename)
         end
       end
 
-      def create_controller
-        puts "Create controller"
-        template 'controllers/controller.rb', "app/controllers/#{file_name}_controller.rb"
-      end
+      protected
 
-      #hook_for :template_engine, :test_framework, :helper, :assets
+      def available_actions
+        %w(index new show edit)
+      end
 
     end
   end
