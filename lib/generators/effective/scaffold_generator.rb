@@ -3,138 +3,101 @@
 module Effective
   module Generators
     class ScaffoldGenerator < Rails::Generators::NamedBase
+      include Rails::Generators::ResourceHelpers
+
       desc 'Creates an Effective Scaffold'
 
       argument :name, type: :string, default: nil
-      argument :attributes, type: :array, default: [], banner: 'field:type field:type'
+      argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
+
+      #class_option :migration, type: :boolean, default: true
 
       source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
 
-# config.generators do |g|
-#   g.orm             :active_record
-#   g.template_engine :erb
-#   g.test_framework  :test_unit, fixture: false
-#   g.stylesheets     false
-#   g.javascripts     false
-# end
-
-      def initialize(args, *options)
-        super
-        assign_extended_options!(args)
+      def create_migration
+        Rails::Generators.invoke('migration', ["create_#{file_name.pluralize}"] + attributes_as_arguments)
       end
 
       def create_model
+        template 'models/model.rb', File.join('app/models', class_path, "#{file_name}.rb")
+      end
+
+      def create_routes
+        Rails::Generators.invoke('resource_route', [name])
       end
 
       def create_controller
-      end
-
-      # def copy_view_files
-      #   available_views.each do |view|
-      #     filename = filename_with_extensions(view)
-      #     template filename, File.join("app/views", controller_file_path, filename)
-      #   end
-      # end
-
-      def add_to_routes
-      end
-
-      def create_model
-        template 'model.rb.erb', "app/models/#{file_path}.rb"
-      end
-
-      def show_readme
-        readme "README" if behavior == :invoke
+        Rails::Generators.invoke('effective:controller', [name])
       end
 
       protected
 
-      def indent(attribute, tabs = 3)
-        longest = attributes.map { |attribute| attribute.name.length }.max
-        current = attribute.kind_of?(String) ? attribute.length : attribute.name.length
-        difference = ((longest - current) / 2).to_i
-
-        if (longest % 2 != 0) || (current % 2 != 0)
-          [*0..(tabs+difference)].map { "\t" }.join()
-        else
-          [*1..(tabs+difference)].map { "\t" }.join()
-        end
+      # Used by the migration template to determine the parent name of the model
+      def parent_class_name
+        options[:parent] || 'ApplicationRecord'
       end
 
-      def format(options, top = true)
-        case options
-        when Hash
-          (top ? '' : '{') + options.map { |k, v| ":#{k} => #{format(v, false)}" }.join(', ') + (top ? '' : '}')
-        when Array
-          '[' + options.map { |obj| format(obj, true) }.join(', ') + ']'
-        when String
-          "'#{options}'"
-        when Symbol
-          ":#{options}"
-        else
-          options.to_s
-        end
+      def attributes_as_arguments
+        attributes.map { |att| "#{att.name}:#{att.type}" }
       end
 
-      private
 
-      # rails generate effective:model Effective::SomethingAwful title:string:default='something in the way':validates[presence, numericality]
-      # rails generate effective:model Effective::SomethingAwful title:string:default['something in the way']:validates[presence,numericality[greater_than_or_equal_to[0]]]
-      def assign_extended_options!(args)
-        attributes.each do |attribute|
-          arg = args.find { |arg| arg.split(':').first == attribute.name }
-          next unless arg
+      # def self.next_migration_number(dirname)
+      #   next_migration_number = current_migration_number(dirname) + 1
+      #   ActiveRecord::Migration.next_migration_number(next_migration_number)
+      # end
 
-          (arg.split(':')[2..-1] || []).each do |option|
-            attribute.attr_options.merge!(parse_option(option))
-          end
+      # def primary_key_type
+      #   key_type = options[:primary_key_type]
+      #   ", id: :#{key_type}" if key_type
+      # end
 
-        end
-      end
+      # def create_migration_file
+      #   return unless options[:migration]
+      #   migration_template 'migrations/create_table_migration.rb', "db/migrate/create_#{table_name}.rb"
+      # end
 
-      # rails generate effective:model Effective::SomethingAwful title:string:default['something in the way']:validates[presence,numericality[greater_than_or_equal_to[0]]]
+      # def create_model
+      #   template 'models/model.rb', File.join('app/models', class_path, "#{file_name}.rb")
+      # end
 
-      def parse_option(option, from_inner = false)
-        raise 'Unbalanced brackets error' if option.count('[') != option.count(']')
 
-        options = split_by_commas(option)
+      # def create_migration
+      #   atts = attributes.map { |att| "#{att.name}:#{att.type}" }
+      #   Rails::Generators.invoke('active_record:model', [name] + atts, {migration: true, timestamps: true})
+      # end
 
-        if options.length > 1
-          options.map { |option| parse_option(option) }
-        else
-          open = option.index('[')
-          close = option.rindex(']')
 
-          if open.nil? && close.nil? # This is a singular value
-            value = (Integer(option) rescue nil) || (Float(option) rescue nil)
-            value ||= (from_inner ? option.to_s : option.to_sym)
-          else
-            outer = option[0...open]
-            inner = option[open+1...close]
 
-            {outer.to_sym => parse_option(inner, true)}
-          end
-        end
-      end
+      # hook_for :orm, required: true, desc: 'ORM to be invoked' do |invoked|
+      #   binding.pry
+      # end
 
-      def split_by_commas(str)
-        start = 0; depth = 0
-        length = str.length
+      #hook_for :template_engine # HAML
 
-        [].tap do |splits|
-          str.chars.each_with_index do |char, index|
-            if char == '['
-              depth += 1
-            elsif char == ']'
-              depth -= 1
-            elsif char == ',' && depth == 0
-              splits << str[start...index]
-              start = index+1
-            end
-          end
-          splits << str[start..length] # Last split
-        end
-      end
+      # hook_for :helper, as: :scaffold do |invoked|
+      #   invoke invoked, [controller_name]
+      # end
+
+
+      # hook_for :template_engine, :test_framework, as: :scaffold
+
+
+      # def create_migration_file
+      #   return unless options[:migration]
+      #   migration_template 'migrations/create_table_migration.rb', "db/migrate/create_#{table_name}.rb"
+      # end
+
+      # def create_model
+      #   template 'models/model.rb', "app/models/#{file_name}.rb"
+      # end
+
+      # def self.next_migration_number(thing)
+      #   123
+      # end
+
+
+
 
     end
   end

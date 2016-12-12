@@ -22,10 +22,11 @@ module Effective
       end
 
       def create_controller
+        puts "Create controller"
         template 'controllers/controller.rb', "app/controllers/#{file_name}_controller.rb"
       end
 
-      hook_for :template_engine, :test_framework, :helper, :assets
+      #hook_for :template_engine, :test_framework, :helper, :assets
 
     end
   end
