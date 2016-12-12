@@ -84,7 +84,7 @@ namespace :csv do
     path = Rails.root.to_s + '/tmp/csv_exports/'
     FileUtils.mkdir_p(path) unless File.directory?(path)
 
-    (ActiveRecord::Base.connection.tables - ['schema_migrations']).each do |table|
+    (ActiveRecord::Base.connection.tables - ['schema_migrations', 'ar_internal_metadata']).each do |table|
       records = ActiveRecord::Base.connection.exec_query("SELECT * FROM #{table} ORDER BY id")
 
       CSV.open(path + "#{table}.csv", 'wb') do |csv|
