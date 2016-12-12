@@ -208,6 +208,24 @@ end
 
 Override `before_import()` or `after_import()` to run code before or after the import.
 
+# Scaffolding
+
+Scaffolding is the fastest way to build a rails app.  Take advantage of scaffolding.
+
+
+```ruby
+rails generate scaffold product name:string  # active_record, test_unit, resource_route, scaffold_controller, haml, test_unit, helper, assets
+rails generate scaffold_controller product  # haml, test_unit, helper,
+rails generate model product  # active_record, test_unit
+rails generate active_record:model product   # test_unit
+rails generate resource_route product
+rails generate test_unit:model product
+rails generate mailer product
+rails generate job product
+```
+
+
+
 ## License
 
 MIT License.  Copyright [Code and Effect Inc.](http://www.codeandeffect.com/)
