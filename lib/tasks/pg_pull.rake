@@ -10,12 +10,12 @@ namespace :pg do
     puts "=== Pulling remote '#{args.remote}' database into latest.dump"
 
     Bundler.with_clean_env do
-      unless system("heroku pg:backups capture --remote #{args.remote}")
+      unless system("heroku pg:backups:capture --remote #{args.remote}")
         puts "Error capturing heroku backup"
         exit
       end
 
-      if system("curl -o latest.dump `heroku pg:backups public-url --remote #{args.remote}`")
+      if system("curl -o latest.dump `heroku pg:backups:public-url --remote #{args.remote}`")
         puts "Downloading database completed"
       else
         puts "Error downloading database"
@@ -71,19 +71,19 @@ namespace :pg do
     puts "=== Cloning remote '#{args.source_remote}' to '#{args.target_remote}'"
 
     Bundler.with_clean_env do
-      unless system("heroku pg:backups capture --remote #{args.source_remote}")
+      unless system("heroku pg:backups:capture --remote #{args.source_remote}")
         puts "Error capturing heroku backup"
         exit
       end
 
-      url = (`heroku pg:backups public-url --remote #{args.source_remote}`).chomp
+      url = (`heroku pg:backups:public-url --remote #{args.source_remote}`).chomp
 
       unless (url || '').length > 0
         puts "Error reading public-url from remote #{args.source_remote}"
         exit
       end
 
-      unless system("heroku pg:backups restore '#{url}' DATABASE_URL --remote #{args.target_remote}")
+      unless system("heroku pg:backups:restore '#{url}' DATABASE_URL --remote #{args.target_remote}")
         puts "Error cloning heroku backup"
         exit
       end
