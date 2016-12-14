@@ -22,7 +22,7 @@ class <%= singular_class_name %> < <%= parent_class_name.classify %>
 
 <% attributes.each do |attribute| -%>
   validates :<%= attribute.name %>, presence: true
-<% end %>
+<% end -%>
 
 <% if to_s_attribute.present? -%>
   def to_s
