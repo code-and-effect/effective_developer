@@ -4,7 +4,7 @@ module Effective
   module Generators
     class ViewGenerator < Rails::Generators::NamedBase
       include Helpers
-      source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
+      source_root File.expand_path(('../' * 4) + 'lib/scaffolds', __FILE__)
 
       desc 'Creates one or more views in your app/views folder.'
 

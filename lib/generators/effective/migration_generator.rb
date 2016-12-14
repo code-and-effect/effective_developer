@@ -5,14 +5,14 @@ module Effective
     class MigrationGenerator < Rails::Generators::NamedBase
       include Helpers
 
-      source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
+      source_root File.expand_path(('../' * 4) + 'lib/scaffolds', __FILE__)
 
       desc 'Creates a migration.'
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
       def create_migration
-        Rails::Generators.invoke('migration', ["create_#{file_name.pluralize}"] + invoked_attributes)
+        Rails::Generators.invoke('migration', ["create_#{plural_name}"] + invoked_attributes)
       end
 
     end

@@ -5,14 +5,14 @@ module Effective
     class ModelGenerator < Rails::Generators::NamedBase
       include Helpers
 
-      source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
+      source_root File.expand_path(('../' * 4) + 'lib/scaffolds', __FILE__)
 
       desc 'Creates a model in your app/models folder.'
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
       def create_model
-        template 'models/model.rb', File.join('app/models', class_path, "#{file_name}.rb")
+        template 'models/model.rb', File.join('app/models', class_path, "#{singular_name}.rb")
       end
 
     end

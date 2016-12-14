@@ -57,7 +57,7 @@ namespace :csv do
 
       require 'csv'
 
-      generator = ERB.new(File.read(File.dirname(__FILE__) + '/../generators/effective_developer/csv_importer.rb.erb'))
+      generator = ERB.new(File.read(File.dirname(__FILE__) + '/../scaffolds/importers/csv_importer.rb'))
       letters = ('A'..'AT').to_a
 
       Dir['lib/csv_importers/data/*.csv'].each do |file|

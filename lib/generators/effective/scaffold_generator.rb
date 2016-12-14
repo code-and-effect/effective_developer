@@ -9,7 +9,7 @@ module Effective
     class ScaffoldGenerator < Rails::Generators::NamedBase
       include Helpers
 
-      source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
+      source_root File.expand_path(('../' * 4) + 'lib/scaffolds', __FILE__)
 
       desc 'Creates an Effective Scaffold'
 

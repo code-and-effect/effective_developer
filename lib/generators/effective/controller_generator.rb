@@ -5,7 +5,7 @@ module Effective
     class ControllerGenerator < Rails::Generators::NamedBase
       include Helpers
 
-      source_root File.expand_path(('../' * 4) + 'app/scaffolds', __FILE__)
+      source_root File.expand_path(('../' * 4) + 'lib/scaffolds', __FILE__)
 
       desc 'Creates a controller in your app/controllers folder.'
 
@@ -27,7 +27,7 @@ module Effective
       end
 
       def create_controller
-        template 'controllers/controller.rb', File.join('app/controllers', class_path, "#{file_name}_controller.rb")
+        template 'controllers/controller.rb', File.join('app/controllers', class_path, "#{plural_name}_controller.rb")
       end
 
     end
