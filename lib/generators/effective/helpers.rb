@@ -5,8 +5,11 @@ module Effective
       protected
 
       def invoked_attributes
-        attributes = (respond_to?(:attributes) ? self.attributes : Array(options.attributes).compact)
-        attributes.map { |att| "#{att.name}:#{att.type}" }
+        if respond_to?(:attributes) && attributes.first.kind_of?(Rails::Generators::GeneratedAttribute)
+          attributes.map { |att| "#{att.name}:#{att.type}" }
+        else
+          Array(options.attributes).compact
+        end
       end
 
       def invoked_actions
@@ -35,8 +38,24 @@ module Effective
         class_name.singularize
       end
 
+      def plural_class_name
+        class_name.pluralize
+      end
+
       def max_attribute_name_length
         @max_attribute_name_length ||= (attributes.map { |att| att.name.length }.max || 0)
+      end
+
+      def index_path
+        index_helper.sub('_url', '').sub('_path', '') + '_path'
+      end
+
+      def edit_path
+        edit_helper.sub('_url', '_path')
+      end
+
+      def show_path
+        show_helper.sub('_url', '_path')
       end
 
     end

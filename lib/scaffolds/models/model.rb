@@ -43,5 +43,6 @@ class <%= singular_class_name %> < <%= parent_class_name.classify %>
     update_column(:archived, false) # This intentionally skips validation
   end
 <% end -%>
+
 end
 <% end -%>

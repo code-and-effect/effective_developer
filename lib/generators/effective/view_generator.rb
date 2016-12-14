@@ -13,12 +13,11 @@ module Effective
 
       attr_accessor :attributes
 
-      def initialize(args, *options)
-        if options.kind_of?(Array) && options.second.kind_of?(Hash)
-          self.attributes = options.second.delete(:attributes)
-        end
+      def assign_attributes
+        return if respond_to?(:attributes)
 
-        super
+        @attributes = invoked_attributes.map { |attr| Rails::Generators::GeneratedAttribute.parse(attr) }
+        self.class.send(:attr_reader, :attributes)
       end
 
       def create_views
