@@ -14,14 +14,25 @@ class <%= singular_class_name %> < <%= parent_class_name.classify %>
 <% attributes.each do |attribute| -%>
   # <%= attribute.name.ljust(max_attribute_name_length) %> :<%= attribute.type %>
 <% end -%>
+<% if archived_attribute.present? -%>
 
-  def to_s
-<% if to_s_attribute.present? -%>
-    <%= to_s_attribute.name %> || 'New <%= singular_class_name %>'
-<% else -%>
-    '<%= singular_class_name %>'
+  scope :<%= plural_table_name %>, -> { where(archived: false) }
+  scope :archived, -> { where(archived: true) }
 <% end -%>
+
+<% attributes.each do |attribute| -%>
+  validates :<%= attribute.name %>, presence: true
+<% end %>
+
+<% if to_s_attribute.present? -%>
+  def to_s
+    <%= to_s_attribute.name %> || 'New <%= singular_class_name %>'
   end
+<% else -%>
+  def to_s
+    '<%= singular_class_name %>'
+  end
+<% end -%>
 <% if archived_attribute.present? -%>
 
   def destroy
