@@ -24,6 +24,10 @@ module Effective
         end
       end
 
+      def invoked_attributes_args
+        invoked_attributes.present? ? (['--attributes'] + invoked_attributes) : []
+      end
+
       def klass_attributes
         klass = class_name.safe_constantize
         return [] unless klass

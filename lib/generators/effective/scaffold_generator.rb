@@ -1,5 +1,9 @@
 # rails generate effective:scaffold NAME [field[:type] field[:type]] [options]
 
+# TODO - probably lots
+
+# Generates a migration, model, datatable, routes, controller, views
+
 # rails generate effective:scaffold Thing
 # rails generate effective:scaffold admin/thing name:string details:text --actions index show edit update
 # rails generate effective:scaffold admin/thing name:string details:text
@@ -16,28 +20,32 @@ module Effective
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
       class_option :actions, type: :array, default: ['crud'], desc: 'Included actions', banner: 'index show'
 
+      def create_model
+        Rails::Generators.invoke('effective:model', [name] + invoked_attributes)
+      end
+
       def create_migration
         Rails::Generators.invoke('effective:migration', [name] + invoked_attributes)
       end
 
-      def create_model
-        Rails::Generators.invoke('effective:model', [name] + invoked_attributes)
+      def create_route
+        Rails::Generators.invoke('effective:route', [name] + invoked_actions)
+      end
+
+      def create_controller
+        Rails::Generators.invoke('effective:controller', [name] + invoked_actions + invoked_attributes_args)
       end
 
       def create_datatable
         Rails::Generators.invoke('effective:datatable', [name] + invoked_attributes)
       end
 
-      def create_routes
-        Rails::Generators.invoke('effective:route', [name] + invoked_actions)
-      end
-
-      def create_controller
-        Rails::Generators.invoke('effective:controller', [name] + invoked_actions + ['--attributes'] + invoked_attributes)
-      end
-
       def create_views
-        Rails::Generators.invoke('effective:view', [name] + invoked_actions + ['--attributes'] + invoked_attributes)
+        Rails::Generators.invoke('effective:views', [name] + invoked_actions + invoked_attributes_args)
+      end
+
+      def create_form
+        Rails::Generators.invoke('effective:form', [name] + invoked_attributes)
       end
 
     end

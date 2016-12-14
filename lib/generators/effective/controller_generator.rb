@@ -1,7 +1,9 @@
 # rails generate effective:controller NAME [action action] [options]
 
-# rails generate effective:controller Thing index show destroy
-# rails generate effective:controller Thing --attributes name:string description:text
+# Generates a controller
+# rails generate effective:controller Thing
+# rails generate effective:controller Thing index edit create
+# rails generate effective:controller Thing index edit create --attributes name:string description:text
 
 module Effective
   module Generators

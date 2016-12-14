@@ -13,7 +13,7 @@
   %tbody
     - @<%= plural_table_name %>.each do |<%= singular_table_name %>|
       %tr
-<% for attribute in attributes -%>
+<% for attribute in [] -%>
         %td= <%= singular_table_name %>.<%= attribute.name %>
 <% end -%>
         %td= link_to 'Show', <%= singular_table_name %>

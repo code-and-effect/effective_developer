@@ -1,5 +1,11 @@
 # rails generate effective:route NAME [action action] [options]
 
+# TODO - support actions
+
+# Adds a route to config/routes.rb
+# rails generate effective:route Thing
+# rails generate effective:model Thing index edit create
+
 module Effective
   module Generators
     class RouteGenerator < Rails::Generators::NamedBase

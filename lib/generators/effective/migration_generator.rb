@@ -1,5 +1,11 @@
 # rails generate effective:migration NAME [field[:type] field[:type]] [options]
 
+# TODO - read from model dsl
+
+# Generates a create_* migration
+# rails generate effective:migration Thing
+# rails generate effective:migration Thing name:string description:text
+
 module Effective
   module Generators
     class MigrationGenerator < Rails::Generators::NamedBase

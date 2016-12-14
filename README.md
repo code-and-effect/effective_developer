@@ -222,6 +222,14 @@ rails generate resource_route product
 rails generate test_unit:model product
 rails generate mailer product
 rails generate job product
+
+
+rails generate effective:controller Thing --attributes name:string description:text one:string two:string three:string four:string five:string six:string seven:string eight:string nine:string ten:string roles:string
+
+rails generate effective:scaffold Thing name:string description:text one:string two:string three:string four:string five:string six:string seven:string eight:string nine:string ten:string roles:string --actions index show edit
+
+rails generate effective:controller Thing
+
 ```
 
 

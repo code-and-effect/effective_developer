@@ -1,5 +1,9 @@
 # rails generate effective:model NAME [field[:type] field[:type]] [options]
 
+# Generates a model
+# rails generate effective:model Thing
+# rails generate effective:model Thing name:string description:text
+
 module Effective
   module Generators
     class ModelGenerator < Rails::Generators::NamedBase
@@ -16,7 +20,7 @@ module Effective
       end
 
       def to_s_attribute
-        attributes.find { |att| ['name', 'title'].include?(att.name) }
+        attributes.find { |att| ['display_name', 'name', 'title', 'subject'].include?(att.name) }
       end
 
       def archived_attribute
