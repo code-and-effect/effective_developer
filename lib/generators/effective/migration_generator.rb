@@ -15,6 +15,10 @@ module Effective
         Rails::Generators.invoke('migration', ["create_#{plural_name}"] + invoked_attributes)
       end
 
+      def invoked_attributes
+        super | ['created_at:datetime', 'updated_at:datetime']
+      end
+
     end
   end
 end

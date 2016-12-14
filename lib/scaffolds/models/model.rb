@@ -9,5 +9,28 @@ class <%= singular_class_name %> < <%= parent_class_name.classify %>
 <% if attributes.any?(&:password_digest?) -%>
   has_secure_password
 <% end -%>
+
+  # Attributes
+<% attributes.each do |attribute| -%>
+  # <%= attribute.name.ljust(max_attribute_name_length) %> :<%= attribute.type %>
+<% end -%>
+
+  def to_s
+<% if to_s_attribute.present? -%>
+    <%= to_s_attribute.name %> || 'New <%= singular_class_name %>'
+<% else -%>
+    '<%= singular_class_name %>'
+<% end -%>
+  end
+<% if archived_attribute.present? -%>
+
+  def destroy
+    update_column(:archived, true) # This intentionally skips validation
+  end
+
+  def unarchive
+    update_column(:archived, false) # This intentionally skips validation
+  end
+<% end -%>
 end
 <% end -%>

@@ -35,6 +35,10 @@ module Effective
         class_name.singularize
       end
 
+      def max_attribute_name_length
+        @max_attribute_name_length ||= (attributes.map { |att| att.name.length }.max || 0)
+      end
+
     end
   end
 end
