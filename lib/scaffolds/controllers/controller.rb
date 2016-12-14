@@ -119,10 +119,9 @@ class <%= plural_class_name %>Controller < ApplicationController
 
   def permitted_params
     params.require(:<%= singular_name %>).permit(:id,
-<% (attributes_names - ['roles']).each_slice(8).with_index do |slice, index| -%>
-      <%= slice.map { |attr| ':' + attr }.join(', ') %><%= ',' if ((index+1) * 8) < attributes.length || attributes_names.include?('roles') %>
+<% attributes_names.each_slice(8).with_index do |slice, index| -%>
+      <%= slice.map { |name| permitted_param_for(name) }.join(', ') %><%= ',' if ((index+1) * 8) < attributes.length %>
 <% end -%>
-      <%= 'roles: EffectiveRoles.permitted_params' if attributes_names.include?('roles') %>
     )
   end
 

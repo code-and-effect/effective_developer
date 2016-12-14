@@ -4,14 +4,6 @@ module Effective
 
       protected
 
-      def invoked_attributes
-        if respond_to?(:attributes) && attributes.first.kind_of?(Rails::Generators::GeneratedAttribute)
-          attributes.map { |att| "#{att.name}:#{att.type}" }
-        else
-          Array(options.attributes).compact
-        end
-      end
-
       def invoked_actions
         actions = (respond_to?(:actions) ? self.actions : options.actions)
         actions = Array(actions).flat_map { |arg| arg.gsub('[', '').gsub(']', '').split(',') }
@@ -24,7 +16,41 @@ module Effective
         end
       end
 
-      # Used by model and datatable
+      def invoked_attributes
+        if respond_to?(:attributes)
+          attributes.map { |att| "#{att.name}:#{att.type}" }
+        else
+          Array(options.attributes).compact
+        end
+      end
+
+      def klass_attributes
+        klass = class_name.safe_constantize
+        return [] unless klass
+
+        begin
+          attributes = klass.new().attributes
+        rescue ActiveRecord::StatementInvalid => e
+          pending = ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations(ActiveRecord::Migrator.migrations_paths)).pending_migrations.present?
+
+          if e.message.include?('PG::UndefinedTable') && pending
+            migrate = ask("Unable to read the attributes of #{class_name}. There are pending migrations. Run db:migrate now? [y/n]")
+            system('bundle exec rake db:migrate') if migrate.to_s.include?('y')
+          end
+        end
+
+        begin
+          attributes = klass.new().attributes
+        rescue => e
+          puts "Unable to call #{class_name}.new().attributes. Continuing with empty attributes."
+          return []
+        end
+
+        (attributes.keys - [klass.primary_key, 'created_at', 'updated_at']).map do |attr|
+          "#{attr}:#{klass.column_for_attribute(attr).type || 'string'}"
+        end
+      end
+
       def parent_class_name
         options[:parent] || (Rails::VERSION::MAJOR > 4 ? 'ApplicationRecord' : 'ActiveRecord::Base')
       end

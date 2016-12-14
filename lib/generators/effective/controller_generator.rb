@@ -15,18 +15,31 @@ module Effective
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
       class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
-      def assign_attributes
-        @attributes = invoked_attributes.map { |attr| Rails::Generators::GeneratedAttribute.parse(attr) }
-        self.class.send(:attr_reader, :attributes)
-      end
-
       def assign_actions
         @actions = invoked_actions
       end
 
+      def assign_attributes
+        @attributes = (invoked_attributes.presence || klass_attributes).map do |attribute|
+          Rails::Generators::GeneratedAttribute.parse(attribute)
+        end
+
+        self.class.send(:attr_reader, :attributes)
+      end
+
       def create_controller
-        binding.pry
         template 'controllers/controller.rb', File.join('app/controllers', class_path, "#{plural_name}_controller.rb")
+      end
+
+      protected
+
+      def permitted_param_for(attribute_name)
+        case attribute_name
+        when 'roles'
+          'roles: EffectiveRoles.permitted_params'
+        else
+          ':' + attribute_name
+        end
       end
 
     end

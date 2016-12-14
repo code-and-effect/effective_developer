@@ -33,11 +33,11 @@ module Effective
       end
 
       def create_controller
-        Rails::Generators.invoke('effective:controller', [name] + invoked_actions, attributes: invoked_attributes)
+        Rails::Generators.invoke('effective:controller', [name] + invoked_actions + ['--attributes'] + invoked_attributes)
       end
 
       def create_views
-        Rails::Generators.invoke('effective:view', [name] + invoked_actions, attributes: invoked_attributes)
+        Rails::Generators.invoke('effective:view', [name] + invoked_actions + ['--attributes'] + invoked_attributes)
       end
 
     end
