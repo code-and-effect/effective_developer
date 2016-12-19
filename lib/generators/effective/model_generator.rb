@@ -16,7 +16,7 @@ module Effective
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
       def create_model
-        template 'models/model.rb', File.join('app/models', model_class_path, "#{singular_name}.rb")
+        template 'models/model.rb', File.join('app/models', class_path, "#{singular_name}.rb")
       end
 
       def to_s_attribute

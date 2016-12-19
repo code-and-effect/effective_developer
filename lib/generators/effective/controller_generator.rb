@@ -30,7 +30,8 @@ module Effective
       end
 
       def create_controller
-        template 'controllers/controller.rb', File.join('app/controllers', class_path, "#{plural_name}_controller.rb")
+        binding.pry
+        template 'controllers/controller.rb', File.join('app/controllers', module_path, "#{plural_name}_controller.rb")
       end
 
       protected

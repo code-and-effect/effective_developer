@@ -81,6 +81,15 @@ module Effective
         class_name.underscore.split('/')[0..-2]
       end
 
+      # Just the module path
+      # thing => ''
+      # effective::thing => ''
+      # admin/thing => 'admin'
+      # admin/effective::thing => 'admin'
+      def module_path
+        name.include?('/') ? name.split('/').first.downcase : ''
+      end
+
       # Skips any module or namespace
       # thing => 'thing'
       # things => 'thing'
