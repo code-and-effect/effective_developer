@@ -24,29 +24,29 @@ module Effective
         Rails::Generators.invoke('effective:model', [name] + invoked_attributes)
       end
 
-      def create_migration
-        Rails::Generators.invoke('effective:migration', [name] + invoked_attributes)
-      end
+      # def create_migration
+      #   Rails::Generators.invoke('effective:migration', [name] + invoked_attributes)
+      # end
 
-      def create_route
-        Rails::Generators.invoke('effective:route', [name] + invoked_actions)
-      end
+      # def create_route
+      #   Rails::Generators.invoke('effective:route', [name] + invoked_actions)
+      # end
 
-      def create_controller
-        Rails::Generators.invoke('effective:controller', [name] + invoked_actions + invoked_attributes_args)
-      end
+      # def create_controller
+      #   Rails::Generators.invoke('effective:controller', [name] + invoked_actions + invoked_attributes_args)
+      # end
 
-      def create_datatable
-        Rails::Generators.invoke('effective:datatable', [name] + invoked_attributes)
-      end
+      # def create_datatable
+      #   Rails::Generators.invoke('effective:datatable', [name] + invoked_attributes)
+      # end
 
-      def create_views
-        Rails::Generators.invoke('effective:views', [name] + invoked_actions + invoked_attributes_args)
-      end
+      # def create_views
+      #   Rails::Generators.invoke('effective:views', [name] + invoked_actions + invoked_attributes_args)
+      # end
 
-      def create_form
-        Rails::Generators.invoke('effective:form', [name] + invoked_attributes)
-      end
+      # def create_form
+      #   Rails::Generators.invoke('effective:form', [name] + invoked_attributes)
+      # end
 
     end
   end

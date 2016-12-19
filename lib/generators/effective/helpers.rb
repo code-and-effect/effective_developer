@@ -59,22 +59,22 @@ module Effective
         options[:parent] || (Rails::VERSION::MAJOR > 4 ? 'ApplicationRecord' : 'ActiveRecord::Base')
       end
 
-      # The built in singular_name doesn't seem to do the right thing
-      def singular_name
-        super.singularize
-      end
+      # # Always enforce a singlular class_name
+      # # scaffold admin/things => Thing
+      # # scaffold admin::things => Admin::Thing
+      # def class_name
+      #   name.include?('::') ? super.singularize : super.singularize.split('::').last
+      # end
 
-      def singular_class_name
-        class_name.singularize
-      end
+      # # scaffold admin/thing => ''
+      # # scaffold admin::thing => 'admin'
+      # def singular_class_path
+      #   class_name.include?('::') ? class_path : ''
+      # end
 
-      def plural_class_name
-        class_name.pluralize
-      end
-
-      def max_attribute_name_length
-        @max_attribute_name_length ||= (attributes.map { |att| att.name.length }.max || 0)
-      end
+      # def singular_name
+      #   super.singularize
+      # end
 
       def index_path
         index_helper.sub('_url', '').sub('_path', '') + '_path'

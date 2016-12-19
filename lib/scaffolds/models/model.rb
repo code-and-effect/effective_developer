@@ -1,5 +1,5 @@
 <% module_namespacing do -%>
-class <%= singular_class_name %> < <%= parent_class_name.classify %>
+class <%= class_name %> < <%= parent_class_name.classify %>
 <% attributes.select(&:reference?).each do |attribute| -%>
   belongs_to :<%= attribute.name %><%= ', polymorphic: true' if attribute.polymorphic? %><%= ', required: true' if attribute.required? %>
 <% end -%>
@@ -26,11 +26,11 @@ class <%= singular_class_name %> < <%= parent_class_name.classify %>
 
 <% if to_s_attribute.present? -%>
   def to_s
-    <%= to_s_attribute.name %> || 'New <%= singular_class_name %>'
+    <%= to_s_attribute.name %> || 'New <%= singular_name.titleize %>'
   end
 <% else -%>
   def to_s
-    '<%= singular_class_name %>'
+    '<%= singular_name.titleize %>'
   end
 <% end -%>
 <% if archived_attribute.present? -%>

@@ -16,7 +16,7 @@ module Effective
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
       def create_model
-        template 'models/model.rb', File.join('app/models', class_path, "#{singular_name}.rb")
+        template 'models/model.rb', File.join('app/models', singular_class_path, "#{singular_name}.rb")
       end
 
       def to_s_attribute
@@ -25,6 +25,10 @@ module Effective
 
       def archived_attribute
         attributes.find { |att| att.name == 'archived' && att.type == :boolean }
+      end
+
+      def max_attribute_name_length
+        @max_attribute_name_length ||= (attributes.map { |att| att.name.length }.max || 0)
       end
 
     end

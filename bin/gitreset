@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Resets any unmerged changes AND removes all new files and directories
+
+git reset --hard && git clean -fd
