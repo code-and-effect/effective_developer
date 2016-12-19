@@ -59,22 +59,37 @@ module Effective
         options[:parent] || (Rails::VERSION::MAJOR > 4 ? 'ApplicationRecord' : 'ActiveRecord::Base')
       end
 
-      # # Always enforce a singlular class_name
-      # # scaffold admin/things => Thing
-      # # scaffold admin::things => Admin::Thing
-      # def class_name
-      #   name.include?('::') ? super.singularize : super.singularize.split('::').last
-      # end
+      # Always enforces a singlular class_name
+      # thing => Thing
+      # things => Thing
+      # admin/thing => Thing
+      # admin/things => Thing
+      # effective::thing => Effective::Thing
+      # effective::things => Effective::Thing
+      # admin/effective::thing => Effective::Thing
+      # admin/effective::things => Effective::Thing
+      def class_name
+        (name.include?('/') ? super.sub(name.split('/').first.classify + '::', '') : super).singularize
+      end
 
-      # # scaffold admin/thing => ''
-      # # scaffold admin::thing => 'admin'
-      # def singular_class_path
-      #   class_name.include?('::') ? class_path : ''
-      # end
+      # Skips any module
+      # thing => ''
+      # effective::thing => 'effective'
+      # admin/thing => ''
+      # admin/effective::thing => 'effective'
+      def model_class_path
+        class_name.underscore.split('/')[0..-2]
+      end
 
-      # def singular_name
-      #   super.singularize
-      # end
+      # Skips any module or namespace
+      # thing => 'thing'
+      # things => 'thing'
+      # effective::thing => 'thing'
+      # admin/thing => 'thing'
+      # admin/effective::thing => 'thing'
+      def singular_name
+        class_name.split('::').last.downcase
+      end
 
       def index_path
         index_helper.sub('_url', '').sub('_path', '') + '_path'

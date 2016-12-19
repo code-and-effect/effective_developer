@@ -26,11 +26,11 @@ class <%= class_name %> < <%= parent_class_name.classify %>
 
 <% if to_s_attribute.present? -%>
   def to_s
-    <%= to_s_attribute.name %> || 'New <%= singular_name.titleize %>'
+    <%= to_s_attribute.name %> || 'New <%= human_name %>'
   end
 <% else -%>
   def to_s
-    '<%= singular_name.titleize %>'
+    '<%= human_name %>'
   end
 <% end -%>
 <% if archived_attribute.present? -%>
