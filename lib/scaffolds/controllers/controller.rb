@@ -3,7 +3,7 @@ require_dependency '<%= namespaced_path %>/application_controller'
 
 <% end -%>
 <% module_namespacing do -%>
-class <%= plural_class_name %>Controller < ApplicationController
+class <%= controller_class_name %>Controller < ApplicationController
   before_action :authenticate_user! # Devise enforce user is present
 
 <% if actions.delete('index') -%>
@@ -11,7 +11,7 @@ class <%= plural_class_name %>Controller < ApplicationController
     @page_title = '<%= plural_name.titleize %>'
     authorize! :index, <%= class_name %>
 
-    render_datatable_index Effective::Datatables::<%= plural_class_name %>.new(params[:scopes])
+    render_datatable_index Effective::Datatables::<%= controller_class_name %>.new(params[:scopes])
   end
 
 <% end -%>
@@ -19,7 +19,7 @@ class <%= plural_class_name %>Controller < ApplicationController
   def new
     @<%= singular_name %> = <%= class_name %>.new
 
-    @page_title = 'New <%= singular_name.titleize %>'
+    @page_title = 'New <%= human_name %>'
     authorize! :new, @<%= singular_name %>
   end
 
@@ -28,12 +28,12 @@ class <%= plural_class_name %>Controller < ApplicationController
   def create
     @<%= singular_name %> = <%= class_name %>.new(permitted_params)
 
-    @page_title = 'New <%= singular_name.titleize %>'
+    @page_title = 'New <%= human_name %>'
     authorize! :create, @<%= singular_name %>
 
     if @<%= singular_name %>.save
       flash[:success] = 'Successfully created <%= singular_name %>'
-      redirect_to <%= edit_path %>
+      redirect_to <%= new_path %>
     else
       flash.now[:danger] = "Unable to create <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
       render :new

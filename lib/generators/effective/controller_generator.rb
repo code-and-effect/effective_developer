@@ -30,11 +30,18 @@ module Effective
       end
 
       def create_controller
-        binding.pry
-        template 'controllers/controller.rb', File.join('app/controllers', module_path, "#{plural_name}_controller.rb")
+        template 'controllers/controller.rb', File.join('app/controllers', namespace_path, "#{plural_name}_controller.rb")
       end
 
       protected
+
+      def controller_class_name
+        if name.include?('/')
+          name[0...name.rindex('/')].classify + '::' + singular_name.classify.pluralize
+        else
+          singular_name.classify.pluralize
+        end
+      end
 
       def permitted_param_for(attribute_name)
         case attribute_name

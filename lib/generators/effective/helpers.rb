@@ -59,57 +59,34 @@ module Effective
         options[:parent] || (Rails::VERSION::MAJOR > 4 ? 'ApplicationRecord' : 'ActiveRecord::Base')
       end
 
-      # Always enforces a singlular class_name
-      # thing => Thing
-      # things => Thing
-      # admin/thing => Thing
-      # admin/things => Thing
-      # effective::thing => Effective::Thing
-      # effective::things => Effective::Thing
-      # admin/effective::thing => Effective::Thing
-      # admin/effective::things => Effective::Thing
-      def class_name
-        (name.include?('/') ? super.sub(name.split('/').first.classify + '::', '') : super).singularize
+      # We handle this a bit different than the regular scaffolds
+      def assign_names!(name)
+        @class_path = (name.include?('/') ? name[(name.rindex('/')+1)..-1] : name).split('::')
+        @class_path.map!(&:underscore)
+        @class_path[@class_path.length-1] = @class_path.last.singularize # Always singularize
+        @file_name = @class_path.pop
       end
 
-      # Skips any module
-      # thing => ''
-      # effective::thing => 'effective'
-      # admin/thing => ''
-      # admin/effective::thing => 'effective'
-      def model_class_path
-        class_name.underscore.split('/')[0..-2]
-      end
-
-      # Just the module path
-      # thing => ''
-      # effective::thing => ''
-      # admin/thing => 'admin'
-      # admin/effective::thing => 'admin'
-      def module_path
-        name.include?('/') ? name.split('/').first.downcase : ''
-      end
-
-      # Skips any module or namespace
-      # thing => 'thing'
-      # things => 'thing'
-      # effective::thing => 'thing'
-      # admin/thing => 'thing'
-      # admin/effective::thing => 'thing'
-      def singular_name
-        class_name.split('::').last.downcase
+      # admin/effective::things => 'admin'
+      # effective::things => ''
+      def namespace_path
+        name.include?('/') ? name[0...name.rindex('/')] : ''
       end
 
       def index_path
-        index_helper.sub('_url', '').sub('_path', '') + '_path'
+        [namespace_path.underscore.presence, plural_name].compact.join('_') + '_path'
+      end
+
+      def new_path
+        "new_#{show_path}"
       end
 
       def edit_path
-        edit_helper.sub('_url', '_path')
+        "edit_#{show_path}"
       end
 
       def show_path
-        show_helper.sub('_url', '_path')
+        [namespace_path.underscore.presence, singular_name].compact.join('_') + "_path(@#{singular_name})"
       end
 
     end

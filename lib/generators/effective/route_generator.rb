@@ -18,7 +18,7 @@ module Effective
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
 
       def create_route
-        Rails::Generators.invoke('resource_route', [name])
+        Rails::Generators.invoke('resource_route', [[namespace_path.presence, plural_name].compact.join('/')])
       end
 
     end
