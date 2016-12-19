@@ -26,8 +26,10 @@ module Effective
 
       def create_views
         (invoked_actions & available_actions).each do |action|
-          template "views/#{action}.html.haml", File.join('app/views', file_path.pluralize, "#{action}.html.haml")
+          template "views/#{action}.html.haml", File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "#{action}.html.haml")
         end
+
+        template "views/_resource.html.haml", File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_#{singular_name}.html.haml")
       end
 
       private

@@ -1,0 +1,5 @@
+<% for attribute in attributes -%>
+%p
+  %b <%= attribute.human_name %>:
+  = @<%= singular_table_name %>.<%= attribute.name %>
+<% end -%>

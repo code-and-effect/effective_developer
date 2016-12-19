@@ -73,6 +73,14 @@ module Effective
         name.include?('/') ? name[0...name.rindex('/')] : ''
       end
 
+      def namespaced_class_name
+        if name.include?('/')
+          name[0...name.rindex('/')].classify + '::' + singular_name.classify.pluralize
+        else
+          singular_name.classify.pluralize
+        end
+      end
+
       def index_path
         [namespace_path.underscore.presence, plural_name].compact.join('_') + '_path'
       end

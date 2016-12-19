@@ -3,7 +3,7 @@ require_dependency '<%= namespaced_path %>/application_controller'
 
 <% end -%>
 <% module_namespacing do -%>
-class <%= controller_class_name %>Controller < ApplicationController
+class <%= namespaced_class_name %>Controller < ApplicationController
   before_action :authenticate_user! # Devise enforce user is present
 
 <% if actions.delete('index') -%>
@@ -11,7 +11,7 @@ class <%= controller_class_name %>Controller < ApplicationController
     @page_title = '<%= plural_name.titleize %>'
     authorize! :index, <%= class_name %>
 
-    render_datatable_index Effective::Datatables::<%= controller_class_name %>.new(params[:scopes])
+    render_datatable_index Effective::Datatables::<%= namespaced_class_name %>.new(params[:scopes])
   end
 
 <% end -%>
@@ -33,7 +33,7 @@ class <%= controller_class_name %>Controller < ApplicationController
 
     if @<%= singular_name %>.save
       flash[:success] = 'Successfully created <%= singular_name %>'
-      redirect_to <%= new_path %>
+      redirect_to <%= show_path %>
     else
       flash.now[:danger] = "Unable to create <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
       render :new

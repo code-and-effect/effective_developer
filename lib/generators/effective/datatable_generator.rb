@@ -26,7 +26,7 @@ module Effective
       end
 
       def create_datatable
-        template 'datatables/datatable.rb', File.join('app/models/effective/datatables', class_path, "#{plural_name}.rb")
+        template 'datatables/datatable.rb', File.join('app/models/effective/datatables', namespace_path, "#{plural_name}.rb")
       end
 
     end

@@ -35,14 +35,6 @@ module Effective
 
       protected
 
-      def controller_class_name
-        if name.include?('/')
-          name[0...name.rindex('/')].classify + '::' + singular_name.classify.pluralize
-        else
-          singular_name.classify.pluralize
-        end
-      end
-
       def permitted_param_for(attribute_name)
         case attribute_name
         when 'roles'

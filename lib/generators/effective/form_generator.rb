@@ -24,7 +24,7 @@ module Effective
       end
 
       def create_form
-        template 'forms/_form.html.haml', File.join('app/views', file_path.pluralize, '_form.html.haml')
+        template "forms/_form.html.haml", File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_form.html.haml")
       end
 
     end
