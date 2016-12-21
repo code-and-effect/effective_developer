@@ -23,41 +23,13 @@ module Effective
           if namespaces.blank?
             w.insert_after_last(resources) { |line, depth| depth == 1 && line.start_with?('resources') } ||
             w.insert_before_last(resources) { |line, depth| depth == 1 && line.start_with?('root') } ||
-            w.insert_before_last(resources) { |line, depth| depth == 0 && line.start_with?('end') }
+            w.insert_before_last(resources) { |line, depth| depth == 0 && line == 'end' }
           end
         end
 
       end
 
-
-      #   lines = File.open('config/routes.rb').readlines
-
-      #   # Find and replace resources
-      #   if namespaces.blank?
-      #     result = insert_after(lines, resources) { |line, depth| depth == 1 && line.start_with?("resources: #{plural_name}") }
-
-
-      #     index = index_with_depth(lines) { |line, depth| depth == 1 && line.strip.start_with?("resources :#{plural_name}") }
-
-      #     if index.blank?
-      #       index = index_with_depth(lines) { |line, depth| depth == 1 && line.strip.start_with?('resources') }
-      #       index = index + 1 if index
-
-      #       index ||= indexes_with_depth(lines) { |line, depth| depth == 1 && line.strip.start_with?('namespace') }.first
-      #       index ||= indexes_with_depth(lines) { |line, depth| depth == 1 && line.strip.start_with?('root') }.last
-      #       index ||= indexes_with_depth(lines) { |line, depth| depth == 1 && line.strip == 'end' }.last
-
-      #       insert(lines, index, resources)
-      #     end
-      #   end
-
-      #   File.open('config/routes.rb', 'w') do |file|
-      #     lines.each { |line| file.write(line) }
-      #   end
-
-      #   #binding.pry
-      #   #Rails::Generators.invoke('resource_route', [[namespace_path.presence, plural_name].compact.join('/')])
-      # end
+      # Rails::Generators.invoke('resource_route', [[namespace_path.presence, plural_name].compact.join('/')])
 
       private
 
