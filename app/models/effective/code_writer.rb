@@ -91,10 +91,6 @@ module Effective
       nil
     end
 
-    def depth_at(line_index)
-      each_with_depth { |_, depth, index| return depth if line_index == index }
-    end
-
     # Returns the index of the first line where the passed block returns true
     def first(start: 0, &block)
       each_with_depth do |line, depth, index|
@@ -102,6 +98,7 @@ module Effective
         return index if block.call(line, depth, index)
       end
     end
+    alias_method :find, :first
 
     # Returns the index of the last line where the passed block returns true
     def last(start: 0, &block)
@@ -126,8 +123,13 @@ module Effective
 
       retval
     end
+    alias_method :select, :all
 
     private
+
+    def depth_at(line_index)
+      each_with_depth { |_, depth, index| return depth if line_index == index }
+    end
 
     def do?(content)
       content = content.kind_of?(Integer) ? lines[content] : content
@@ -148,6 +150,7 @@ module Effective
       content.kind_of?(Array) && content.last.strip == 'end'.freeze
     end
 
+    # Is the first word in each line the same?
     def same?(a, b)
       a = (a.kind_of?(Integer) ? lines[a] : a).split(' ').first
       b = (b.kind_of?(Integer) ? lines[b] : b).split(' ').first

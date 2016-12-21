@@ -23,7 +23,10 @@ module Effective
           if namespaces.blank?
             w.insert_after_last(resources) { |line, depth| depth == 1 && line.start_with?('resources') } ||
             w.insert_before_last(resources) { |line, depth| depth == 1 && line.start_with?('root') } ||
-            w.insert_before_last(resources) { |line, depth| depth == 0 && line == 'end' }
+            w.insert_before_last(resources) { |line, depth| line == 'end' }
+          end
+
+          if namespaces.present?
           end
         end
 
