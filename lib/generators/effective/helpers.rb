@@ -101,41 +101,6 @@ module Effective
         [namespace_path.underscore.presence, singular_name].compact.join('_') + "_path(@#{singular_name})"
       end
 
-      private
-
-      def index_with_depth(lines, start = 0, &block)
-        each_with_depth(lines) do |line, depth, index|
-          next if index < start
-          return index if block.call(line, depth, index) == true
-        end
-
-        nil
-      end
-
-      def indexes_with_depth(lines, start = 0, &block)
-        indexes = []
-
-        each_with_depth(lines) do |line, depth, index|
-          next if index < start
-          indexes << index if block.call(line, depth, index) == true
-        end
-
-        indexes
-      end
-
-      def each_with_depth(lines, &block)
-        depth = 0
-
-        Array(lines).each_with_index do |line, index|
-          stripped = line.to_s.strip
-
-          block.call(stripped, depth, index)
-
-          depth += 1 if stripped.end_with?(' do')
-          depth -= 1 if stripped == 'end'
-        end
-      end
-
     end
   end
 end
