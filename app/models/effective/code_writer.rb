@@ -24,7 +24,7 @@ module Effective
       index = last(&block)
       return nil unless index
 
-      insert(content, index+1, depth_at(index))
+      insert(content, index)
     end
 
     def insert(content, index, depth = nil)
@@ -33,13 +33,17 @@ module Effective
       depth ||= depth_at(index)
 
       # If the line we're inserting at is a block, fast-forward the insert to after that block
-      binding.pry
-
       if do?(index)
-        index = first(start: index) { |line| end?(line) }
+        index = first(start: index) { |line| end?(line) } + 1
+        lines.insert(index, newline)
+      elsif block?(contents)  # If the line above us wasn't a block, but the content to insert is, put in a new line
+        lines.insert(index+1, newline)
+        index += 1
       end
 
       content_depth = 0
+
+      index = index + 1 # Insert after the given line
 
       contents.each do |content|
         content_depth -= 1 if end?(content)
@@ -121,6 +125,10 @@ module Effective
     def end?(content)
       content = content.kind_of?(Integer) ? lines[content] : content
       content.strip == 'end'.freeze
+    end
+
+    def block?(content)
+      content.kind_of?(Array) && content.last.strip == 'end'.freeze
     end
 
   end
