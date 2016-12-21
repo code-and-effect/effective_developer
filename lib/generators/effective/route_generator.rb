@@ -21,7 +21,9 @@ module Effective
 
         Effective::CodeWriter.new('config/routes.rb') do |w|
           if namespaces.blank?
-            w.insert_after_last(resources) { |line, depth| depth == 1 && line.start_with?('resources') }
+            w.insert_after_last(resources) { |line, depth| depth == 1 && line.start_with?('resources') } ||
+            w.insert_before_last(resources) { |line, depth| depth == 1 && line.start_with?('root') } ||
+            w.insert_before_last(resources) { |line, depth| depth == 0 && line.start_with?('end') }
           end
         end
 

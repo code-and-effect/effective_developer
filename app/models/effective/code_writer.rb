@@ -18,8 +18,7 @@ module Effective
       end
     end
 
-    # Returns true if the insert happened
-    # Returns nil if no insert
+    # Returns true if the insert happened, nil if no insert
     def insert_after_last(content, &block)
       index = last(&block)
       return nil unless index
@@ -27,16 +26,24 @@ module Effective
       insert(content, index)
     end
 
+    # Returns true if the insert happened, nil if no insert
+    def insert_before_last(content, &block)
+      index = last(&block)
+      return nil unless index
+
+      insert(content, index-1)
+    end
+
     def insert(content, index, depth = nil)
       contents = (content.kind_of?(Array) ? content : content.split(newline)).map { |str| str.strip }
 
       depth ||= depth_at(index)
 
-      # If the line we're inserting at is a block, fast-forward the insert to after that block
+      # If the line we're inserting at is a block, fast-forward the end of the block. And add a newline.
       if do?(index)
         index = first(start: index) { |line| end?(line) } + 1
         lines.insert(index, newline)
-      elsif block?(contents)  # If the line above us wasn't a block, but the content to insert is, put in a new line
+      elsif !same?(contents, index) && !whitespace?(index)  # If the line above us isn't the same command or whitespace add a new line.
         lines.insert(index+1, newline)
         index += 1
       end
@@ -58,6 +65,12 @@ module Effective
         content_depth += 1 if do?(content)
       end
 
+      if block?(contents) && !whitespace?(index)
+        lines.insert(index, newline)
+      elsif !whitespace?(index) && !(same?(contents.first, index) || end?(index))
+        lines.insert(index, newline)
+      end
+
       true
     end
 
@@ -70,10 +83,9 @@ module Effective
       Array(lines).each_with_index do |line, index|
         stripped = line.to_s.strip
 
-        block.call(stripped, depth, index)
-
-        depth += 1 if do?(stripped)
         depth -= 1 if end?(stripped)
+        block.call(stripped, depth, index)
+        depth += 1 if do?(stripped)
       end
 
       nil
@@ -127,9 +139,19 @@ module Effective
       content.strip == 'end'.freeze
     end
 
+    def whitespace?(content)
+      content = content.kind_of?(Integer) ? lines[content] : content
+      content.strip.length == 0
+    end
+
     def block?(content)
       content.kind_of?(Array) && content.last.strip == 'end'.freeze
     end
 
+    def same?(a, b)
+      a = (a.kind_of?(Integer) ? lines[a] : a).split(' ').first
+      b = (b.kind_of?(Integer) ? lines[b] : b).split(' ').first
+      a == b
+    end
   end
 end
