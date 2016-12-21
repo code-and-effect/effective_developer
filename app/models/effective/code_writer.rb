@@ -31,10 +31,18 @@ module Effective
       contents = (content.kind_of?(Array) ? content : content.split(newline)).map { |str| str.strip }
 
       depth ||= depth_at(index)
+
+      # If the line we're inserting at is a block, fast-forward the insert to after that block
+      binding.pry
+
+      if do?(index)
+        index = first(start: index) { |line| end?(line) }
+      end
+
       content_depth = 0
 
       contents.each do |content|
-        content_depth -= 1 if content == 'end'.freeze
+        content_depth -= 1 if end?(content)
 
         if content == ''
           lines.insert(index, newline)
@@ -42,9 +50,8 @@ module Effective
           lines.insert(index, (indent * (depth + content_depth)) + content + newline)
         end
 
-        index = index + 1
-
-        content_depth += 1 if content.end_with?(' do'.freeze)
+        index += 1
+        content_depth += 1 if do?(content)
       end
 
       true
@@ -61,8 +68,8 @@ module Effective
 
         block.call(stripped, depth, index)
 
-        depth += 1 if stripped.end_with?(' do'.freeze)
-        depth -= 1 if stripped == 'end'.freeze
+        depth += 1 if do?(stripped)
+        depth -= 1 if end?(stripped)
       end
 
       nil
@@ -73,7 +80,7 @@ module Effective
     end
 
     # Returns the index of the first line where the passed block returns true
-    def first(start = 0, &block)
+    def first(start: 0, &block)
       each_with_depth do |line, depth, index|
         next if index < start
         return index if block.call(line, depth, index)
@@ -81,7 +88,7 @@ module Effective
     end
 
     # Returns the index of the last line where the passed block returns true
-    def last(start = 0, &block)
+    def last(start: 0, &block)
       retval = nil
 
       each_with_depth do |line, depth, index|
@@ -93,7 +100,7 @@ module Effective
     end
 
     # Returns an array of indexes for each line where the passed block returnst rue
-    def all(start = 0, &block)
+    def all(start: 0, &block)
       retval = []
 
       each_with_depth do |line, depth, index|
@@ -102,6 +109,18 @@ module Effective
       end
 
       retval
+    end
+
+    private
+
+    def do?(content)
+      content = content.kind_of?(Integer) ? lines[content] : content
+      content.strip.end_with?(' do'.freeze)
+    end
+
+    def end?(content)
+      content = content.kind_of?(Integer) ? lines[content] : content
+      content.strip == 'end'.freeze
     end
 
   end
