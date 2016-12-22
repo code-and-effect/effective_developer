@@ -27,6 +27,13 @@ module Effective
           end
 
           if namespaces.present?
+
+            w.within("namespace :admin do") do
+              w.insert_before_last(resources) do |line, depth|
+                depth == 1 && line.start_with?('root')
+              end
+            end
+
           end
         end
 
