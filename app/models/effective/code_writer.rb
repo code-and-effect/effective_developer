@@ -85,7 +85,7 @@ module Effective
       end
 
       unless whitespace?(index) || end?(index)
-        if block?(contents) || !same?(contents.first, index)
+        if block?(contents) || !same?(contents, index)
           lines.insert(index, newline)
         end
       end
@@ -161,41 +161,33 @@ module Effective
     end
 
     def do?(content)
-      string(content).strip.end_with?(' do'.freeze)
+      ss(content).end_with?(' do'.freeze)
     end
 
     def end?(content)
-      content = content.kind_of?(Integer) ? lines[content] : content
-      content.strip.end_with?('end'.freeze)
+      ss(content, array_method: :last).end_with?('end'.freeze)
     end
 
     def whitespace?(content)
-      content = content.kind_of?(Integer) ? lines[content] : content
-      content.strip.length == 0
+      ss(content).length == 0
     end
 
     def block?(content)
-      case content
-      when Array
-        end?(content.last)
-      when String
-        end?(content)
-      when Integer
-        do?(content) || end?(content)
-      end
+      end?(content) || do?(content)
     end
 
     # Is the first word in each line the same?
     def same?(a, b)
-      string(a).strip.split(' ').first == string(b).strip.split(' ').first
+      ss(a).split(' ').first == ss(b).split(' ').first
     end
 
-    def string(value)
+    # Stripped string
+    def ss(value, array_method: :first)
       value = case value
       when Integer then lines[value]
-      when Array then value.first
+      when Array then value.send(array_method)
       else value
-      end
+      end.strip
     end
 
   end
