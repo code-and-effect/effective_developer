@@ -41,7 +41,7 @@ module Effective
 
       # If the line we're inserting at is a block, fast-forward the end of the block. And add a newline.
       if do?(index)
-        index = first(start: index) { |line| end?(line) } + 1
+        index = first(from: index) { |line| end?(line) } + 1
         lines.insert(index, newline)
       elsif !same?(contents, index) && !whitespace?(index)  # If the line above us isn't the same command or whitespace add a new line.
         lines.insert(index+1, newline)
@@ -74,8 +74,6 @@ module Effective
       true
     end
 
-    protected
-
     # Iterate over the lines with a depth, and passed the stripped line to the passed block
     def each_with_depth(&block)
       depth = 0
@@ -92,33 +90,36 @@ module Effective
     end
 
     # Returns the index of the first line where the passed block returns true
-    def first(start: 0, &block)
+    def first(from: 0, to: nil, &block)
       each_with_depth do |line, depth, index|
-        next if index < start
+        next if index < from
         return index if block.call(line, depth, index)
+        break if to == index
       end
     end
     alias_method :find, :first
 
     # Returns the index of the last line where the passed block returns true
-    def last(start: 0, &block)
+    def last(from: 0, to: nil, &block)
       retval = nil
 
       each_with_depth do |line, depth, index|
-        next if index < start
+        next if index < from
         retval = index if block.call(line, depth, index)
+        break if to == index
       end
 
       retval
     end
 
     # Returns an array of indexes for each line where the passed block returnst rue
-    def all(start: 0, &block)
+    def all(from: 0, to: nil, &block)
       retval = []
 
       each_with_depth do |line, depth, index|
-        next if index < start
+        next if index < from
         retval << index if block.call(line, depth, index)
+        break if to == index
       end
 
       retval
