@@ -18,7 +18,6 @@ module Effective
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
 
       def create_route
-
         Effective::CodeWriter.new('config/routes.rb') do |w|
           if namespaces.blank?
             w.insert_after_last(resources) { |line, depth| depth == 1 && line.start_with?('resources') } ||
@@ -27,13 +26,26 @@ module Effective
           end
 
           if namespaces.present?
+            found_index = 0; found_namespaces = 0
 
-            w.within("namespace :admin do") do
-              w.insert_before_last(resources) do |line, depth|
-                depth == 1 && line.start_with?('root')
+            namespaces.each do |namespace|
+              index = nil
+
+              w.within(found_index) do
+                index = w.first { |line, depth| depth == 1 && line == namespace }
               end
+
+              break unless index
+              found_index = index; found_namespaces += 1
             end
 
+            content = namespaces[found_namespaces..-1] + [resources].flatten + (['end'] * namespaces[found_namespaces..-1].length)
+
+            w.within(found_index) do
+              w.insert_after_last(content) { |line, depth| depth == 1 && line.start_with?('resources') } ||
+              w.insert_before_last(content) { |line, depth| depth == 1 && line.start_with?('root') } ||
+              w.insert_before_last(content) { |line, depth| line == 'end' }
+            end
           end
         end
 
@@ -44,7 +56,7 @@ module Effective
       private
 
       def namespaces
-        namespace_path.split('/').map { |namespace| "namespace :#{namespace} do"}
+        @namespaces ||= namespace_path.split('/').map { |namespace| "namespace :#{namespace} do"}
       end
 
       def resources

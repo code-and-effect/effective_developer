@@ -10,6 +10,7 @@ module Effective
       @indent = indent
       @newline = newline
 
+      # Two stacks of indexes, used by within()
       @from = []
       @to = []
 
