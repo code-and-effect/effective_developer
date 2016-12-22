@@ -18,40 +18,28 @@ module Effective
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
 
       def create_route
+        blocks = []
+
         Effective::CodeWriter.new('config/routes.rb') do |w|
-          if namespaces.blank?
-            w.insert_after_last(resources) { |line, depth| depth == 1 && line.start_with?('resources') } ||
-            w.insert_before_last(resources) { |line, depth| depth == 1 && line.start_with?('root') } ||
-            w.insert_before_last(resources) { |line, depth| line == 'end' }
+          namespaces.each do |namespace|
+            index = nil
+
+            w.within(blocks.last) do
+              index = w.first { |line, depth| depth == 1 && line == namespace }
+            end
+
+            index ? (blocks << index) : break
           end
 
-          if namespaces.present?
-            found_index = 0; found_namespaces = 0
+          content = namespaces[blocks.length..-1] + [resources].flatten + (['end'] * (namespaces.length - blocks.length))
 
-            namespaces.each do |namespace|
-              index = nil
-
-              w.within(found_index) do
-                index = w.first { |line, depth| depth == 1 && line == namespace }
-              end
-
-              break unless index
-              found_index = index; found_namespaces += 1
-            end
-
-            content = namespaces[found_namespaces..-1] + [resources].flatten + (['end'] * namespaces[found_namespaces..-1].length)
-
-            w.within(found_index) do
-              w.insert_after_last(content) { |line, depth| depth == 1 && line.start_with?('resources') } ||
-              w.insert_before_last(content) { |line, depth| depth == 1 && line.start_with?('root') } ||
-              w.insert_before_last(content) { |line, depth| line == 'end' }
-            end
+          w.within(blocks.last) do
+            w.insert_after_last(content) { |line, depth| depth == 1 && line.start_with?('resources') } ||
+            w.insert_before_last(content) { |line, depth| depth == 1 && line.start_with?('root') } ||
+            w.insert_before_last(content) { |line, depth| line == 'end' }
           end
         end
-
       end
-
-      # Rails::Generators.invoke('resource_route', [[namespace_path.presence, plural_name].compact.join('/')])
 
       private
 

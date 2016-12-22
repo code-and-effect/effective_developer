@@ -38,6 +38,8 @@ module Effective
     end
 
     def within(content, &block)
+      content ||= 0
+
       from = content.kind_of?(Integer) ? content : first { |line| line.start_with?(content) && do?(line) }
       return nil unless from
 
@@ -60,9 +62,9 @@ module Effective
       if do?(index)
         index = first(from: index) { |line| end?(line) } + 1
         lines.insert(index, newline)
-      elsif !same?(contents, index) && !whitespace?(index)  # If the line above us isn't the same command or whitespace add a new line.
-        lines.insert(index+1, newline)
+      elsif !whitespace?(index) && (do?(contents) || !same?(contents, index))
         index += 1
+        lines.insert(index, newline)
       end
 
       content_depth = 0
@@ -82,10 +84,10 @@ module Effective
         content_depth += 1 if do?(content)
       end
 
-      if block?(contents) && !whitespace?(index)
-        lines.insert(index, newline)
-      elsif !whitespace?(index) && !(same?(contents.first, index) || end?(index))
-        lines.insert(index, newline)
+      unless whitespace?(index) || end?(index)
+        if block?(contents) || !same?(contents.first, index)
+          lines.insert(index, newline)
+        end
       end
 
       true
@@ -159,8 +161,7 @@ module Effective
     end
 
     def do?(content)
-      content = content.kind_of?(Integer) ? lines[content] : content
-      content.strip.end_with?(' do'.freeze)
+      string(content).strip.end_with?(' do'.freeze)
     end
 
     def end?(content)
@@ -186,9 +187,16 @@ module Effective
 
     # Is the first word in each line the same?
     def same?(a, b)
-      a = (a.kind_of?(Integer) ? lines[a] : a).split(' ').first
-      b = (b.kind_of?(Integer) ? lines[b] : b).split(' ').first
-      a == b
+      string(a).strip.split(' ').first == string(b).strip.split(' ').first
     end
+
+    def string(value)
+      value = case value
+      when Integer then lines[value]
+      when Array then value.first
+      else value
+      end
+    end
+
   end
 end
