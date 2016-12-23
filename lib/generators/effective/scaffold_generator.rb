@@ -32,6 +32,10 @@ module Effective
         Rails::Generators.invoke('effective:route', [name] + invoked_actions)
       end
 
+      def create_ability
+        Rails::Generators.invoke('effective:ability', [name] + invoked_actions)
+      end
+
       def create_controller
         Rails::Generators.invoke('effective:controller', [name] + invoked_actions + invoked_attributes_args)
       end

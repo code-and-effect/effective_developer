@@ -1,7 +1,5 @@
 # rails generate effective:route NAME [action action] [options]
 
-# TODO - support actions
-
 # Adds a route to config/routes.rb
 # rails generate effective:route Thing
 # rails generate effective:model Thing index edit create
@@ -38,6 +36,8 @@ module Effective
             w.insert_before_last(content) { |line, depth| depth == 1 && line.start_with?('root') } ||
             w.insert_before_last(content) { |line, depth| line == 'end' }
           end
+
+          say_status :route, content.join("\n\t\t")
         end
       end
 
