@@ -24,6 +24,10 @@ module Effective
         self.class.send(:attr_reader, :attributes)
       end
 
+      def invoke_views
+        say_status :invoke, :views, :white
+      end
+
       def create_views
         (invoked_actions & available_actions).each do |action|
           template "views/#{action}.html.haml", File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "#{action}.html.haml")

@@ -3,7 +3,7 @@ require_dependency '<%= namespaced_path %>/application_controller'
 
 <% end -%>
 <% module_namespacing do -%>
-class <%= namespaced_class_name %>Controller < ApplicationController
+class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify, ApplicationController].join('::') %>
   before_action :authenticate_user! # Devise enforce user is present
 
 <% if actions.delete('index') -%>
@@ -11,7 +11,7 @@ class <%= namespaced_class_name %>Controller < ApplicationController
     @page_title = '<%= plural_name.titleize %>'
     authorize! :index, <%= class_name %>
 
-    render_datatable_index Effective::Datatables::<%= namespaced_class_name %>.new(params[:scopes])
+    @datatable = Effective::Datatables::<%= namespaced_class_name %>.new(params[:scopes])
   end
 
 <% end -%>
@@ -33,7 +33,7 @@ class <%= namespaced_class_name %>Controller < ApplicationController
 
     if @<%= singular_name %>.save
       flash[:success] = 'Successfully created <%= singular_name %>'
-      redirect_to <%= show_path %>
+      redirect_to(redirect_path)
     else
       flash.now[:danger] = "Unable to create <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
       render :new
@@ -68,7 +68,7 @@ class <%= namespaced_class_name %>Controller < ApplicationController
 
     if @<%= singular_name %>.update_attributes(permitted_params)
       flash[:success] = 'Successfully updated <%= singular_name %>'
-      redirect_to <%= edit_path %>
+      redirect_to(redirect_path)
     else
       flash.now[:danger] = "Unable to update <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
       render :edit
@@ -123,6 +123,19 @@ class <%= namespaced_class_name %>Controller < ApplicationController
       <%= slice.map { |name| permitted_param_for(name) }.join(', ') %><%= ',' if ((index+1) * 8) < attributes.length %>
 <% end -%>
     )
+  end
+
+  def redirect_path
+    case params[:commit].to_s
+    when 'Save'
+      <%= edit_path %>
+    when 'Save and Continue'
+      <%= index_path %>
+    when 'Save and Add New'
+      <%= new_path %>
+    else
+      raise 'Unexpected redirect path'
+    end
   end
 
 end

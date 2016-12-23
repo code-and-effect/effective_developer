@@ -29,6 +29,10 @@ module Effective
         self.class.send(:attr_reader, :attributes)
       end
 
+      def invoke_controller
+        say_status :invoke, :controller, :white
+      end
+
       def create_controller
         template 'controllers/controller.rb', File.join('app/controllers', namespace_path, "#{plural_name}_controller.rb")
       end

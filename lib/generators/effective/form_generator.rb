@@ -23,8 +23,26 @@ module Effective
         end
       end
 
+      def invoke_form
+        say_status :invoke, :form, :white
+      end
+
       def create_form
         template "forms/_form.html.haml", File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_form.html.haml")
+      end
+
+      protected
+
+      def namespaces
+        @namespaces ||= namespace_path.split('/').map { |namespace| ":#{namespace}"}
+      end
+
+      def form_for
+        if namespaces.blank?
+          singular_name
+        else
+          '[' + namespaces.join(', ') + ', ' + singular_name + ']'
+        end
       end
 
     end

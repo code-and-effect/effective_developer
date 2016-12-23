@@ -1,25 +1,10 @@
-%h1 Listing <%= plural_table_name %>
+%h1= @page_title
 
-%table
-  %thead
-    %tr
-<% for attribute in attributes -%>
-      %th <%= attribute.human_name %>
-<% end -%>
-      %th
-      %th
-      %th
+- if can?(:new, <%= class_name %>)
+  %p.text-right= link_to 'New <%= human_name %>', <%= new_path %>, class: 'btn btn-primary'
 
-  %tbody
-    - @<%= plural_table_name %>.each do |<%= singular_table_name %>|
-      %tr
-<% for attribute in [] -%>
-        %td= <%= singular_table_name %>.<%= attribute.name %>
-<% end -%>
-        %td= link_to 'Show', <%= singular_table_name %>
-        %td= link_to 'Edit', edit_<%= singular_table_name %>_path(<%= singular_table_name %>)
-        %td= link_to 'Destroy', <%= singular_table_name %>, method: :delete, data: { confirm: 'Are you sure?' }
-
-%br
-
-= link_to 'New <%= human_name %>', new_<%= singular_table_name %>_path
+- if @datatable.present?
+  = render_datatable_scopes(@datatable)
+  = render_datatable(@datatable)
+- else
+  %p There are no <%= plural_name %>.

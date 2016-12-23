@@ -25,6 +25,10 @@ module Effective
         self.class.send(:attr_reader, :attributes)
       end
 
+      def invoke_datatable
+        say_status :invoke, :datatable, :white
+      end
+
       def create_datatable
         template 'datatables/datatable.rb', File.join('app/models/effective/datatables', namespace_path, "#{plural_name}.rb")
       end

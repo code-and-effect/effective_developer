@@ -15,9 +15,15 @@ module Effective
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
+      def invoke_model
+        say_status :invoke, :model, :white
+      end
+
       def create_model
         template 'models/model.rb', File.join('app/models', class_path, "#{file_name}.rb")
       end
+
+      protected
 
       def to_s_attribute
         attributes.find { |att| ['display_name', 'name', 'title', 'subject'].include?(att.name) }

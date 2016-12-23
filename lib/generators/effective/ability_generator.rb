@@ -15,6 +15,10 @@ module Effective
 
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
 
+      def invoke_ability
+        say_status :invoke, :ability, :white
+      end
+
       def create_ability
         Effective::CodeWriter.new('app/models/ability.rb') do |w|
           if namespaces.blank?

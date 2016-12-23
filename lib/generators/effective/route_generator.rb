@@ -15,6 +15,10 @@ module Effective
 
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
 
+      def invoke_route
+        say_status :invoke, :route, :white
+      end
+
       def create_route
         blocks = []
 

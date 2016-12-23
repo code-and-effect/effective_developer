@@ -1,5 +1,7 @@
+%table.table
+  %tbody
 <% for attribute in attributes -%>
-%p
-  %b <%= attribute.human_name %>:
-  = @<%= singular_table_name %>.<%= attribute.name %>
-<% end -%>
+    %tr
+      %th <%= attribute.human_name %>
+      %td= <%= singular_name %>.<%= attribute.name %>
+<% end %>
