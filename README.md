@@ -210,29 +210,39 @@ Override `before_import()` or `after_import()` to run code before or after the i
 
 # Scaffolding
 
-Scaffolding is the fastest way to build a rails app.  Take advantage of scaffolding.
+Scaffolding is the fastest way to build a rails app. The effective scaffolds try to improve on the rails built in ones.
 
+To generate an entire resource:
 
 ```ruby
-rails generate scaffold product name:string  # active_record, test_unit, resource_route, scaffold_controller, haml, test_unit, helper, assets
-rails generate scaffold_controller product  # haml, test_unit, helper,
-rails generate model product  # active_record, test_unit
-rails generate active_record:model product   # test_unit
-rails generate resource_route product
-rails generate test_unit:model product
-rails generate mailer product
-rails generate job product
-
-
-rails generate effective:controller Thing --attributes name:string description:text one:string two:string three:string four:string five:string six:string seven:string eight:string nine:string ten:string roles:string
-
-rails generate effective:scaffold Thing name:string description:text one:string two:string three:string four:string five:string six:string seven:string eight:string nine:string ten:string roles:string --actions index show edit
-
-rails generate effective:controller Thing
-
+rails generate effective:scaffold thing name:string description:text
+rails generate effective:scaffold admin/thing name:string description:text
+rails generate effective:scaffold thing name:string description:text --actions crud archive
+rails generate effective:scaffold admin/thing name:string description:text --actions crud-show unarchive
 ```
 
+Or generate everything except the model and migration (and read the attributes from the model):
 
+```ruby
+rails generate effective:scaffold_controller thing
+rails generate effective:scaffold_controller admin/thing --actions crud-show
+```
+
+Or call one at a time:
+
+```ruby
+rails generate effective:model thing name:string description:text
+rails generate effective:migration thing name:string description:text
+rails generate effective:controller thing # or admin/thing
+rails generate effective:route thing
+rails generate effective:ability thing # CanCanCan
+rails generate effective:menu thing  # If app/views/*namespaces/_navbar.html.haml is present
+rails generate effective:datatable thing
+rails generate effective:views thing
+rails generate effective:form thing
+```
+
+These are still a little bit work in progress.  There will be more "inspect the model and do the right thing" implemented "soon".
 
 ## License
 
