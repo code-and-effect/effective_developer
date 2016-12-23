@@ -40,12 +40,12 @@ module Effective
     def within(content, &block)
       content ||= 0
 
-      from = content.kind_of?(Integer) ? content : first { |line| line.start_with?(content) && do?(line) }
+      from = content.kind_of?(Integer) ? content : first { |line| line.start_with?(content) && open?(line) }
       return nil unless from
 
       from_depth = depth_at(from)
 
-      to = first(from: from) { |line, depth| depth == from_depth && end?(line) }
+      to = first(from: from) { |line, depth| depth == from_depth && close?(line) }
       return nil unless to
 
       @from.push(from); @to.push(to)
@@ -59,10 +59,10 @@ module Effective
       depth ||= depth_at(index)
 
       # If the line we're inserting at is a block, fast-forward the end of the block. And add a newline.
-      if do?(index)
-        index = first(from: index) { |line| end?(line) } + 1
+      if open?(index)
+        index = first(from: index) { |line| close?(line) } + 1
         lines.insert(index, newline)
-      elsif !whitespace?(index) && (do?(contents) || !same?(contents, index))
+      elsif !whitespace?(index) && (open?(contents) || !same?(contents, index))
         index += 1
         lines.insert(index, newline)
       end
@@ -72,7 +72,7 @@ module Effective
       index = index + 1 # Insert after the given line
 
       contents.each do |content|
-        content_depth -= 1 if end?(content)
+        content_depth -= 1 if close?(content)
 
         if content == ''
           lines.insert(index, newline)
@@ -81,10 +81,10 @@ module Effective
         end
 
         index += 1
-        content_depth += 1 if do?(content)
+        content_depth += 1 if open?(content)
       end
 
-      unless whitespace?(index) || end?(index)
+      unless whitespace?(index) || close?(index)
         if block?(contents) || !same?(contents, index)
           lines.insert(index, newline)
         end
@@ -101,9 +101,10 @@ module Effective
       Array(lines).each_with_index do |line, index|
         stripped = line.to_s.strip
 
-        depth -= 1 if end?(stripped)
+        depth -= 1 if close?(stripped)
+
         block.call(stripped, depth - from_depth, index)
-        depth += 1 if do?(stripped)
+        depth += 1 if open?(stripped)
       end
 
       nil
@@ -124,6 +125,8 @@ module Effective
       retval = nil
 
       each_with_depth do |line, depth, index|
+        puts "[#{depth}]: #{line}"
+
         next if index < (from || 0)
         retval = index if block.call(line, depth, index)
         break if to == index
@@ -152,20 +155,24 @@ module Effective
       depth = 0
 
       Array(lines).each_with_index do |line, index|
-        depth -= 1 if end?(line)
+        depth -= 1 if close?(line)
         break if line_index == index
-        depth += 1 if do?(line)
+        depth += 1 if open?(line)
       end
 
       depth
     end
 
-    def do?(content)
-      ss(content).end_with?(' do'.freeze)
+    def open?(content)
+      stripped = ss(content)
+
+      [' do'].any? { |end_with| stripped.end_with?(end_with) } ||
+      ['class ', 'module ', 'def ', 'if '].any? { |start_with| stripped.start_with?(start_with) }
     end
 
-    def end?(content)
-      ss(content, array_method: :last).end_with?('end'.freeze)
+    def close?(content)
+      stripped = ss(content, array_method: :last)
+      stripped.end_with?('end'.freeze) && !stripped.include?('do ')
     end
 
     def whitespace?(content)
@@ -173,7 +180,7 @@ module Effective
     end
 
     def block?(content)
-      end?(content) || do?(content)
+      close?(content) || open?(content)
     end
 
     # Is the first word in each line the same?
@@ -189,6 +196,5 @@ module Effective
       else value
       end.strip
     end
-
   end
 end
