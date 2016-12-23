@@ -3,7 +3,7 @@ require_dependency '<%= namespaced_path %>/application_controller'
 
 <% end -%>
 <% module_namespacing do -%>
-class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify, ApplicationController].join('::') %>
+class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.presence, ApplicationController].compact.join('::') %>
   before_action :authenticate_user! # Devise enforce user is present
 
 <% if actions.delete('index') -%>

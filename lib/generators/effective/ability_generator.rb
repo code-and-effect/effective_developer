@@ -54,7 +54,7 @@ module Effective
             abilities += (invoked_actions - crud_actions)
           end
 
-          abilities = ['manage'] if abilities.blank?
+          abilities = ['manage'] if abilities.blank? || abilities == (crud_actions - ['show'])
 
           if abilities.length == 1
             abilities = ":#{abilities.first}"

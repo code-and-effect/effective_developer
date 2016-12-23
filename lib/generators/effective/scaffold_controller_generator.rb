@@ -1,13 +1,14 @@
 # rails generate effective:scaffold NAME [field[:type] field[:type]] [options]
 
+# Generates a migration, model, datatable, routes, controller, views
+
 # rails generate effective:scaffold Thing
 # rails generate effective:scaffold admin/thing name:string details:text --actions index show edit update
-# rails generate effective:scaffold admin/thing name:string details:text --actions crud-show
 # rails generate effective:scaffold admin/thing name:string details:text
 
 module Effective
   module Generators
-    class ScaffoldGenerator < Rails::Generators::NamedBase
+    class ScaffoldControllerGenerator < Rails::Generators::NamedBase
       include Helpers
 
       source_root File.expand_path(('../' * 4) + 'lib/scaffolds', __FILE__)
@@ -16,14 +17,6 @@ module Effective
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
       class_option :actions, type: :array, default: ['crud'], desc: 'Included actions', banner: 'index show'
-
-      def invoke_model
-        Rails::Generators.invoke('effective:model', [name] + invoked_attributes)
-      end
-
-      def invoke_migration
-        Rails::Generators.invoke('effective:migration', [name] + invoked_attributes)
-      end
 
       def invoke_controller
         Rails::Generators.invoke('effective:controller', [name] + invoked_actions + invoked_attributes_args)

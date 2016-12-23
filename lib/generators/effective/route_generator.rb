@@ -51,7 +51,9 @@ module Effective
         @resources ||= (
           resources = "resources :#{plural_name}"
 
-          if (crud_actions - invoked_actions).present?
+          if ((crud_actions - ['show']) == invoked_actions)
+            resources << ', except: [:show]'
+          elsif (crud_actions - invoked_actions).present?
             resources << ', only: ['
             resources << (crud_actions & invoked_actions).map { |action| ':' + action }.join(', ')
             resources << ']'

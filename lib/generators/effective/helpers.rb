@@ -8,16 +8,20 @@ module Effective
         %w(index new create show edit update destroy)
       end
 
+      # --actions crud another
+      # --actions crud-show another
       def invoked_actions
         actions = (respond_to?(:actions) ? self.actions : options.actions)
         actions = Array(actions).flat_map { |arg| arg.gsub('[', '').gsub(']', '').split(',') }
 
-        case actions
-        when ['crud']
-          crud_actions
-        else
-          actions
+        crudish = actions.find { |action| action.start_with?('crud') }
+
+        if crudish
+          actions = crud_actions + (actions - [crudish])
+          crudish.split('-').each { |except| actions.delete(except) }
         end
+
+        actions
       end
 
       def invoked_attributes
