@@ -71,6 +71,10 @@ module Effective
         @file_name = @class_path.pop
       end
 
+      def namespaces
+        @namespaces ||= namespace_path.split('/')
+      end
+
       # admin/effective::things => 'admin'
       # effective::things => ''
       def namespace_path

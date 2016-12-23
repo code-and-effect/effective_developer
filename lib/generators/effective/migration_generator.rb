@@ -17,6 +17,10 @@ module Effective
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
+      def invoke_migration
+        say_status :invoke, :migration, :white
+      end
+
       def create_migration
         Rails::Generators.invoke('migration', ["create_#{plural_name}"] + invoked_attributes)
       end

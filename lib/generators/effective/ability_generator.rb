@@ -42,10 +42,6 @@ module Effective
 
       private
 
-      def namespaces
-        @namespaces ||= namespace_path.split('/')
-      end
-
       def ability
         @ability ||= (
           abilities = []

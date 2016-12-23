@@ -27,13 +27,13 @@ module Effective
             index = nil
 
             w.within(blocks.last) do
-              index = w.first { |line, depth| depth == 1 && line == namespace }
+              index = w.first { |line, depth| depth == 1 && line == "namespace :#{namespace} do"}
             end
 
             index ? (blocks << index) : break
           end
 
-          content = namespaces[blocks.length..-1] + [resources].flatten + (['end'] * (namespaces.length - blocks.length))
+          content = namespaces[blocks.length..-1].map { |ns| "namespace :#{ns} do"} + [resources].flatten + (['end'] * (namespaces.length - blocks.length))
 
           w.within(blocks.last) do
             w.insert_after_last(content) { |line, depth| depth == 1 && line.start_with?('resources') } ||
@@ -46,10 +46,6 @@ module Effective
       end
 
       private
-
-      def namespaces
-        @namespaces ||= namespace_path.split('/').map { |namespace| "namespace :#{namespace} do"}
-      end
 
       def resources
         @resources ||= (

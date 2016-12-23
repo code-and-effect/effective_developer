@@ -32,12 +32,16 @@ module Effective
         Rails::Generators.invoke('effective:route', [name] + invoked_actions)
       end
 
+      def invoke_controller
+        Rails::Generators.invoke('effective:controller', [name] + invoked_actions + invoked_attributes_args)
+      end
+
       def invoke_ability
         Rails::Generators.invoke('effective:ability', [name] + invoked_actions)
       end
 
-      def invoke_controller
-        Rails::Generators.invoke('effective:controller', [name] + invoked_actions + invoked_attributes_args)
+      def invoke_menu
+        Rails::Generators.invoke('effective:menu', [name])
       end
 
       def invoke_datatable
