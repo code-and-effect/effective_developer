@@ -4,7 +4,7 @@ module Effective
     attr_reader :lines
     attr_reader :indent, :newline
 
-    def initialize(filename, indent: "\t".freeze, newline: "\n".freeze, &block)
+    def initialize(filename, indent: '  '.freeze, newline: "\n".freeze, &block)
       @lines = File.open(filename).readlines
 
       @indent = indent
@@ -125,8 +125,6 @@ module Effective
       retval = nil
 
       each_with_depth do |line, depth, index|
-        puts "[#{depth}]: #{line}"
-
         next if index < (from || 0)
         retval = index if block.call(line, depth, index)
         break if to == index
