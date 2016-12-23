@@ -246,7 +246,7 @@ rails generate effective:views thing
 rails generate effective:form thing
 ```
 
-These are still a little bit work in progress.  There will be more "inspect the model and do the right thing" implemented "soon".
+These scaffold generators are still an ongoing work in progress.  There is a lot more inspect the model and do the right thing type functionality to be implemented "soon".
 
 ## License
 
