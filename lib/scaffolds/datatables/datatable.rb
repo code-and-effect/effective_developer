@@ -2,10 +2,9 @@ module Effective
   module Datatables
     class <%= namespaced_class_name %> < Effective::Datatable
 
-      datatable do
-      <% attributes.each do |attribute| %>
+      datatable do<% attributes.each do |attribute| %>
         table_column :<%= attribute.name -%>
-      <% end %>
+<% end %>
 
         actions_column
       end
