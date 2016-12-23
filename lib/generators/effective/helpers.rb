@@ -98,7 +98,7 @@ module Effective
       end
 
       def new_path
-        "new_#{show_path}"
+        ['new', namespace_path.underscore.presence, singular_name].compact.join('_') + '_path'
       end
 
       def edit_path
