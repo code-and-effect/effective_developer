@@ -212,23 +212,27 @@ Override `before_import()` or `after_import()` to run code before or after the i
 
 Scaffolding is the fastest way to build a rails app. The effective scaffolds try to improve on the rails built in ones.
 
-To generate an entire resource:
+To generate an entire resource (4 different examples):
 
 ```ruby
 rails generate effective:scaffold thing name:string description:text
+
 rails generate effective:scaffold admin/thing name:string description:text
+
 rails generate effective:scaffold thing name:string description:text --actions crud archive
+
 rails generate effective:scaffold admin/thing name:string description:text --actions crud-show unarchive
 ```
 
-Or generate everything except the model and migration (and read the attributes from the model):
+Or, read from the existing model, and just generate the controller, route, ability, menu, datatable, views, form (2 different examples):
 
 ```ruby
 rails generate effective:scaffold_controller thing
+
 rails generate effective:scaffold_controller admin/thing --actions crud-show
 ```
 
-Or call one at a time:
+Or call each scaffold one at a time:
 
 ```ruby
 rails generate effective:model thing name:string description:text
