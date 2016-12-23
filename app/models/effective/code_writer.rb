@@ -2,17 +2,17 @@ module Effective
   class CodeWriter
 
     attr_reader :lines
-    attr_reader :indent, :newline
+    attr_reader :filename, :indent, :newline
 
     def initialize(filename, indent: '  '.freeze, newline: "\n".freeze, &block)
-      @lines = File.open(filename).readlines
-
+      @filename = filename
       @indent = indent
       @newline = newline
 
-      # Two stacks of indexes, used by within()
       @from = []
       @to = []
+
+      @lines = File.open(filename).readlines
 
       block.call(self)
 
@@ -93,6 +93,22 @@ module Effective
       true
     end
 
+    def insert_raw(content, index, depth = 0)
+      contents = (content.kind_of?(Array) ? content : content.split(newline))
+
+      index = index + 1 # Insert after the given line
+
+      contents.each do |content|
+        if content.strip == ''
+          lines.insert(index, newline)
+        else
+          lines.insert(index, (indent * depth) + content + newline)
+        end
+
+        index += 1
+      end
+    end
+
     # Iterate over the lines with a depth, and passed the stripped line to the passed block
     def each_with_depth(&block)
       depth = 0
@@ -147,9 +163,11 @@ module Effective
     end
     alias_method :select, :all
 
-    private
-
     def depth_at(line_index)
+      if filename.end_with?('.haml')
+        return (lines[line_index].length - lines[line_index].lstrip.length) / indent.length
+      end
+
       depth = 0
 
       Array(lines).each_with_index do |line, index|
@@ -160,6 +178,8 @@ module Effective
 
       depth
     end
+
+    private
 
     def open?(content)
       stripped = ss(content)
