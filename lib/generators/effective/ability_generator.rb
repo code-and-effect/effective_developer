@@ -22,19 +22,27 @@ module Effective
       def create_ability
         Effective::CodeWriter.new('app/models/ability.rb') do |w|
           if namespaces.blank?
-            w.insert_after_last(ability) { |line, depth| depth == 2 && line.start_with?('can ') } ||
-            w.insert_before_last(ability) { |line, depth| depth == 2 && line.start_with?('if') } ||
-            w.insert_before_last(ability) { |line, depth| depth == 2 && line == 'end' }
+            if w.find { |line, depth| depth == 2 && line == ability }
+              say_status :identical, ability, :blue
+            else
+              w.insert_after_last(ability) { |line, depth| depth == 2 && line.start_with?('can ') } ||
+              w.insert_before_last(ability) { |line, depth| depth == 2 && line.start_with?('if') } ||
+              w.insert_before_last(ability) { |line, depth| depth == 2 && line == 'end' }
 
-            say_status :ability, ability
+              say_status :ability, ability
+            end
           end
 
           namespaces.each do |namespace|
             w.within("if user.is?(:#{namespace})") do
-              w.insert_after_last(ability) { |line, depth| depth == 1 && line.start_with?('can ') } ||
-              w.insert_before_last(ability) { |line, depth| depth == 1 && line == 'end' }
+              if w.find { |line, depth| depth == 1 && line == ability }
+                say_status :identical, ability, :blue
+              else
+                w.insert_after_last(ability) { |line, depth| depth == 1 && line.start_with?('can ') } ||
+                w.insert_before_last(ability) { |line, depth| depth == 1 && line == 'end' }
 
-              say_status "#{namespace}_ability", ability
+                say_status "#{namespace}_ability", ability
+              end
             end
           end
         end

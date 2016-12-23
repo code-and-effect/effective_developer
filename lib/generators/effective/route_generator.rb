@@ -36,12 +36,16 @@ module Effective
           content = namespaces[blocks.length..-1].map { |ns| "namespace :#{ns} do"} + [resources].flatten + (['end'] * (namespaces.length - blocks.length))
 
           w.within(blocks.last) do
-            w.insert_after_last(content) { |line, depth| depth == 1 && line.start_with?('resources') } ||
-            w.insert_before_last(content) { |line, depth| depth == 1 && line.start_with?('root') } ||
-            w.insert_before_last(content) { |line, depth| line == 'end' }
-          end
+            if content.length == 1 && w.find { |line, depth| depth == 1 && line == content.first }
+              say_status :identical, content.first, :blue
+            else
+              w.insert_after_last(content) { |line, depth| depth == 1 && line.start_with?('resources') } ||
+              w.insert_before_last(content) { |line, depth| depth == 1 && line.start_with?('root') } ||
+              w.insert_before_last(content) { |line, depth| line == 'end' }
 
-          say_status :route, content.join("\n\t\t")
+              say_status :route, content.join("\n\t\t")
+            end
+          end
         end
       end
 
