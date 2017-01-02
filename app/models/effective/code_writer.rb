@@ -149,7 +149,7 @@ module Effective
       retval
     end
 
-    # Returns an array of indexes for each line where the passed block returnst rue
+    # Returns an array of indexes for each line where the passed block returns true
     def all(from: @from.last, to: @to.last, &block)
       retval = []
 
@@ -162,6 +162,21 @@ module Effective
       retval
     end
     alias_method :select, :all
+
+    # Yields each line to a block and returns an array of the results
+    def map(from: @from.last, to: @to.last, indexes: [], &block)
+      retval = []
+
+      each_with_depth do |line, depth, index|
+        next if index < (from || 0)
+        next unless indexes.blank? || indexes.include?(index)
+
+        retval << block.call(line, depth, index)
+        break if to == index
+      end
+
+      retval
+    end
 
     def depth_at(line_index)
       if filename.end_with?('.haml')
