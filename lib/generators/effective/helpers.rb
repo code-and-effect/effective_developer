@@ -36,7 +36,7 @@ module Effective
         invoked_attributes.present? ? (['--attributes'] + invoked_attributes) : []
       end
 
-      def klass_attributes
+      def klass_attributes(verbose: true)
         klass = class_name.safe_constantize
         return [] unless klass
 
@@ -54,7 +54,7 @@ module Effective
         begin
           attributes = klass.new().attributes
         rescue => e
-          puts "Unable to call #{class_name}.new().attributes. Continuing with empty attributes."
+          puts "Unable to call #{class_name}.new().attributes. Continuing with empty attributes." if verbose
           return []
         end
 
