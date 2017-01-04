@@ -26,7 +26,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
 <% end -%>
 <% if actions.delete('create') -%>
   def create
-    @<%= singular_name %> = <%= class_name %>.new(permitted_params)
+    @<%= singular_name %> = <%= class_name %>.new(<%= singular_name %>_params)
 
     @page_title = 'New <%= human_name %>'
     authorize! :create, @<%= singular_name %>
@@ -66,7 +66,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
     @page_title = "Edit #{@<%= singular_name %>}"
     authorize! :update, @<%= singular_name %>
 
-    if @<%= singular_name %>.update_attributes(permitted_params)
+    if @<%= singular_name %>.update_attributes(<%= singular_name %>_params)
       flash[:success] = 'Successfully updated <%= singular_name %>'
       redirect_to(redirect_path)
     else
@@ -117,7 +117,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
 <% end -%>
   private
 
-  def permitted_params
+  def <%= singular_name %>_params
     params.require(:<%= singular_name %>).permit(:id,
 <% attributes_names.each_slice(8).with_index do |slice, index| -%>
       <%= slice.map { |name| permitted_param_for(name) }.join(', ') %><%= ',' if ((index+1) * 8) < attributes.length %>
