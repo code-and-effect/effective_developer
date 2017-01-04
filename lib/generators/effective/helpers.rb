@@ -58,8 +58,15 @@ module Effective
           return []
         end
 
-        (attributes.keys - [klass.primary_key, 'created_at', 'updated_at']).map do |attr|
-          "#{attr}:#{klass.column_for_attribute(attr).type || 'string'}"
+        attribute_names = attributes.keys - [klass.primary_key, 'created_at', 'updated_at']
+        attribute_names -= ['site_id'] if klass.respond_to?(:is_site_specific)
+
+        attribute_names.map do |attr|
+          if klass.respond_to?(:column_for_attribute) # Rails 4+
+            "#{attr}:#{klass.column_for_attribute(attr).try(:type) || 'string'}"
+          else
+            "#{attr}:#{klass.columns_hash[attr].try(:type) || 'string'}"
+          end
         end
       end
 

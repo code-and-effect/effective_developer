@@ -12,7 +12,7 @@ module Effective
 
       desc 'Adds a menu link to an existing _navbar.html.haml'
 
-      def invoke_ability
+      def invoke_menu
         say_status :invoke, :menu, :white
       end
 

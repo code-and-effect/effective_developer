@@ -15,8 +15,8 @@ module Effective
 
       desc 'Creates an Effective Scaffold'
 
-      argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
-      class_option :actions, type: :array, default: ['crud'], desc: 'Included actions', banner: 'index show'
+      argument :actions, type: :array, default: ['crud'], banner: 'action action'
+      class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
       def invoke_controller
         Rails::Generators.invoke('effective:controller', [name] + invoked_actions + invoked_attributes_args)
@@ -35,6 +35,10 @@ module Effective
       end
 
       def invoke_datatable
+        unless invoked_actions.include?('index')
+          say_status(:skipped, :datatable, :yellow) and return
+        end
+
         Rails::Generators.invoke('effective:datatable', [name] + invoked_attributes)
       end
 
@@ -43,6 +47,10 @@ module Effective
       end
 
       def invoke_form
+        unless invoked_actions.include?('new') || invoked_actions.include?('edit')
+          say_status(:skipped, :form, :yellow) and return
+        end
+
         Rails::Generators.invoke('effective:form', [name] + invoked_attributes)
       end
 

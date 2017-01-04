@@ -42,6 +42,10 @@ module Effective
       end
 
       def invoke_datatable
+        unless invoked_actions.include?('index')
+          say_status(:skipped, :datatable, :yellow) and return
+        end
+
         Rails::Generators.invoke('effective:datatable', [name] + invoked_attributes)
       end
 
@@ -50,6 +54,10 @@ module Effective
       end
 
       def invoke_form
+        unless invoked_actions.include?('new') || invoked_actions.include?('edit')
+          say_status(:skipped, :form, :yellow) and return
+        end
+
         Rails::Generators.invoke('effective:form', [name] + invoked_attributes)
       end
 
