@@ -101,11 +101,11 @@ module Effective
       end
 
       def index_path
-        [namespace_path.underscore.presence, plural_name].compact.join('_') + '_path'
+        [namespace_path.underscore.presence, plural_name, 'path'].compact.join('_')
       end
 
       def new_path
-        ['new', namespace_path.underscore.presence, singular_name].compact.join('_') + '_path'
+        ['new', namespace_path.underscore.presence, singular_name, 'path'].compact.join('_')
       end
 
       def edit_path
@@ -113,7 +113,7 @@ module Effective
       end
 
       def show_path
-        [namespace_path.underscore.presence, singular_name].compact.join('_') + "_path(@#{singular_name})"
+        [namespace_path.underscore.presence, singular_name, 'path', "(@#{singular_name})"].compact.join('_')
       end
 
     end
