@@ -6,7 +6,11 @@ require_dependency '<%= namespaced_path %>/application_controller'
 class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.presence, ApplicationController].compact.join('::') %>
   before_action :authenticate_user! # Devise enforce user is present
 
-<% if actions.delete('index') -%>
+<% if defined?(EffectiveResources) -%>
+  include Effective::CrudController
+
+<% end -%>
+<% if actions.delete('index') && !defined?(EffectiveResources) -%>
   def index
     @page_title = '<%= plural_name.titleize %>'
     authorize! :index, <%= class_name %>
@@ -15,7 +19,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
   end
 
 <% end -%>
-<% if actions.delete('new') -%>
+<% if actions.delete('new') && !defined?(EffectiveResources) -%>
   def new
     @<%= singular_name %> = <%= class_name %>.new
 
@@ -24,7 +28,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
   end
 
 <% end -%>
-<% if actions.delete('create') -%>
+<% if actions.delete('create') && !defined?(EffectiveResources) -%>
   def create
     @<%= singular_name %> = <%= class_name %>.new(<%= singular_name %>_params)
 
@@ -41,7 +45,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
   end
 
 <% end -%>
-<% if actions.delete('show') -%>
+<% if actions.delete('show') && !defined?(EffectiveResources) -%>
   def show
     @<%= singular_name %> = <%= class_name %>.find(params[:id])
 
@@ -50,7 +54,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
   end
 
 <% end -%>
-<% if actions.delete('edit') -%>
+<% if actions.delete('edit') && !defined?(EffectiveResources) -%>
   def edit
     @<%= singular_name %> = <%= class_name %>.find(params[:id])
 
@@ -59,7 +63,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
   end
 
 <% end -%>
-<% if actions.delete('update') -%>
+<% if actions.delete('update') && !defined?(EffectiveResources) -%>
   def update
     @<%= singular_name %> = <%= class_name %>.find(params[:id])
 
@@ -76,7 +80,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
   end
 
 <% end -%>
-<% if actions.delete('destroy') -%>
+<% if actions.delete('destroy') && !defined?(EffectiveResources) -%>
   def destroy
     @<%= singular_name %> = <%= class_name %>.find(params[:id])
     authorize! :destroy, @<%= singular_name %>
@@ -84,7 +88,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
     if @<%= singular_name %>.destroy
       flash[:success] = 'Successfully deleted <%= singular_name %>'
     else
-      flash.now[:danger] = "Unable to delete <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
+      flash[:danger] = "Unable to delete <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
     end
 
     redirect_to <%= index_path %>
@@ -115,7 +119,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
   end
 
 <% end -%>
-  private
+  protected
 
   def <%= singular_name %>_params
     params.require(:<%= singular_name %>).permit(:id,
@@ -125,6 +129,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
     )
   end
 
+<% if !defined?(EffectiveResources) -%>
   def redirect_path
     case params[:commit].to_s
     when 'Save'
@@ -138,5 +143,6 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
     end
   end
 
+<% end -%>
 end
 <% end -%>
