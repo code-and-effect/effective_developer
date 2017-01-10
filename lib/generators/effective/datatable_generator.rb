@@ -13,7 +13,7 @@ module Effective
 
       source_root File.expand_path(('../' * 4) + 'lib/scaffolds', __FILE__)
 
-      desc 'Creates an Effective::Datatable in your app/effective/datatables folder.'
+      desc 'Creates an Effective::Datatable in your app/datatables folder.'
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
@@ -30,7 +30,7 @@ module Effective
       end
 
       def create_datatable
-        template 'datatables/datatable.rb', File.join('app/models/effective/datatables', namespace_path, "#{plural_name}.rb")
+        template 'datatables/datatable.rb', File.join('app/datatables', namespace_path, "#{plural_name}_datatable.rb")
       end
 
     end

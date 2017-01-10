@@ -11,7 +11,7 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
     @page_title = '<%= plural_name.titleize %>'
     authorize! :index, <%= class_name %>
 
-    @datatable = Effective::Datatables::<%= namespaced_class_name %>.new(params[:scopes])
+    @datatable = <%= namespaced_class_name %>Datatable.new(params[:scopes])
   end
 
 <% end -%>

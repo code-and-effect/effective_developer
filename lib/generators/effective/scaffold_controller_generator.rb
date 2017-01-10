@@ -13,7 +13,7 @@ module Effective
 
       source_root File.expand_path(('../' * 4) + 'lib/scaffolds', __FILE__)
 
-      desc 'Creates an Effective Scaffold'
+      desc 'Creates an Effective Scaffold based on an existing model'
 
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
       class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
