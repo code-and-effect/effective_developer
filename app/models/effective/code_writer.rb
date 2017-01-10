@@ -22,19 +22,19 @@ module Effective
     end
 
     # Returns true if the insert happened, nil if no insert
-    def insert_after_last(content, &block)
+    def insert_after_last(content, depth: nil, content_depth: nil, &block)
       index = last(&block)
       return nil unless index
 
-      insert(content, index)
+      insert(content, index, depth: depth, content_depth: content_depth)
     end
 
     # Returns true if the insert happened, nil if no insert
-    def insert_before_last(content, &block)
+    def insert_before_last(content, depth: nil, content_depth: nil, &block)
       index = last(&block)
       return nil unless index
 
-      insert(content, index-1)
+      insert(content, index-1, depth: depth, content_depth: content_depth)
     end
 
     def within(content, &block)
@@ -53,7 +53,7 @@ module Effective
       @from.pop; @to.pop
     end
 
-    def insert(content, index, depth = nil)
+    def insert(content, index, depth: nil, content_depth: nil)
       contents = (content.kind_of?(Array) ? content : content.split(newline)).map { |str| str.strip }
 
       depth ||= depth_at(index)
@@ -67,7 +67,7 @@ module Effective
         lines.insert(index, newline)
       end
 
-      content_depth = 0
+      content_depth ||= 0
 
       index = index + 1 # Insert after the given line
 
@@ -199,7 +199,7 @@ module Effective
     def open?(content)
       stripped = ss(content)
 
-      [' do'].any? { |end_with| stripped.end_with?(end_with) } ||
+      [' do'].any? { |end_with| stripped.split('#').first.to_s.end_with?(end_with) } ||
       ['class ', 'module ', 'def ', 'if '].any? { |start_with| stripped.start_with?(start_with) }
     end
 
