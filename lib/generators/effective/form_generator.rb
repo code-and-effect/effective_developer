@@ -31,6 +31,9 @@ module Effective
         template 'forms/_form.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form.html.haml')
       end
 
+      def create_has_many
+      end
+
       protected
 
       def form_for
@@ -47,6 +50,7 @@ module Effective
 
         partial = nil
         partial = 'belongs_to' if belongs_tos.include?(attribute.name)
+        partial = 'has_many' if has_manys.include?(attribute.name)
 
         partial ||= case attribute.type
           when :integer   ; 'integer'
@@ -57,7 +61,7 @@ module Effective
         end
 
         ERB.new(
-          File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/_field_#{partial}.html.erb")
+          File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/_field_#{partial}.html.haml")
         ).result(b).split("\n").map { |line| ('  ' * depth) + line }.join("\n")
       end
 

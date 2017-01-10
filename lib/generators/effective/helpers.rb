@@ -109,6 +109,27 @@ module Effective
         )
       end
 
+      def has_manys
+        @has_manys || = (
+        )
+      end
+
+      #   # Collect to_s representations for all has_one associations
+      # (resource.class.try(:reflect_on_all_associations, :has_one) || []).each do |association|
+      #   attributes[association.name] = resource.send(association.name).to_s.presence
+      # end
+
+      # # Collects attributes for all accepts_as_nested_parameters has_many associations
+      # (resource.class.try(:reflect_on_all_autosave_associations) || []).each do |association|
+      #   attributes[association.name] = {}
+
+      #   Array(resource.send(association.name)).each_with_index do |child, index|
+      #     attributes[association.name][index+1] = ActiveRecordLogger.new(child, options.merge(logger: logger)).attributes
+      #   end
+
+      #   attributes[association.name].presence
+      # end
+
       def sort_attribute_names(klass, attribute_names)
         written = written_attributes.reject { |att| att.ends_with?(':references') }.map { |att| att.split(':').first }
 
