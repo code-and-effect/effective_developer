@@ -41,6 +41,26 @@ module Effective
         end
       end
 
+      def render_field(attribute, depth: 1)
+        b = binding
+        b.local_variable_set(:attribute, attribute)
+
+        partial = nil
+        partial = 'belongs_to' if belongs_tos.include?(attribute.name)
+
+        partial ||= case attribute.type
+          when :integer   ; 'integer'
+          when :datetime  ; 'datetime'
+          when :date      ; 'date'
+          when :text      ; 'text'
+          else 'string'
+        end
+
+        ERB.new(
+          File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/_field_#{partial}.html.erb")
+        ).result(b).split("\n").map { |line| ('  ' * depth) + line }.join("\n")
+      end
+
     end
   end
 end

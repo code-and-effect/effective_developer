@@ -1,0 +1,3 @@
+= f.input :<%= attribute.name %>,
+  as: :effective_select,
+  collection: <%= attribute.name.gsub('_id', '').classify %>.all

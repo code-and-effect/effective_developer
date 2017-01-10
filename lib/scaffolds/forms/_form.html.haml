@@ -1,6 +1,6 @@
 = simple_form_for(<%= form_for %>) do |f|
 <% for attribute in attributes -%>
-  = f.input :<%= attribute.name %>
+<%= render_field(attribute) %>
 <% end -%>
 
 <% if defined?(EffectiveResources) -%>

@@ -103,8 +103,13 @@ module Effective
         )
       end
 
+      def belongs_tos
+        @belongs_tos ||= (
+          (class_name.constantize.reflect_on_all_associations(:belongs_to) rescue []).map { |a| a.foreign_key }
+        )
+      end
+
       def sort_attribute_names(klass, attribute_names)
-        belongs_tos = (klass.reflect_on_all_associations(:belongs_to) rescue []).map { |a| a.foreign_key }
         written = written_attributes.reject { |att| att.ends_with?(':references') }.map { |att| att.split(':').first }
 
         attribute_names.sort do |a, b|
