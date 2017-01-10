@@ -4,7 +4,7 @@
 <% end -%>
 
 <% if defined?(EffectiveResources) -%>
-  = simple_for_submit(f)
+  = simple_form_submit(f)
 <% else %>
   %p.text-right
     = f.button :submit, 'Save', data: { disable_with: 'Saving...' }
