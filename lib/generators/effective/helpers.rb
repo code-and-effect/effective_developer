@@ -110,8 +110,7 @@ module Effective
       end
 
       def has_manys
-        @has_manys || = (
-        )
+        @has_manys || = []
       end
 
       #   # Collect to_s representations for all has_one associations
