@@ -35,41 +35,6 @@ module Effective
 
       protected
 
-      # Written attributes include all belong_tos, as well as
-      # any Attributes comments as per our custom 'Attributes' comment block contained in the model file
-
-      # Attributes
-      # name        :string
-      # description :text
-      #
-      # another :string
-
-      def written_attributes
-        @written_attributes ||= (
-          attributes = []
-
-          Effective::CodeWriter.new(File.join('app/models', class_path, "#{file_name}.rb")) do |w|
-            # belong_tos
-            references = w.select { |line| line.start_with?('belongs_to '.freeze) }
-
-            if references.present?
-              attributes += w.map(indexes: references) { |line| [[line.scan(/belongs_to\s+:(\w+)/).flatten.first, 'references']] }
-            end
-
-            # Attributes
-            first = w.find { |line| line == '# Attributes' }
-            break unless first
-
-            last = w.find(from: first) { |line| line.start_with?('#') == false && line.length > 0 }
-            break unless last
-
-            attributes += w.map(from: first+1, to: last-1) { |line| line.scan(/^\W+(\w+)\W+:(\w+)/).presence }
-          end
-
-          attributes.flatten(1).compact.map { |attribute| attribute.join(':') }
-        )
-      end
-
       def timestamps
         ['created_at:datetime', 'updated_at:datetime']
       end

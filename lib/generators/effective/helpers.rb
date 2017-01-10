@@ -24,6 +24,8 @@ module Effective
         actions
       end
 
+      # As per the command line invoked actions
+      # ['name:string', 'description:text']
       def invoked_attributes
         if respond_to?(:attributes)
           attributes.map { |att| "#{att.name}:#{att.type}" }
@@ -36,6 +38,8 @@ module Effective
         invoked_attributes.present? ? (['--attributes'] + invoked_attributes) : []
       end
 
+      # All attributes from the klass. Sorted as per the model Attributes block.
+      # ['user_id:integer', name:string', 'description:text']
       def klass_attributes(verbose: true)
         klass = class_name.safe_constantize
         return [] unless klass
@@ -61,12 +65,72 @@ module Effective
         attribute_names = attributes.keys - [klass.primary_key, 'created_at', 'updated_at']
         attribute_names -= ['site_id'] if klass.respond_to?(:is_site_specific)
 
-        attribute_names.map do |attr|
+        sort_attribute_names(klass, attribute_names).map do |attr|
           if klass.respond_to?(:column_for_attribute) # Rails 4+
             "#{attr}:#{klass.column_for_attribute(attr).try(:type) || 'string'}"
           else
             "#{attr}:#{klass.columns_hash[attr].try(:type) || 'string'}"
           end
+        end
+      end
+
+      # Written attributes include all belong_tos, as well as
+      # any Attributes comments as per our custom 'Attributes' comment block contained in the model file
+      # ['user:references', name:string', 'description:text']
+      def written_attributes
+        @written_attributes ||= (
+          attributes = []
+
+          Effective::CodeWriter.new(File.join('app/models', class_path, "#{file_name}.rb")) do |w|
+            # belong_tos
+            references = w.select { |line| line.start_with?('belongs_to '.freeze) }
+
+            if references.present?
+              attributes += w.map(indexes: references) { |line| [[line.scan(/belongs_to\s+:(\w+)/).flatten.first, 'references']] }
+            end
+
+            # Attributes
+            first = w.find { |line| line == '# Attributes' }
+            break unless first
+
+            last = w.find(from: first) { |line| line.start_with?('#') == false && line.length > 0 }
+            break unless last
+
+            attributes += w.map(from: first+1, to: last-1) { |line| line.scan(/^\W+(\w+)\W+:(\w+)/).presence }
+          end
+
+          attributes.flatten(1).compact.map { |attribute| attribute.join(':') }
+        )
+      end
+
+      def sort_attribute_names(klass, attribute_names)
+        belongs_tos = (klass.reflect_on_all_associations(:belongs_to) rescue []).map { |a| a.foreign_key }
+        written = written_attributes.reject { |att| att.ends_with?(':references') }.map { |att| att.split(':').first }
+
+        attribute_names.sort do |a, b|
+          index = nil
+
+          # belongs_to
+          index ||= (
+            if belongs_tos.include?(a) && !belongs_tos.include?(b)
+              -1
+            elsif !belongs_tos.include?(a) && belongs_tos.include?(b)
+              1
+            end
+          )
+
+          # written
+          index ||= (
+            if written.include?(a) && written.include?(b)
+              written.index(a) <=> written.index(b)
+            elsif written.include?(a) && !written.include?(b)
+              -1
+            elsif !written.include?(a) && written.include?(b)
+              1
+            end
+          )
+
+          index || a <=> b
         end
       end
 
