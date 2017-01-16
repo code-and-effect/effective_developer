@@ -1,0 +1,32 @@
+= simple_form_for(<%= form_for %>) do |f|
+  %div{role: 'tabpanel'}
+    %ul.nav.nav-tabs{role: 'tablist'}
+      %li.active{role: 'presentation'}
+        %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= singular_name %>-tab', href: '#<%= singular_name %>-tab'}
+          <%= human_name %>
+
+<% for has_many in has_manys -%>
+      %li{role: 'presentation'}
+        %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= has_many %>-tab', href: '#<%= has_many %>-tab'}
+          <%= has_many.to_s.titleize %>
+<% end -%>
+
+  .tab-content
+    #<%= singular_name %>-tab.tab-pane.active{role: 'tabpanel'}
+      = render 'fields', f: f
+
+<% for has_many in has_manys -%>
+    #<%= has_many %>-tab.tab-pane{role: 'tabpanel'}
+      = render '<%= has_many %>', f: f
+<% end -%>
+
+  %hr
+
+<% if defined?(EffectiveResources) -%>
+  = simple_form_submit(f)
+<% else -%>
+  %p.text-right
+    = f.button :submit, 'Save', data: { disable_with: 'Saving...' }
+    = f.button :submit, 'Save and Continue', data: { disable_with: 'Saving...' }
+    = f.button :submit, 'Save and Add New', data: { disable_with: 'Saving...' }
+<% end -%>

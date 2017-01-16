@@ -27,11 +27,25 @@ module Effective
         say_status :invoke, :form, :white
       end
 
-      def create_form
-        template 'forms/_form.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form.html.haml')
+      def create_default_form
+        if has_manys.blank?
+          template 'forms/default/_form.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form.html.haml')
+        end
       end
 
-      def create_has_many
+      def create_tabpanel_form
+        if has_manys.present?
+          template 'forms/tabpanel/_form.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form.html.haml')
+          template 'forms/tabpanel/_tab_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form_fields.html.haml')
+        end
+
+        class_eval { attr_accessor :attribute }
+
+        has_manys.each do |has_many|
+          @attribute = Rails::Generators::GeneratedAttribute.parse("#{has_many}")
+          template 'forms/tabpanel/_tab_has_many.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_form_#{has_many}.html.haml")
+          template 'forms/fields/_nested_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), has_many.to_s.underscore.pluralize, "_fields.html.haml")
+        end
       end
 
       protected
@@ -44,7 +58,7 @@ module Effective
         end
       end
 
-      def render_field(attribute, depth: 1)
+      def render_field(attribute, depth: 0)
         b = binding
         b.local_variable_set(:attribute, attribute)
 
@@ -61,7 +75,7 @@ module Effective
         end
 
         html = ERB.new(
-          File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/_field_#{partial}.html.haml")
+          File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/fields/_field_#{partial}.html.haml")
         ).result(b).split("\n").map { |line| ('  ' * depth) + line }
 
         html.length > 1 ? (html.join("\n") + "\n") : html.join
