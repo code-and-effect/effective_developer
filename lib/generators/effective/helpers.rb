@@ -103,6 +103,19 @@ module Effective
         )
       end
 
+      def scopes
+        @scopes ||= (
+          scopes = []
+
+          Effective::CodeWriter.new(File.join('app/models', class_path, "#{file_name}.rb")) do |w|
+            lines = w.select { |line| line.start_with?('scope :'.freeze) }
+            scopes += w.map(indexes: lines) { |line| line.scan(/scope\s+:(\w+)/).flatten.first }
+          end
+
+          scopes
+        )
+      end
+
       def belongs_tos
         @belongs_tos ||= (
           (class_name.constantize.reflect_on_all_associations(:belongs_to) rescue []).map { |a| a.foreign_key }
@@ -110,7 +123,7 @@ module Effective
       end
 
       def has_manys
-        @has_manys || = []
+        @has_manys ||= []
       end
 
       #   # Collect to_s representations for all has_one associations

@@ -1,6 +1,6 @@
 %h1= @page_title
 
-<%- if actions.include?('new') %>
+<% if actions.include?('new') -%>
 - if can?(:new, <%= class_name %>)
   %p.text-right= link_to 'New <%= human_name %>', <%= new_path %>, class: 'btn btn-primary'
 

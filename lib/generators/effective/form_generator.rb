@@ -60,9 +60,11 @@ module Effective
           else 'string'
         end
 
-        ERB.new(
+        html = ERB.new(
           File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/_field_#{partial}.html.haml")
-        ).result(b).split("\n").map { |line| ('  ' * depth) + line }.join("\n")
+        ).result(b).split("\n").map { |line| ('  ' * depth) + line }
+
+        html.length > 1 ? (html.join("\n") + "\n") : html.join
       end
 
     end
