@@ -1,11 +1,11 @@
 #<%= attribute.name %>
   = f.simple_fields_for :<%= attribute.name %>, f.object.<%= attribute.name %> do |fields|
-    = render '<%= attribute.name %>/fields', f: fields
+    = render '<%= [namespace_path.presence, attribute.name].compact.join('/') %>/fields', f: fields
 
   - if can? :update, f.object
     = f.error :<%= attribute.name %>, class: 'alert alert-danger'
     .links
-      = link_to_add_association(f, :<%= attribute.name %>, partial: '<%= attribute.name %>/fields') do
+      = link_to_add_association(f, :<%= attribute.name %>, partial: '<%= [namespace_path.presence, attribute.name].compact.join('/') %>/fields') do
         %button.btn.btn-success
           %span.glyphicon.glyphicon-plus-sign
           Add another <%= attribute.name.singularize.titleize.downcase %>

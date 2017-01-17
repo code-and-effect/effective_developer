@@ -122,9 +122,9 @@ module Effective
         )
       end
 
-      def has_manys
-        @has_manys ||= (
-          class_name.constantize.reflect_on_all_autosave_associations.map { |a| a.name.to_s }
+      def nested_attributes
+        @nested_attributes ||= (
+          (class_name.constantize.reflect_on_all_autosave_associations.map { |a| a.name.to_s } - ['regions', 'addresses']).sort
         )
       end
 

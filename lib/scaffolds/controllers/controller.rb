@@ -124,10 +124,10 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
   def <%= singular_name %>_params
     params.require(:<%= singular_name %>).permit(:id,
 <% attributes_names.each_slice(8).with_index do |slice, index| -%>
-      <%= slice.map { |name| permitted_param_for(name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || has_manys.present?) %>
+      <%= slice.map { |name| permitted_param_for(name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || nested_attributes.present?) %>
 <% end -%>
-<% has_manys.each_with_index do |has_many, index| -%>
-      <%= has_many %>_attributes: [:id, :_destroy]<%= ',' if index < has_manys.length-1 %>
+<% nested_attributes.each_with_index do |nested_attribute, index| -%>
+      <%= nested_attribute %>_attributes: [:id, :_destroy]<%= ',' if index < nested_attributes.length-1 %>
 <% end -%>
     )
   end

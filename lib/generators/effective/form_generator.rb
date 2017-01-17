@@ -28,23 +28,23 @@ module Effective
       end
 
       def create_default_form
-        if has_manys.blank?
+        if nested_attributes.blank?
           template 'forms/default/_form.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form.html.haml')
         end
       end
 
       def create_tabpanel_form
-        if has_manys.present?
+        if nested_attributes.present?
           template 'forms/tabpanel/_form.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form.html.haml')
-          template 'forms/tabpanel/_tab_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form_fields.html.haml')
+          template 'forms/tabpanel/_tab_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_form_#{singular_name}.html.haml")
         end
 
         class_eval { attr_accessor :attribute }
 
-        has_manys.each do |has_many|
-          @attribute = Rails::Generators::GeneratedAttribute.parse("#{has_many}")
-          template 'forms/tabpanel/_tab_has_many.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_form_#{has_many}.html.haml")
-          template 'forms/fields/_nested_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), has_many.to_s.underscore.pluralize, "_fields.html.haml")
+        nested_attributes.each do |nested_attribute|
+          @attribute = Rails::Generators::GeneratedAttribute.parse("#{nested_attribute}")
+          template 'forms/tabpanel/_tab_nested_attribute.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_form_#{nested_attribute}.html.haml")
+          template 'forms/fields/_nested_attribute_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), nested_attribute.to_s.underscore.pluralize, "_fields.html.haml")
         end
       end
 
@@ -64,7 +64,7 @@ module Effective
 
         partial = nil
         partial = 'belongs_to' if belongs_tos.include?(attribute.name)
-        partial = 'has_many' if has_manys.include?(attribute.name)
+        partial = 'nested_attribute' if nested_attributes.include?(attribute.name)
 
         partial ||= case attribute.type
           when :integer   ; 'integer'
