@@ -39,7 +39,7 @@ module Effective
           say_status(:skipped, :datatable, :yellow) and return
         end
 
-        Rails::Generators.invoke('effective:datatable', [name] + invoked_attributes)
+        Rails::Generators.invoke('effective:datatable', [name] + invoked_actions + invoked_attributes_args)
       end
 
       def invoke_views

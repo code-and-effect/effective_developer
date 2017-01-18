@@ -188,6 +188,10 @@ module Effective
         end
       end
 
+      def action_path(name, at: true)
+        name.to_s.underscore + '_' + show_path(at: at)
+      end
+
       def index_path
         [namespace_path.underscore.presence, plural_name, 'path'].compact.join('_')
       end
@@ -200,8 +204,8 @@ module Effective
         "edit_#{show_path}"
       end
 
-      def show_path
-        [namespace_path.underscore.presence, singular_name, 'path', "(@#{singular_name})"].compact.join('_')
+      def show_path(at: true)
+        [namespace_path.underscore.presence, singular_name, 'path'].compact.join('_') + "(#{'@' if at}#{singular_name})"
       end
 
     end

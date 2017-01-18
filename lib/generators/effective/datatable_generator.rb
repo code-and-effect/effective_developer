@@ -15,7 +15,8 @@ module Effective
 
       desc 'Creates an Effective::Datatable in your app/datatables folder.'
 
-      argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
+      argument :actions, type: :array, default: ['crud'], banner: 'action action'
+      class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
       def assign_attributes
         @attributes = (invoked_attributes.presence || klass_attributes).map do |attribute|
