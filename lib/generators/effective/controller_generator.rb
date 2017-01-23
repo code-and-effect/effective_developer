@@ -17,10 +17,6 @@ module Effective
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
       class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
-      def initialize_resource
-        @resource = Effective::Resource.new(name)
-      end
-
       def assign_actions
         @actions = invoked_actions
       end
@@ -30,11 +26,10 @@ module Effective
         #   Rails::Generators::GeneratedAttribute.parse(attribute)
         # end
 
-        @resource.written_attributes
-
         @attributes ||= invoked_attributes.map { |att| Rails::Generators::GeneratedAttribute.parse(att) }.presence
-        @attributes ||= @resource.klass_attributes
+        @attributes ||= resource.attributes
 
+        binding.pry
 
         self.class.send(:attr_reader, :attributes)
       end
@@ -48,6 +43,10 @@ module Effective
       end
 
       protected
+
+      def resource
+        @resource ||= Effective::Resource.new(name)
+      end
 
       def permitted_param_for(attribute_name)
         case attribute_name
