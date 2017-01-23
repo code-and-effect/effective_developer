@@ -1,5 +1,5 @@
 <% module_namespacing do -%>
-class <%= class_name %> < <%= parent_class_name.classify %>
+class <%= resource.class_name %> < <%= parent_class_name.classify %>
 <% attributes.select(&:reference?).each do |attribute| -%>
   belongs_to :<%= attribute.name %><%= ', polymorphic: true' if attribute.polymorphic? %><%= ', required: true' if attribute.required? %>
 <% end -%>
@@ -28,11 +28,11 @@ class <%= class_name %> < <%= parent_class_name.classify %>
 
 <% if to_s_attribute.present? -%>
   def to_s
-    <%= to_s_attribute.name %> || 'New <%= human_name %>'
+    <%= to_s_attribute.name %> || 'New <%= resource.human_name %>'
   end
 <% else -%>
   def to_s
-    '<%= human_name %>'
+    '<%= resource.human_name %>'
   end
 <% end -%>
 <% if archived_attribute.present? -%>
