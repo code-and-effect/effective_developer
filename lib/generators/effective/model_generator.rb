@@ -15,15 +15,23 @@ module Effective
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
+      def initialize_resource
+        @resource = Effective::Resource.new(name)
+      end
+
       def invoke_model
         say_status :invoke, :model, :white
       end
 
       def create_model
-        template 'models/model.rb', File.join('app/models', class_path, "#{file_name}.rb")
+        template 'models/model.rb', @resource.model_file
       end
 
       protected
+
+      def parent_class_name
+        options[:parent] || (Rails::VERSION::MAJOR > 4 ? 'ApplicationRecord' : 'ActiveRecord::Base')
+      end
 
       def to_s_attribute
         attributes.find { |att| ['display_name', 'name', 'title', 'subject'].include?(att.name) }
