@@ -17,14 +17,24 @@ module Effective
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
       class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
+      def initialize_resource
+        @resource = Effective::Resource.new(name)
+      end
+
       def assign_actions
         @actions = invoked_actions
       end
 
       def assign_attributes
-        @attributes = (invoked_attributes.presence || klass_attributes).map do |attribute|
-          Rails::Generators::GeneratedAttribute.parse(attribute)
-        end
+        # @attributes = (invoked_attributes.presence || klass_attributes).map do |attribute|
+        #   Rails::Generators::GeneratedAttribute.parse(attribute)
+        # end
+
+        @resource.written_attributes
+
+        @attributes ||= invoked_attributes.map { |att| Rails::Generators::GeneratedAttribute.parse(att) }.presence
+        @attributes ||= @resource.klass_attributes
+
 
         self.class.send(:attr_reader, :attributes)
       end
@@ -34,7 +44,7 @@ module Effective
       end
 
       def create_controller
-        template 'controllers/controller.rb', File.join('app/controllers', namespace_path, "#{plural_name}_controller.rb")
+        template 'controllers/controller.rb', @resource.controller_file
       end
 
       protected
