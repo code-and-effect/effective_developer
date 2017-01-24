@@ -27,23 +27,23 @@ module Effective
       end
 
       def create_default_form
-        if resource.nested_attributes.blank?
+        if resource.nested_resources.blank?
           template 'forms/default/_form.html.haml', resource.view_file('form', partial: true)
         end
       end
 
       def create_tabpanel_form
-        if resource.nested_attributes.present?
+        if resource.nested_resources.present?
           template 'forms/tabpanel/_form.html.haml', resource.view_file('form', partial: true)
           template 'forms/tabpanel/_tab_fields.html.haml', resource.view_file("form_#{resource.name}", partial: true)
         end
 
-        class_eval { attr_accessor :attribute }
+        class_eval { attr_accessor :nested_resource }
 
-        resource.nested_attributes.each do |nested_attribute|
-          @attribute = nested_attribute
-          template 'forms/tabpanel/_tab_nested_attribute.html.haml', resource.view_file("form_#{nested_attribute.name}", partial: true)
-          template 'forms/fields/_nested_attribute_fields.html.haml', File.join('app/views', resource.namespace, (resource.namespace.present? ? '' : resource.class_path), nested_attribute.name.to_s.underscore.pluralize, '_fields.html.haml')
+        resource.nested_resources.each do |_, nested_resource|
+          @nested_resource = nested_resource
+          template 'forms/tabpanel/_tab_nested_resource.html.haml', resource.view_file("form_#{nested_resource.plural_name}", partial: true)
+          template 'forms/fields/_nested_resource_fields.html.haml', File.join('app/views', resource.namespace, (resource.namespace.present? ? '' : resource.class_path), nested_resource.name.to_s.underscore.pluralize, '_fields.html.haml')
         end
       end
 
@@ -65,8 +65,11 @@ module Effective
           b.local_variable_set(:reference, attribute)
           'belongs_to'
         when ActiveRecord::Reflection::HasManyReflection
-          b.local_variable_set(:reference, attribute)
-          'nested_attribute'
+          b.local_variable_set(:nested_resource, attribute)
+          'nested_resource'
+        when Effective::Resource
+          b.local_variable_set(:nested_resource, attribute)
+          'nested_resource'
         else
           b.local_variable_set(:attribute, attribute)
           (attribute.type || :string).to_s

@@ -119,10 +119,10 @@ class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.
   def <%= resource.name %>_params
     params.require(:<%= resource.name %>).permit(:id,
 <% attributes.each_slice(8).with_index do |slice, index| -%>
-      <%= slice.map { |att| permitted_param_for(att.name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || resource.nested_attributes.present?) %>
+      <%= slice.map { |att| permitted_param_for(att.name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || resource.nested_resources.present?) %>
 <% end -%>
-<% resource.nested_attributes.each_with_index do |nested_attribute, index| -%>
-      <%= nested_attribute.name %>_attributes: [:id, :_destroy]<%= ',' if index < resource.nested_attributes.length-1 %>
+<% resource.nested_resources.each_with_index do |(_, nested_resource), index| -%>
+      <%= nested_resource.name %>_attributes: [:id, :_destroy, <%= (nested_resource.belong_tos_attributes + nested_resource.attributes).map { |att| ':' + att.name.to_s }.join(', ') %>]<%= ',' if index < resource.nested_resources.length-1 %>
 <% end -%>
     )
   end
