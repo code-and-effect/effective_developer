@@ -1,3 +1,7 @@
+<% for reference in resource.belong_tos -%>
+<%= render_field(reference) %>
+<% end -%>
+
 <% for attribute in attributes -%>
 <%= render_field(attribute) %>
 <% end -%>

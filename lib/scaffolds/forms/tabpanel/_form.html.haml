@@ -2,20 +2,20 @@
   %div{role: 'tabpanel'}
     %ul.nav.nav-tabs{role: 'tablist'}
       %li.active{role: 'presentation'}
-        %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= singular_name %>-tab', href: '#<%= singular_name %>-tab'}
-          <%= singular_name.to_s.titleize %>
+        %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= resource.name %>-tab', href: '#<%= resource.name %>-tab'}
+          <%= resource.human_name.titleize %>
 
-<% for nested_attribute in nested_attributes -%>
+<% for nested_attribute in resource.nested_attributes -%>
       %li{role: 'presentation'}
         %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= nested_attribute %>-tab', href: '#<%= nested_attribute %>-tab'}
-          <%= nested_attribute.to_s.titleize %>
+          <%= resource.nested_attribute.to_s.titleize %>
 
 <% end -%>
   .tab-content
-    #<%= singular_name %>-tab.tab-pane.active{role: 'tabpanel'}
-      = render 'form_<%= singular_name %>', f: f
+    #<%= resource.name %>-tab.tab-pane.active{role: 'tabpanel'}
+      = render 'form_<%= resource.name %>', f: f
 
-<% for nested_attribute in nested_attributes -%>
+<% for nested_attribute in resource.nested_attributes -%>
     #<%= nested_attribute %>-tab.tab-pane{role: 'tabpanel'}
       = render 'form_<%= nested_attribute %>', f: f
 

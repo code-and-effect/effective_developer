@@ -18,9 +18,8 @@ module Effective
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
 
       def assign_attributes
-        @attributes = (invoked_attributes.presence || klass_attributes).map do |attribute|
-          Rails::Generators::GeneratedAttribute.parse(attribute)
-        end
+        @attributes = invoked_attributes.presence || resource_attributes
+        self.class.send(:attr_reader, :attributes)
       end
 
       def invoke_form
@@ -28,33 +27,33 @@ module Effective
       end
 
       def create_default_form
-        if nested_attributes.blank?
-          template 'forms/default/_form.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form.html.haml')
+        if resource.nested_attributes.blank?
+          template 'forms/default/_form.html.haml', resource.view_file('form', partial: true)
         end
       end
 
       def create_tabpanel_form
-        if nested_attributes.present?
-          template 'forms/tabpanel/_form.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, '_form.html.haml')
-          template 'forms/tabpanel/_tab_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_form_#{singular_name}.html.haml")
+        if resource.nested_attributes.present?
+          template 'forms/tabpanel/_form.html.haml', resource.view_file('form', partial: true)
+          template 'forms/tabpanel/_tab_fields.html.haml', resource.view_file("form_#{resource.name}", partial: true)
         end
 
         class_eval { attr_accessor :attribute }
 
-        nested_attributes.each do |nested_attribute|
-          @attribute = Rails::Generators::GeneratedAttribute.parse("#{nested_attribute}")
-          template 'forms/tabpanel/_tab_nested_attribute.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_form_#{nested_attribute}.html.haml")
-          template 'forms/fields/_nested_attribute_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), nested_attribute.to_s.underscore.pluralize, "_fields.html.haml")
+        resource.nested_attributes.each do |nested_attribute|
+          @attribute = nested_attribute
+          template 'forms/tabpanel/_tab_nested_attribute.html.haml', resource.view_file("form_#{nested_attribute}", partial: true)
+          template 'forms/fields/_nested_attribute_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), nested_attribute.to_s.underscore.pluralize, '_fields.html.haml')
         end
       end
 
       protected
 
       def form_for
-        if namespaces.blank?
-          singular_name
+        if resource.namespaces.blank?
+          resource.name
         else
-          '[' + namespaces.map { |ns| ':' + ns }.join(', ') + ', ' + singular_name + ']'
+          '[' + resource.namespaces.map { |ns| ':' + ns }.join(', ') + ', ' + resource.name + ']'
         end
       end
 
