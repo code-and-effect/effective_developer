@@ -63,7 +63,7 @@ module Effective
         b.local_variable_set(:attribute, attribute)
 
         partial = nil
-        partial = 'belongs_to' if belongs_tos.include?(attribute.name)
+        partial = 'belongs_to' if resource.belong_tos.include?(attribute.name)
         partial = 'nested_attribute' if nested_attributes.include?(attribute.name)
 
         partial ||= case attribute.type

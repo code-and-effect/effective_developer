@@ -1,20 +1,26 @@
-class <%= namespaced_class_name %>Datatable < Effective::Datatable
-<% if scopes.present? -%>
-
-  scopes do<% ([:all] + scopes).uniq.each do |scope| %>
-    scope :<%= scope -%>
+class <%= resource.namespaced_class_name %>Datatable < Effective::Datatable
+<% if resource.scopes.present? -%>
+  scopes do<% ([:all] + resource.scopes).uniq.each_with_index do |scope, index| %>
+    scope :<%= scope -%><%= ', default: true' if index == 0 -%>
 <% end %>
   end
 
 <% end -%>
-  datatable do<% attributes.each do |attribute| %>
-    table_column :<%= attribute.name -%>
-<% end %>
+  datatable do
+    default_order :<%= attributes.find { |att| att.name == 'updated_at' } || attributes.first %>, :desc
+
+<% resource.belong_tos.each do |reference| -%>
+    table_column :<%= reference.name %>
+<% end -%>
+
+<% attributes.each do |attribute| -%>
+    table_column :<%= attribute.name %>
+<% end -%>
 
 <% if (invoked_actions - crud_actions).present? -%>
     actions_column do |<%= singular_name %>|
-<% (invoked_actions - crud_actions).each do |action| -%>
-      glyphicon_to('ok', <%= action_path(:mark_as_paid, at: false) %>, title: '<%= action.titleize %>')
+<% (invoked_actions - crud_actions).each_with_index do |action, index| -%>
+      glyphicon_to('ok', <%= resource.action_path_helper(action, at: false) %>, title: '<%= action.titleize %>')<%= ' +' if (index+1) < (invoked_actions - crud_actions).length %>
 <% end -%>
     end
 <% else -%>
@@ -22,13 +28,13 @@ class <%= namespaced_class_name %>Datatable < Effective::Datatable
 <% end -%>
   end
 
-<% if scopes.blank? -%>
+<% if resource.scopes.blank? -%>
   def collection
-    <%= class_name %>.all
+    <%= resource.class_name %>.all
   end
 <% else -%>
   def collection
-    col = <%= class_name %>.all
+    col = <%= resource.class_name %>.all
     col = col.send(current_scope) if current_scope
     col
   end

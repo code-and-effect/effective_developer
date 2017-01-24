@@ -61,19 +61,6 @@ module Effective
         klass_attributes.presence || resource.written_attributes
       end
 
-
-      # def belongs_tos
-      #   @belongs_tos ||= (
-      #     (class_name.constantize.reflect_on_all_associations(:belongs_to) rescue []).map { |a| a.foreign_key }
-      #   )
-      # end
-
-      # def nested_attributes
-      #   @nested_attributes ||= (
-      #     (class_name.constantize.reflect_on_all_autosave_associations.map { |a| a.name.to_s } - ['regions', 'addresses']).sort
-      #   )
-      # end
-
       # def action_path(name, at: true)
       #   name.to_s.underscore + '_' + show_path(at: at)
       # end

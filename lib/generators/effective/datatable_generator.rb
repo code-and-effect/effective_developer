@@ -19,10 +19,7 @@ module Effective
       class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
       def assign_attributes
-        @attributes = (invoked_attributes.presence || klass_attributes).map do |attribute|
-          Rails::Generators::GeneratedAttribute.parse(attribute)
-        end
-
+        @attributes = invoked_attributes.presence || resource_attributes
         self.class.send(:attr_reader, :attributes)
       end
 
@@ -31,7 +28,7 @@ module Effective
       end
 
       def create_datatable
-        template 'datatables/datatable.rb', File.join('app/datatables', namespace_path, "#{plural_name}_datatable.rb")
+        template 'datatables/datatable.rb', resource.datatable_file
       end
 
     end

@@ -22,7 +22,7 @@ module Effective
       end
 
       def assign_attributes
-        @attributes = invoked_attributes.presence || (resource.belongs_to_attributes + resource_attributes)
+        @attributes = invoked_attributes.presence || (resource.belong_tos_attributes + resource_attributes)
         self.class.send(:attr_reader, :attributes)
       end
 

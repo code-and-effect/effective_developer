@@ -131,7 +131,7 @@ class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.
   def redirect_path
     case params[:commit].to_s
     when 'Save'
-      <%= resource.edit_path + '(@' + resource.name + ')' %>
+      <%= resource.edit_path_helper %>
     when 'Save and Continue'
       <%= resource.index_path %>
     when 'Save and Add New'
