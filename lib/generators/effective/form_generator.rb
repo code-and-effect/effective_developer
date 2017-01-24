@@ -59,14 +59,16 @@ module Effective
 
       def render_field(attribute, depth: 0)
         b = binding
-        b.local_variable_set(:attribute, attribute)
 
         partial = case attribute
         when ActiveRecord::Reflection::BelongsToReflection
+          b.local_variable_set(:reference, attribute)
           'belongs_to'
         when ActiveRecord::Reflection::HasManyReflection
+          b.local_variable_set(:reference, attribute)
           'nested_attribute'
         else
+          b.local_variable_set(:attribute, attribute)
           (attribute.type || :string).to_s
         end
 
