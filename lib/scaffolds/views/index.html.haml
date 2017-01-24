@@ -1,12 +1,12 @@
 %h1= @page_title
 
 <% if actions.include?('new') -%>
-- if can?(:new, <%= class_name %>)
-  %p.text-right= link_to 'New <%= human_name %>', <%= new_path %>, class: 'btn btn-primary'
+- if can?(:new, <%= resource.class_name %>)
+  %p.text-right= link_to 'New <%= resource.human_name %>', <%= resource.new_path %>, class: 'btn btn-primary'
 
 <% end -%>
 - if @datatable.present?
   = render_datatable_scopes(@datatable)
   = render_datatable(@datatable)
 - else
-  %p There are no <%= plural_name %>.
+  %p There are no <%= resource.plural_name %>.

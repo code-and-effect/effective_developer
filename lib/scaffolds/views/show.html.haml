@@ -3,10 +3,10 @@
 <% if (invoked_actions - crud_actions).present? -%>
 %p.text-right
 <% (invoked_actions - crud_actions).each do |action| -%>
-  - if can?(:<%= action.to_s %>, @<%= singular_name %>)
-    = link_to '<%= action.titleize %>', <%= action_path(:mark_as_paid) %>, class: 'btn btn-default',
+  - if can?(:<%= action.to_s %>, @<%= resource.name %>)
+    = link_to '<%= action.titleize %>', <%= resource.action_path_helper(action, at: true) %>, class: 'btn btn-default',
       data: { confirm: 'Really <%= action.to_s.titleize %>?' }
 
 <% end -%>
 <% end -%>
-= render @<%= singular_name %>
+= render @<%= resource.name %>

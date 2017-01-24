@@ -17,10 +17,7 @@ module Effective
       class_option :attributes, type: :array, default: [], desc: 'Included form attributes, otherwise read from model'
 
       def assign_attributes
-        @attributes = (invoked_attributes.presence || klass_attributes).map do |attribute|
-          Rails::Generators::GeneratedAttribute.parse(attribute)
-        end
-
+        @attributes = invoked_attributes.presence || resource_attributes
         self.class.send(:attr_reader, :attributes)
       end
 
@@ -30,10 +27,10 @@ module Effective
 
       def create_views
         (invoked_actions & available_actions).each do |action|
-          template "views/#{action}.html.haml", File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "#{action}.html.haml")
+          template "views/#{action}.html.haml", resource.view_file(action)
         end
 
-        template "views/_resource.html.haml", File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), plural_name, "_#{singular_name}.html.haml")
+        template 'views/_resource.html.haml', resource.view_file(resource.name, partial: true)
       end
 
       private

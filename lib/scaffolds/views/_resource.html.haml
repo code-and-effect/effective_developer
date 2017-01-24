@@ -1,7 +1,12 @@
 %table.table
   %tbody
+<% for reference in resource.belong_tos -%>
+    %tr
+      %th <%= reference.name.to_s.titleize %>
+      %td= <%= resource.name %>.<%= reference.name %>
+<% end %>
 <% for attribute in attributes -%>
     %tr
-      %th <%= attribute.human_name %>
-      %td= <%= singular_name %>.<%= attribute.name %>
+      %th <%= attribute.name.titleize %>
+      %td= <%= resource.name %>.<%= attribute.name %>
 <% end %>
