@@ -1,8 +1,4 @@
-<% if resource.namespace.present? -%>
-require_dependency '<%= resource.namespace %>/application_controller'
-
-<% end -%>
-class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.classify.presence, ApplicationController].compact.join('::') %>
+class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.try(:classify).presence, ApplicationController].compact.join('::') %>
   before_action :authenticate_user! # Devise enforce user is present
 
 <% if defined?(EffectiveResources) -%>
@@ -90,7 +86,7 @@ class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.
       flash[:danger] = "Unable to delete <%= resource.name %>: #{@<%= resource.name %>.errors.full_messages.to_sentence}"
     end
 
-    redirect_to <%= index_path %>
+    redirect_to <%= resource.index_path %>
   end
 
 <% end -%>
@@ -105,7 +101,7 @@ class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.
       flash.now[:danger] = "Unable to restore <%= resource.name %>: #{@<%= resource.name %>.errors.full_messages.to_sentence}"
     end
 
-    redirect_to <%= index_path %>
+    redirect_to <%= resource.index_path %>
   end
 
 <% end -%>
@@ -123,23 +119,23 @@ class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.
   def <%= resource.name %>_params
     params.require(:<%= resource.name %>).permit(:id,
 <% attributes.each_slice(8).with_index do |slice, index| -%>
-      <%= slice.map { |att| permitted_param_for(att.name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || nested_attributes.present?) %>
+      <%= slice.map { |att| permitted_param_for(att.name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || resource.nested_attributes.present?) %>
 <% end -%>
-<% nested_attributes.each_with_index do |nested_attribute, index| -%>
-      <%= nested_attribute %>_attributes: [:id, :_destroy]<%= ',' if index < nested_attributes.length-1 %>
+<% resource.nested_attributes.each_with_index do |nested_attribute, index| -%>
+      <%= nested_attribute.name %>_attributes: [:id, :_destroy]<%= ',' if index < resource.nested_attributes.length-1 %>
 <% end -%>
     )
   end
 
-<% if !defined?(EffectiveResources) -%>
+<% if defined?(EffectiveResources) -%>
   def redirect_path
     case params[:commit].to_s
     when 'Save'
-      <%= edit_path %>
+      <%= resource.edit_path + '(@' + resource.name + ')' %>
     when 'Save and Continue'
-      <%= index_path %>
+      <%= resource.index_path %>
     when 'Save and Add New'
-      <%= new_path %>
+      <%= resource.new_path %>
     else
       raise 'Unexpected redirect path'
     end
