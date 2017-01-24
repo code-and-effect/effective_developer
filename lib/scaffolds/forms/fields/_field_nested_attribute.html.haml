@@ -8,4 +8,4 @@
       = link_to_add_association(f, :<%= attribute.name %>, partial: '<%= [resource.namespace.presence, attribute.name].compact.join('/') %>/fields') do
         %button.btn.btn-success
           %span.glyphicon.glyphicon-plus-sign
-          Add another <%= attribute.human_name.downcase %>
+          Add another <%= attribute.name.to_s.titleize.singularize.downcase %>

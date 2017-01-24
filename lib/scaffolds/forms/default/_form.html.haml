@@ -1,8 +1,10 @@
 = simple_form_for(<%= form_for %>) do |f|
-<% for attribute in attributes -%>
+<% resource.belong_tos.each do |reference| -%>
+<%= render_field(reference, depth: 1) %>
+<% end -%>
+<% attributes.each do |attribute| -%>
 <%= render_field(attribute, depth: 1) %>
 <% end -%>
-
 <% if defined?(EffectiveResources) -%>
   = simple_form_submit(f)
 <% else -%>

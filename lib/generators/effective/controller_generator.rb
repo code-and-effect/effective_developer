@@ -31,14 +31,10 @@ module Effective
       end
 
       def create_controller
-        template 'controllers/controller.rb', @resource.controller_file
+        template 'controllers/controller.rb', resource.controller_file
       end
 
       protected
-
-      def resource
-        @resource ||= Effective::Resource.new(name)
-      end
 
       def permitted_param_for(attribute_name)
         case attribute_name

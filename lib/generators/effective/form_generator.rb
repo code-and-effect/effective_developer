@@ -42,8 +42,8 @@ module Effective
 
         resource.nested_attributes.each do |nested_attribute|
           @attribute = nested_attribute
-          template 'forms/tabpanel/_tab_nested_attribute.html.haml', resource.view_file("form_#{nested_attribute}", partial: true)
-          template 'forms/fields/_nested_attribute_fields.html.haml', File.join('app/views', namespace_path, (namespace_path.present? ? '' : class_path), nested_attribute.to_s.underscore.pluralize, '_fields.html.haml')
+          template 'forms/tabpanel/_tab_nested_attribute.html.haml', resource.view_file("form_#{nested_attribute.name}", partial: true)
+          template 'forms/fields/_nested_attribute_fields.html.haml', File.join('app/views', resource.namespace, (resource.namespace.present? ? '' : resource.class_path), nested_attribute.name.to_s.underscore.pluralize, '_fields.html.haml')
         end
       end
 
@@ -61,16 +61,13 @@ module Effective
         b = binding
         b.local_variable_set(:attribute, attribute)
 
-        partial = nil
-        partial = 'belongs_to' if resource.belong_tos.include?(attribute.name)
-        partial = 'nested_attribute' if nested_attributes.include?(attribute.name)
-
-        partial ||= case attribute.type
-          when :integer   ; 'integer'
-          when :datetime  ; 'datetime'
-          when :date      ; 'date'
-          when :text      ; 'text'
-          else 'string'
+        partial = case attribute
+        when ActiveRecord::Reflection::BelongsToReflection
+          'belongs_to'
+        when ActiveRecord::Reflection::HasManyReflection
+          'nested_attribute'
+        else
+          (attribute.type || :string).to_s
         end
 
         html = ERB.new(

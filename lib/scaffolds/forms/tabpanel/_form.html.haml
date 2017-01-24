@@ -5,19 +5,19 @@
         %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= resource.name %>-tab', href: '#<%= resource.name %>-tab'}
           <%= resource.human_name.titleize %>
 
-<% for nested_attribute in resource.nested_attributes -%>
+<% resource.nested_attributes.each do |nested_attribute| -%>
       %li{role: 'presentation'}
-        %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= nested_attribute %>-tab', href: '#<%= nested_attribute %>-tab'}
-          <%= resource.nested_attribute.to_s.titleize %>
+        %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= nested_attribute.name %>-tab', href: '#<%= nested_attribute.name %>-tab'}
+          <%= nested_attribute.name.to_s.titleize %>
 
 <% end -%>
   .tab-content
     #<%= resource.name %>-tab.tab-pane.active{role: 'tabpanel'}
       = render 'form_<%= resource.name %>', f: f
 
-<% for nested_attribute in resource.nested_attributes -%>
-    #<%= nested_attribute %>-tab.tab-pane{role: 'tabpanel'}
-      = render 'form_<%= nested_attribute %>', f: f
+<% resource.nested_attributes.each do |nested_attribute| -%>
+    #<%= nested_attribute.name %>-tab.tab-pane{role: 'tabpanel'}
+      = render 'form_<%= nested_attribute.name %>', f: f
 
 <% end -%>
   %hr

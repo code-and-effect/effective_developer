@@ -1,5 +1,4 @@
-= f.input :<%= attribute.name %>,
-  as: :effective_select,
-  collection: <%= attribute.name.gsub('_id', '').classify %>.all,
+= f.input :<%= attribute.foreign_key.presence || (attribute.name.to_s + '_id') %>,
+  as: :effective_select, collection: <%= attribute.name.to_s.classify %>.all,
   hint: ''
 
