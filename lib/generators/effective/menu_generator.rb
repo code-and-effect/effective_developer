@@ -18,9 +18,9 @@ module Effective
 
       def create_menu
         begin
-          Effective::CodeWriter.new((['app/views'] + namespaces + ['_navbar.html.haml']).join('/')) do |w|
+          Effective::CodeWriter.new((['app/views'] + resource.namespaces + ['_navbar.html.haml']).join('/')) do |w|
             if w.find { |line, _| line == menu_content.last.strip }
-              say_status :identical, index_path, :blue
+              say_status :identical, resource.index_path, :blue
             else
               index = w.last { |line, _| line.start_with?('- if can?') }
 
@@ -29,7 +29,7 @@ module Effective
               end
 
               w.insert_raw(menu_content, index+1, w.depth_at(index))
-              say_status :menu, index_path, :green
+              say_status :menu, resource.index_path, :green
             end
           end
         rescue Errno::ENOENT
@@ -42,7 +42,7 @@ module Effective
         begin
           Effective::CodeWriter.new('lib/tasks/generate/effective_menus.rake') do |w|
             if w.find { |line, _| line == effective_menus_content }
-              say_status :identical, index_path, :blue
+              say_status :identical, resource.index_path, :blue
             else
               index = w.first { |line, _| line.start_with?('item') }
 
@@ -50,7 +50,7 @@ module Effective
 
               system('rake generate:effective_menus')
 
-              say_status :effective_menus, index_path, :green
+              say_status :effective_menus, resource.plural_name + '_path', :green
             end
           end
         rescue Errno::ENOENT
@@ -64,13 +64,13 @@ module Effective
       def menu_content
         [
           "\n",
-          "- if can? :manage, #{class_name}",
-          "  %li= link_to '#{plural_name.titleize}', #{index_path}"
+          "- if can? :manage, #{resource.class_name}",
+          "  %li= link_to '#{resource.plural_name.titleize}', #{resource.index_path}"
         ]
       end
 
       def effective_menus_content
-        "item '#{plural_name.titleize}', :#{plural_name}_path"
+        "item '#{resource.plural_name.titleize}', :#{resource.plural_name}_path"
       end
 
     end

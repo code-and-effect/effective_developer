@@ -23,7 +23,7 @@ module Effective
         blocks = []
 
         Effective::CodeWriter.new('config/routes.rb') do |w|
-          namespaces.each do |namespace|
+          resource.namespaces.each do |namespace|
             index = nil
 
             w.within(blocks.last) do
@@ -33,7 +33,8 @@ module Effective
             index ? (blocks << index) : break
           end
 
-          content = namespaces[blocks.length..-1].map { |ns| "namespace :#{ns} do"} + [resources].flatten + (['end'] * (namespaces.length - blocks.length))
+          content = resource.namespaces[blocks.length..-1].map { |namespace| "namespace :#{namespace} do"} +
+            [resources].flatten + (['end'] * (resource.namespaces.length - blocks.length))
 
           w.within(blocks.last) do
             if content.length == 1 && w.find { |line, depth| depth == 1 && line == content.first }

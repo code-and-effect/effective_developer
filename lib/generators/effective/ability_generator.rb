@@ -21,7 +21,7 @@ module Effective
 
       def create_ability
         Effective::CodeWriter.new('app/models/ability.rb') do |w|
-          if namespaces.blank?
+          if resource.namespaces.blank?
             if w.find { |line, depth| depth == 2 && line == ability }
               say_status :identical, ability, :blue
             else
@@ -33,7 +33,7 @@ module Effective
             end
           end
 
-          namespaces.each do |namespace|
+          resource.namespaces.each do |namespace|
             w.within("if user.is?(:#{namespace})") do
               if w.find { |line, depth| depth == 1 && line == ability }
                 say_status :identical, ability, :blue
@@ -70,7 +70,7 @@ module Effective
             abilities = '[' + abilities.map { |action| ':' + action }.join(', ') + ']'
           end
 
-          "can #{abilities}, #{class_name}"
+          "can #{abilities}, #{resource.class_name}"
         )
       end
     end
