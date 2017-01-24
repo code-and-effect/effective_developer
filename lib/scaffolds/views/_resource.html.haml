@@ -1,11 +1,11 @@
 %table.table
   %tbody
-<% for reference in resource.belong_tos -%>
+<% resource.belong_tos.each do |reference| -%>
     %tr
       %th <%= reference.name.to_s.titleize %>
       %td= <%= resource.name %>.<%= reference.name %>
 <% end %>
-<% for attribute in attributes -%>
+<% attributes.each do |attribute| -%>
     %tr
       %th <%= attribute.name.titleize %>
       %td= <%= resource.name %>.<%= attribute.name %>

@@ -27,7 +27,7 @@ module Effective
         elsif resource.klass_attributes.present?
           raise 'klass_attributes already exist.  We cant migrate (yet). Exiting.'
         elsif resource.written_attributes.present?
-          Rails::Generators.invoke('migration', ["create_#{plural_name}"] + (invokable(resource.written_attributes) | timestamps))
+          Rails::Generators.invoke('migration', ["create_#{plural_name}"] + invokable(resource.belong_tos_attributes) + (invokable(resource.written_attributes) | timestamps))
         else
           raise 'You need to specify some attributes or have a model file present'
         end
