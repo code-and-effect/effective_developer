@@ -1,9 +1,8 @@
-<% if namespaced? -%>
-require_dependency '<%= namespaced_path %>/application_controller'
+<% if resource.namespace.present? -%>
+require_dependency '<%= resource.namespace %>/application_controller'
 
 <% end -%>
-<% module_namespacing do -%>
-class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.presence, ApplicationController].compact.join('::') %>
+class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.classify.presence, ApplicationController].compact.join('::') %>
   before_action :authenticate_user! # Devise enforce user is present
 
 <% if defined?(EffectiveResources) -%>
@@ -12,34 +11,34 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
 <% end -%>
 <% if actions.delete('index') && !defined?(EffectiveResources) -%>
   def index
-    @page_title = '<%= plural_name.titleize %>'
-    authorize! :index, <%= class_name %>
+    @page_title = '<%= resource.plural_name.titleize %>'
+    authorize! :index, <%= resource.class_name %>
 
-    @datatable = <%= namespaced_class_name %>Datatable.new(params[:scopes])
+    @datatable = <%= resource.namespaced_class_name %>Datatable.new(params[:scopes])
   end
 
 <% end -%>
 <% if actions.delete('new') && !defined?(EffectiveResources) -%>
   def new
-    @<%= singular_name %> = <%= class_name %>.new
+    @<%= resource.name %> = <%= resource.class_name %>.new
 
-    @page_title = 'New <%= human_name %>'
-    authorize! :new, @<%= singular_name %>
+    @page_title = 'New <%= resource.human_name %>'
+    authorize! :new, @<%= resource.name %>
   end
 
 <% end -%>
 <% if actions.delete('create') && !defined?(EffectiveResources) -%>
   def create
-    @<%= singular_name %> = <%= class_name %>.new(<%= singular_name %>_params)
+    @<%= resource.name %> = <%= resource.class_name %>.new(<%= resource.name %>_params)
 
-    @page_title = 'New <%= human_name %>'
-    authorize! :create, @<%= singular_name %>
+    @page_title = 'New <%= resource.human_name %>'
+    authorize! :create, @<%= resource.name %>
 
-    if @<%= singular_name %>.save
-      flash[:success] = 'Successfully created <%= singular_name %>'
+    if @<%= resource.name %>.save
+      flash[:success] = 'Successfully created <%= resource.name %>'
       redirect_to(redirect_path)
     else
-      flash.now[:danger] = "Unable to create <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
+      flash.now[:danger] = "Unable to create <%= resource.name %>: #{@<%= resource.name %>.errors.full_messages.to_sentence}"
       render :new
     end
   end
@@ -47,34 +46,34 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
 <% end -%>
 <% if actions.delete('show') && !defined?(EffectiveResources) -%>
   def show
-    @<%= singular_name %> = <%= class_name %>.find(params[:id])
+    @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
 
-    @page_title = @<%= singular_name %>.to_s
-    authorize! :show, @<%= singular_name %>
+    @page_title = @<%= resource.name %>.to_s
+    authorize! :show, @<%= resource.name %>
   end
 
 <% end -%>
 <% if actions.delete('edit') && !defined?(EffectiveResources) -%>
   def edit
-    @<%= singular_name %> = <%= class_name %>.find(params[:id])
+    @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
 
-    @page_title = "Edit #{@<%= singular_name %>}"
-    authorize! :edit, @<%= singular_name %>
+    @page_title = "Edit #{@<%= resource.name %>}"
+    authorize! :edit, @<%= resource.name %>
   end
 
 <% end -%>
 <% if actions.delete('update') && !defined?(EffectiveResources) -%>
   def update
-    @<%= singular_name %> = <%= class_name %>.find(params[:id])
+    @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
 
-    @page_title = "Edit #{@<%= singular_name %>}"
-    authorize! :update, @<%= singular_name %>
+    @page_title = "Edit #{@<%= resource.name %>}"
+    authorize! :update, @<%= resource.name %>
 
-    if @<%= singular_name %>.update_attributes(<%= singular_name %>_params)
-      flash[:success] = 'Successfully updated <%= singular_name %>'
+    if @<%= resource.name %>.update_attributes(<%= resource.name %>_params)
+      flash[:success] = 'Successfully updated <%= resource.name %>'
       redirect_to(redirect_path)
     else
-      flash.now[:danger] = "Unable to update <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
+      flash.now[:danger] = "Unable to update <%= resource.name %>: #{@<%= resource.name %>.errors.full_messages.to_sentence}"
       render :edit
     end
   end
@@ -82,13 +81,13 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
 <% end -%>
 <% if actions.delete('destroy') && !defined?(EffectiveResources) -%>
   def destroy
-    @<%= singular_name %> = <%= class_name %>.find(params[:id])
-    authorize! :destroy, @<%= singular_name %>
+    @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
+    authorize! :destroy, @<%= resource.name %>
 
-    if @<%= singular_name %>.destroy
-      flash[:success] = 'Successfully deleted <%= singular_name %>'
+    if @<%= resource.name %>.destroy
+      flash[:success] = 'Successfully deleted <%= resource.name %>'
     else
-      flash[:danger] = "Unable to delete <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
+      flash[:danger] = "Unable to delete <%= resource.name %>: #{@<%= resource.name %>.errors.full_messages.to_sentence}"
     end
 
     redirect_to <%= index_path %>
@@ -97,13 +96,13 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
 <% end -%>
 <% if actions.delete('unarchive') -%>
   def unarchive
-    @<%= singular_name %> = <%= class_name %>.find(params[:id])
-    authorize! :unarchive, @<%= singular_name %>
+    @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
+    authorize! :unarchive, @<%= resource.name %>
 
-    if @<%= singular_name %>.unarchive
-      flash[:success] = 'Successfully restored <%= singular_name %>'
+    if @<%= resource.name %>.unarchive
+      flash[:success] = 'Successfully restored <%= resource.name %>'
     else
-      flash.now[:danger] = "Unable to restore <%= singular_name %>: #{@<%= singular_name %>.errors.full_messages.to_sentence}"
+      flash.now[:danger] = "Unable to restore <%= resource.name %>: #{@<%= resource.name %>.errors.full_messages.to_sentence}"
     end
 
     redirect_to <%= index_path %>
@@ -112,19 +111,19 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
 <% end -%>
 <% actions.each do |action| -%>
   def <%= action %>
-    @<%= singular_name %> = <%= class_name %>.find(params[:id])
+    @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
 
-    @page_title = "<%= action.titleize %> #{@<%= singular_name %>}"
-    authorize! :<%= action %>, @<%= singular_name %>
+    @page_title = "<%= action.titleize %> #{@<%= resource.name %>}"
+    authorize! :<%= action %>, @<%= resource.name %>
   end
 
 <% end -%>
   protected
 
-  def <%= singular_name %>_params
-    params.require(:<%= singular_name %>).permit(:id,
-<% attributes_names.each_slice(8).with_index do |slice, index| -%>
-      <%= slice.map { |name| permitted_param_for(name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || nested_attributes.present?) %>
+  def <%= resource.name %>_params
+    params.require(:<%= resource.name %>).permit(:id,
+<% attributes.each_slice(8).with_index do |slice, index| -%>
+      <%= slice.map { |att| permitted_param_for(att.name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || nested_attributes.present?) %>
 <% end -%>
 <% nested_attributes.each_with_index do |nested_attribute, index| -%>
       <%= nested_attribute %>_attributes: [:id, :_destroy]<%= ',' if index < nested_attributes.length-1 %>
@@ -148,4 +147,3 @@ class <%= namespaced_class_name %>Controller < <%= [namespace_path.classify.pres
 
 <% end -%>
 end
-<% end -%>

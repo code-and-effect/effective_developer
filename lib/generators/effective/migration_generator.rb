@@ -23,11 +23,11 @@ module Effective
 
       def create_migration
         if invoked_attributes.present?
-          Rails::Generators.invoke('migration', ["create_#{plural_name}"] + (invoked_attributes | timestamps))
-        elsif klass_attributes(verbose: false).present?
+          Rails::Generators.invoke('migration', ["create_#{plural_name}"] + (invokable(invoked_attributes) | timestamps))
+        elsif resource.klass_attributes.present?
           raise 'klass_attributes already exist.  We cant migrate (yet). Exiting.'
-        elsif written_attributes.present?
-          Rails::Generators.invoke('migration', ["create_#{plural_name}"] + (written_attributes | timestamps))
+        elsif resource.written_attributes.present?
+          Rails::Generators.invoke('migration', ["create_#{plural_name}"] + (invokable(resource.written_attributes) | timestamps))
         else
           raise 'You need to specify some attributes or have a model file present'
         end

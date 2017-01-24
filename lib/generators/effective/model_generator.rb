@@ -25,10 +25,6 @@ module Effective
 
       protected
 
-      def resource
-        @resource ||= Effective::Resource.new(name)
-      end
-
       def parent_class_name
         options[:parent] || (Rails::VERSION::MAJOR > 4 ? 'ApplicationRecord' : 'ActiveRecord::Base')
       end

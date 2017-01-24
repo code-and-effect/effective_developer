@@ -4,6 +4,10 @@ module Effective
 
       protected
 
+      def resource
+        @resource ||= Effective::Resource.new(name)
+      end
+
       def crud_actions
         %w(index new create show edit update destroy)
       end
@@ -24,19 +28,39 @@ module Effective
         actions
       end
 
-      # As per the command line invoked actions
-      # ['name:string', 'description:text']
+      # As per the command line invoked actions. These are Rails Generated Attributes
       def invoked_attributes
         if respond_to?(:attributes)
-          attributes.map { |att| "#{att.name}:#{att.type}" }
+          attributes
         else
-          Array(options.attributes).compact
+          Array(options.attributes).compact.map { |att| Rails::Generators::GeneratedAttribute.parse(att) }
         end
       end
 
       def invoked_attributes_args
-        invoked_attributes.present? ? (['--attributes'] + invoked_attributes) : []
+        invoked_attributes.present? ? (['--attributes'] + invokable(invoked_attributes)) : []
       end
+
+      # Turns the GeneratedAttribute or Effective::Attribute into an array of strings
+      def invokable(attributes)
+        attributes.map { |att| "#{att.name}:#{att.type}" }
+      end
+
+      def resource_attributes
+        klass_attributes = resource.klass_attributes
+
+        if klass_attributes.blank?
+          pending = ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations(ActiveRecord::Migrator.migrations_paths)).pending_migrations.present?
+
+          migrate = ask("Unable to read the attributes of #{resource.klass}. There are pending migrations. Run db:migrate now? [y/n]")
+          system('bundle exec rake db:migrate') if migrate.to_s.include?('y')
+
+          klass_attributes = resource.klass_attributes
+        end
+
+        klass_attributes.presence || resource.written_attributes
+      end
+
 
       # def belongs_tos
       #   @belongs_tos ||= (

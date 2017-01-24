@@ -22,15 +22,7 @@ module Effective
       end
 
       def assign_attributes
-        # @attributes = (invoked_attributes.presence || klass_attributes).map do |attribute|
-        #   Rails::Generators::GeneratedAttribute.parse(attribute)
-        # end
-
-        @attributes ||= invoked_attributes.map { |att| Rails::Generators::GeneratedAttribute.parse(att) }.presence
-        @attributes ||= resource.attributes
-
-        binding.pry
-
+        @attributes = invoked_attributes.presence || (resource.belongs_to_attributes + resource_attributes)
         self.class.send(:attr_reader, :attributes)
       end
 
