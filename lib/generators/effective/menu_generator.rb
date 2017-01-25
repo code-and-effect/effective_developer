@@ -70,7 +70,7 @@ module Effective
       end
 
       def effective_menus_content
-        "item '#{resource.plural_name.titleize}', :#{resource.plural_name}_path"
+        "item '#{resource.plural_name.titleize}', :#{resource.index_path}"
       end
 
     end

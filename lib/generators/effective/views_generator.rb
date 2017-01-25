@@ -30,7 +30,9 @@ module Effective
           template "views/#{action}.html.haml", resource.view_file(action)
         end
 
-        template 'views/_resource.html.haml', resource.view_file(resource.name, partial: true)
+        if invoked_actions.include?('show') || non_crud_actions.present?
+          template 'views/_resource.html.haml', resource.view_file(resource.name, partial: true)
+        end
       end
 
       private

@@ -1,4 +1,4 @@
-class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.try(:classify).presence, ApplicationController].compact.join('::') %>
+class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.namespace.try(:classify).presence, ApplicationController].compact.join('::') %>
   before_action :authenticate_user! # Devise enforce user is present
 
 <% if defined?(EffectiveResources) -%>
@@ -10,7 +10,7 @@ class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.
     @page_title = '<%= resource.plural_name.titleize %>'
     authorize! :index, <%= resource.class_name %>
 
-    @datatable = <%= resource.namespaced_class_name %>Datatable.new(params[:scopes])
+    @datatable = <%= resource.namespaced_class_name.pluralize %>Datatable.new(params[:scopes])
   end
 
 <% end -%>
@@ -127,7 +127,7 @@ class <%= resource.namespaced_class_name %>Controller < <%= [resource.namespace.
     )
   end
 
-<% if defined?(EffectiveResources) -%>
+<% if !defined?(EffectiveResources) -%>
   def redirect_path
     case params[:commit].to_s
     when 'Save'

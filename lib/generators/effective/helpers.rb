@@ -12,6 +12,10 @@ module Effective
         %w(index new create show edit update destroy)
       end
 
+      def non_crud_actions
+        invoked_actions - crud_actions
+      end
+
       # --actions crud another
       # --actions crud-show another
       def invoked_actions
@@ -50,10 +54,10 @@ module Effective
         klass_attributes = resource.klass_attributes
 
         if klass_attributes.blank?
-          pending = ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations(ActiveRecord::Migrator.migrations_paths)).pending_migrations.present?
-
-          migrate = ask("Unable to read the attributes of #{resource.klass}. There are pending migrations. Run db:migrate now? [y/n]")
-          system('bundle exec rake db:migrate') if migrate.to_s.include?('y')
+          if ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations(ActiveRecord::Migrator.migrations_paths)).pending_migrations.present?
+            migrate = ask("Unable to read the attributes of #{resource.klass || resource.name}. There are pending migrations. Run db:migrate now? [y/n]")
+            system('bundle exec rake db:migrate') if migrate.to_s.include?('y')
+          end
 
           klass_attributes = resource.klass_attributes
         end

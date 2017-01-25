@@ -58,8 +58,8 @@ module Effective
             abilities += (crud_actions & invoked_actions)
           end
 
-          if (invoked_actions - crud_actions).present?
-            abilities += (invoked_actions - crud_actions)
+          if non_crud_actions.present?
+            abilities += non_crud_actions
           end
 
           abilities = ['manage'] if abilities.blank? || abilities == (crud_actions - ['show'])

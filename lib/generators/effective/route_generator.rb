@@ -64,8 +64,8 @@ module Effective
             resources << ']'
           end
 
-          if (invoked_actions - crud_actions).present?
-            [resources + ' do'] + (invoked_actions - crud_actions).map { |action| "get :#{action}, on: :member" } + ['end']
+          if non_crud_actions.present?
+            [resources + ' do'] + non_crud_actions.map { |action| "get :#{action}, on: :member" } + ['end']
           else
             resources
           end

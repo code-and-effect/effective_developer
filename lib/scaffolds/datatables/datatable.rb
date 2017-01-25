@@ -1,4 +1,4 @@
-class <%= resource.namespaced_class_name %>Datatable < Effective::Datatable
+class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Datatable
 <% if resource.scopes.present? -%>
   scopes do<% ([:all] + resource.scopes).uniq.each_with_index do |scope, index| %>
     scope :<%= scope -%><%= ', default: true' if index == 0 -%>
@@ -17,9 +17,9 @@ class <%= resource.namespaced_class_name %>Datatable < Effective::Datatable
     table_column :<%= attribute.name %>
 <% end -%>
 
-<% if (invoked_actions - crud_actions).present? -%>
+<% if non_crud_actions.present? -%>
     actions_column do |<%= singular_name %>|
-<% (invoked_actions - crud_actions).each_with_index do |action, index| -%>
+<% non_crud_actions.each_with_index do |action, index| -%>
       glyphicon_to('ok', <%= resource.action_path_helper(action, at: false) %>, title: '<%= action.titleize %>')<%= ' +' if (index+1) < (invoked_actions - crud_actions).length %>
 <% end -%>
     end
