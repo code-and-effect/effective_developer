@@ -18,11 +18,15 @@ module Effective
       class_option :actions, type: :array, default: ['crud'], desc: 'Included actions', banner: 'index show'
 
       def invoke_model
-        Rails::Generators.invoke('effective:model', [name] + invoked_attributes)
+        if File.exists?(resource.model_file)
+          say_status(:skipped, :model, :yellow) and return
+        end
+
+        Rails::Generators.invoke('effective:model', [name] + invokable(invoked_attributes))
       end
 
       def invoke_migration
-        Rails::Generators.invoke('effective:migration', [name] + invoked_attributes)
+        Rails::Generators.invoke('effective:migration', [name] + invokable(invoked_attributes))
       end
 
       def invoke_controller
@@ -58,7 +62,7 @@ module Effective
           say_status(:skipped, :form, :yellow) and return
         end
 
-        Rails::Generators.invoke('effective:form', [name] + invoked_attributes)
+        Rails::Generators.invoke('effective:form', [name] + invokable(invoked_attributes))
       end
 
     end
