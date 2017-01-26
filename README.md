@@ -270,11 +270,11 @@ class Post < ApplicationRecord
   belongs_to :category
 
   # Attributes
-  # name         :string
+  # title        :string
   # body         :text
   # published_at :datetime
 
-  validates :name, presence: true
+  validates :title, presence: true
   validates :description, presence: true
 
   has_many :comments
@@ -283,16 +283,15 @@ class Post < ApplicationRecord
   scope :published, -> { where.not(published_at: nil) }
 
   def to_s
-    name || 'New Post'
+    title || 'New Post'
   end
 end
 ```
 
-and then run
-
+and then run`
 ```console
-rails generate scaffold post
-rails generate scaffold_controller admin/post
+rails generate effective:scaffold post
+rails generate effective:scaffold_controller admin/post
 ```
 
 Tweak from here

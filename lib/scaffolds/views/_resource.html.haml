@@ -4,9 +4,9 @@
     %tr
       %th <%= reference.name.to_s.titleize %>
       %td= <%= resource.name %>.<%= reference.name %>
-<% end %>
+<% end -%>
 <% attributes.each do |attribute| -%>
     %tr
       %th <%= attribute.name.titleize %>
       %td= <%= resource.name %>.<%= attribute.name %>
-<% end %>
+<% end -%>

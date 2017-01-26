@@ -5,11 +5,12 @@
 <% attributes.each do |attribute| -%>
 <%= render_field(attribute, depth: 1) %>
 <% end -%>
-<% if defined?(EffectiveResources) -%>
+
+  .form-actions
+  <% if defined?(EffectiveResources) -%>
   = simple_form_submit(f)
-<% else -%>
-  %p.text-right
-    = f.button :submit, 'Save', data: { disable_with: 'Saving...' }
-    = f.button :submit, 'Save and Continue', data: { disable_with: 'Saving...' }
-    = f.button :submit, 'Save and Add New', data: { disable_with: 'Saving...' }
-<% end -%>
+  <% else -%>
+  f.button :submit, 'Save', data: { disable_with: 'Saving...' }
+  f.button :submit, 'Save and Continue', data: { disable_with: 'Saving...' }
+  f.button :submit, 'Save and Add New', data: { disable_with: 'Saving...' }
+  <% end -%>
