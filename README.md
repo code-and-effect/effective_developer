@@ -52,6 +52,18 @@ To release a new gem version:
 > gem_release 1.0.0
 ```
 
+## gitreset
+
+Careful, this command will delete all your un committed changes.
+
+A command line script to call `git reset --hard` and also delete any newly created files.
+
+It truly resets you back to a fresh working copy.  Perfect for tweaking scaffold and code generation tools.
+
+```console
+> gitreset
+```
+
 ## gitsweep
 
 A command line script to delete any git branch that has already been merged into master & develop
@@ -208,36 +220,94 @@ end
 
 Override `before_import()` or `after_import()` to run code before or after the import.
 
-# Scaffolding
+# Code Generation
 
-Scaffolding is the fastest way to build a rails app. The effective scaffolds try to improve on the rails built in ones.
+The goal of the `effective_developer` code generation project is to minimize the amount of hand coding required to build a rails website.
 
-To generate an entire resource (4 different examples):
+Only the rails model file should be written by a human.
+
+All database migrations, controllers, forms and views should be generated.
+
+Creating a new working in-place CRUD feature should be a 1-liner.
+
+A huge head start to the interesting part of the code.
+
+## effective scaffolds
+
+Scaffolding is the fastest way to build a CRUD rails app.
+
+The effective scaffolds generally follow the same pattern as the (rails generate)[http://guides.rubyonrails.org/command_line.html#rails-generate] commands.
+
+To create an entire CRUD resource from the command line:
 
 ```ruby
 rails generate effective:scaffold thing name:string description:text
-
+rails generate effective:scaffold thing name:string description:text --actions index show mark_as_paid
 rails generate effective:scaffold admin/thing name:string description:text
+rails generate effective:scaffold admin/thing name:string description:text --actions crud-show
 
-rails generate effective:scaffold thing name:string description:text --actions crud archive
-
-rails generate effective:scaffold admin/thing name:string description:text --actions crud-show unarchive
 ```
 
-Or, read from the existing model, and just generate the controller, route, ability, menu, datatable, views, form (2 different examples):
+Or to skip the model & migration:
 
 ```ruby
 rails generate effective:scaffold_controller thing
-
-rails generate effective:scaffold_controller admin/thing --actions crud-show
+rails generate effective:scaffold_controller thing index show
+rails generate effective:scaffold_controller admin/thing crud mark_as_paid
+rails generate effective:scaffold_controller admin/thing crud-show
 ```
 
-Or call each scaffold one at a time:
+### model file
+
+If there is a regular rails model file present, all attributes, belong_tos, scopes and has_many accepts_nested_attributes
+will be considered when generating the scaffold.
+
+Make a model file like this (or generate it with `rails generate effective:model post name:string body:text` and tweak from there):
 
 ```ruby
+class Post < ApplicationRecord
+  belongs_to :user
+  belongs_to :category
+
+  # Attributes
+  # name         :string
+  # body         :text
+  # published_at :datetime
+
+  validates :name, presence: true
+  validates :description, presence: true
+
+  has_many :comments
+  accepts_nested_attributes_for :comments
+
+  scope :published, -> { where.not(published_at: nil) }
+
+  def to_s
+    name || 'New Post'
+  end
+end
+```
+
+and then run
+
+```console
+rails generate scaffold post
+rails generate scaffold_controller admin/post
+```
+
+Tweak from here
+
+### all scaffolds
+
+You can call scaffolds one at a time:
+
+```ruby
+# These two accept attributes on the command line. like effective:scaffold
 rails generate effective:model thing name:string description:text
 rails generate effective:migration thing name:string description:text
-rails generate effective:controller thing # or admin/thing
+
+# Thes accept actions on the command line. with --attributes. like effective:scaffold_controller
+rails generate effective:controller thing  # /admin/thing
 rails generate effective:route thing
 rails generate effective:ability thing # CanCanCan
 rails generate effective:menu thing  # If app/views/*namespaces/_navbar.html.haml is present
@@ -245,8 +315,6 @@ rails generate effective:datatable thing
 rails generate effective:views thing
 rails generate effective:form thing
 ```
-
-These scaffold generators are still an ongoing work in progress.  There is a lot more inspect the model and do the right thing type functionality to be implemented "soon".
 
 ## License
 
