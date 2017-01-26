@@ -1,4 +1,1 @@
-= f.input :<%= reference.foreign_key.presence || (reference.name.to_s + '_id') %>,
-  as: :effective_select, collection: <%= reference.name.to_s.classify %>.all,
-  hint: ''
-
+= f.input :<%= reference.foreign_key.presence || (reference.name.to_s + '_id') %>, as: :effective_select, collection: <%= reference.name.to_s.classify %>.all
