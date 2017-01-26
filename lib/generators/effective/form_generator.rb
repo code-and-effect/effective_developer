@@ -43,7 +43,7 @@ module Effective
         resource.nested_resources.each do |_, nested_resource|
           @nested_resource = nested_resource
           template 'forms/tabpanel/_tab_nested_resource.html.haml', resource.view_file("form_#{nested_resource.plural_name}", partial: true)
-          template 'forms/fields/_nested_resource_fields.html.haml', File.join('app/views', resource.namespace, (resource.namespace.present? ? '' : resource.class_path), nested_resource.name.to_s.underscore.pluralize, '_fields.html.haml')
+          template 'forms/fields/_nested_resource_fields.html.haml', File.join('app/views', resource.namespace.to_s, (resource.namespace.present? ? '' : resource.class_path), nested_resource.name.to_s.underscore.pluralize, '_fields.html.haml')
         end
       end
 
