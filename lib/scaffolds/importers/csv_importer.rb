@@ -7,7 +7,7 @@ module CsvImporters
     end
 
     def process_row
-      # assign_columns(<%= klass %>.new).save!
+      # assign_columns(<%= klass.singularize %>.new).save!
       raise 'todo'
     end
   end
