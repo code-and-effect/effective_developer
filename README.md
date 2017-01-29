@@ -158,6 +158,15 @@ rake pg:clone
 rake pg:clone[origin,staging]
 ```
 
+## validate
+
+Loads every ActiveRecord object and calls `.valid?` on it.
+
+```ruby
+rake validate
+rake validate[post]
+```
+
 # Rails Helpers
 
 ## CSV Importer
@@ -253,6 +262,7 @@ Or to skip the model & migration:
 ```ruby
 rails generate effective:scaffold_controller thing
 rails generate effective:scaffold_controller thing index show
+rails generate effective:scaffold_controller thing index show --attributes name description
 rails generate effective:scaffold_controller admin/thing crud mark_as_paid
 rails generate effective:scaffold_controller admin/thing crud-show
 ```
@@ -288,7 +298,7 @@ class Post < ApplicationRecord
 end
 ```
 
-and then run`
+and then run
 ```console
 rails generate effective:scaffold post
 rails generate effective:scaffold_controller admin/post
@@ -305,7 +315,7 @@ You can call scaffolds one at a time:
 rails generate effective:model thing name:string description:text
 rails generate effective:migration thing name:string description:text
 
-# Thes accept actions on the command line. with --attributes. like effective:scaffold_controller
+# Thes accept actions on the command line. Pass --attributes as an option. like effective:scaffold_controller
 rails generate effective:controller thing  # /admin/thing
 rails generate effective:route thing
 rails generate effective:ability thing # CanCanCan

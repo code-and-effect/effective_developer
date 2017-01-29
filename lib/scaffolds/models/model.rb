@@ -8,7 +8,7 @@ class <%= resource.class_name %> < <%= parent_class_name.classify %>
   has_secure_token<% if attribute.name != "token" %> :<%= attribute.name %><% end %>
 <% end -%>
 <% end -%>
-<% if attributes.any?(&:password_digest?) -%>
+<% if attributes.any? { |att| att.respond_to?(:password_digest?) && att.password_digest? } -%>
   has_secure_password
 <% end -%>
 

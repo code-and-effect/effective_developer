@@ -20,6 +20,11 @@ module Effective
       end
 
       def create_ability
+        unless File.exists?('app/models/ability.rb')
+          say_status :skipped, :ability, :yellow
+          return
+        end
+
         Effective::CodeWriter.new('app/models/ability.rb') do |w|
           if resource.namespaces.blank?
             if w.find { |line, depth| depth == 2 && line == ability }

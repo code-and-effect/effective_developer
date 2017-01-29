@@ -7,7 +7,7 @@ class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Data
 
 <% end -%>
   datatable do
-    default_order :<%= attributes.find { |att| att.name == 'updated_at' } || attributes.first %>, :desc
+    default_order :<%= (attributes.find { |att| att.name == 'updated_at' } || attributes.first).name -%>, :desc
 
 <% resource.belong_tos.each do |reference| -%>
     table_column :<%= reference.name %>
