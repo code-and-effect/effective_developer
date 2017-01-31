@@ -28,6 +28,10 @@ module Effective
       end
 
       def create_datatable
+        unless defined?(EffectiveDatatables)
+          say_status(:skipped, :datatable, :yellow) and return
+        end
+
         template 'datatables/datatable.rb', resource.datatable_file
       end
 

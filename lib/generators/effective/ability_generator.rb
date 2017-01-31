@@ -21,8 +21,7 @@ module Effective
 
       def create_ability
         unless File.exists?('app/models/ability.rb')
-          say_status :skipped, :ability, :yellow
-          return
+          say_status(:skipped, :ability, :yellow) and return
         end
 
         Effective::CodeWriter.new('app/models/ability.rb') do |w|

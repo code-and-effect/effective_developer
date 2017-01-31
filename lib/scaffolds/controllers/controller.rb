@@ -1,11 +1,11 @@
 class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.namespace.try(:classify).presence, ApplicationController].compact.join('::') %>
   before_action :authenticate_user! # Devise enforce user is present
 
-<% if defined?(EffectiveResources) -%>
+<% if use_effective_resources -%>
   include Effective::CrudController
 
 <% end -%>
-<% if actions.delete('index') && !defined?(EffectiveResources) -%>
+<% if actions.delete('index') && !use_effective_resources -%>
   def index
     @page_title = '<%= resource.plural_name.titleize %>'
     authorize! :index, <%= resource.class_name %>
@@ -14,7 +14,7 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
   end
 
 <% end -%>
-<% if actions.delete('new') && !defined?(EffectiveResources) -%>
+<% if actions.delete('new') && !use_effective_resources -%>
   def new
     @<%= resource.name %> = <%= resource.class_name %>.new
 
@@ -23,7 +23,7 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
   end
 
 <% end -%>
-<% if actions.delete('create') && !defined?(EffectiveResources) -%>
+<% if actions.delete('create') && !use_effective_resources -%>
   def create
     @<%= resource.name %> = <%= resource.class_name %>.new(<%= resource.name %>_params)
 
@@ -40,7 +40,7 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
   end
 
 <% end -%>
-<% if actions.delete('show') && !defined?(EffectiveResources) -%>
+<% if actions.delete('show') && !use_effective_resources -%>
   def show
     @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
 
@@ -49,7 +49,7 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
   end
 
 <% end -%>
-<% if actions.delete('edit') && !defined?(EffectiveResources) -%>
+<% if actions.delete('edit') && !use_effective_resources -%>
   def edit
     @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
 
@@ -58,7 +58,7 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
   end
 
 <% end -%>
-<% if actions.delete('update') && !defined?(EffectiveResources) -%>
+<% if actions.delete('update') && !use_effective_resources -%>
   def update
     @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
 
@@ -75,7 +75,7 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
   end
 
 <% end -%>
-<% if actions.delete('destroy') && !defined?(EffectiveResources) -%>
+<% if actions.delete('destroy') && !use_effective_resources -%>
   def destroy
     @<%= resource.name %> = <%= resource.class_name %>.find(params[:id])
     authorize! :destroy, @<%= resource.name %>
@@ -121,13 +121,13 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
 <% attributes.each_slice(8).with_index do |slice, index| -%>
       <%= slice.map { |att| permitted_param_for(att.name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || resource.nested_resources.present?) %>
 <% end -%>
-<% resource.nested_resources.each_with_index do |(_, nested_resource), index| -%>
+<% resource.nested_resources.each_with_index do |nested_resource, index| -%>
       <%= nested_resource.name %>_attributes: [:id, :_destroy, <%= (nested_resource.belong_tos_attributes + nested_resource.attributes).map { |att| ':' + att.name.to_s }.join(', ') %>]<%= ',' if index < resource.nested_resources.length-1 %>
 <% end -%>
     )
   end
 
-<% if !defined?(EffectiveResources) -%>
+<% if !use_effective_resources -%>
   def redirect_path
     case params[:commit].to_s
     when 'Save'

@@ -5,8 +5,12 @@
   %p.text-right= link_to 'New <%= resource.human_name %>', <%= resource.new_path %>, class: 'btn btn-primary'
 
 <% end -%>
+<% if defined?(EffectiveDatatables) -%>
 - if @datatable.present?
   = render_datatable_scopes(@datatable)
   = render_datatable(@datatable)
 - else
   %p There are no <%= resource.plural_name %>.
+<% else %>
+  = render @<%= resource.plural_name %>
+<% end %>

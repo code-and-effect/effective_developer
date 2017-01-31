@@ -5,7 +5,7 @@
         %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= resource.name %>-tab', href: '#<%= resource.name %>-tab'}
           <%= resource.human_name.titleize %>
 
-<% resource.nested_resources.each do |_, nested_resource| -%>
+<% resource.nested_resources.each do |nested_resource| -%>
       %li{role: 'presentation'}
         %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= nested_resource.plural_name %>-tab', href: '#<%= nested_resource.plural_name %>-tab'}
           <%= nested_resource.plural_name.titleize %>
@@ -15,7 +15,7 @@
     #<%= resource.name %>-tab.tab-pane.active{role: 'tabpanel'}
       = render 'form_<%= resource.name %>', f: f
 
-<% resource.nested_resources.each do |_, nested_resource| -%>
+<% resource.nested_resources.each do |nested_resource| -%>
     #<%= nested_resource.plural_name %>-tab.tab-pane{role: 'tabpanel'}
       = render 'form_<%= nested_resource.plural_name %>', f: f
 <% end -%>

@@ -30,6 +30,15 @@ module Effective
         say_status :invoke, :controller, :white
       end
 
+      # Find if effective_resources is in the app's Gemfile
+      def enable_effective_resources
+        self.class.send(:attr_reader, :use_effective_resources)
+
+        Effective::CodeWriter.new('Gemfile') do |w|
+          @use_effective_resources = w.find { |line| line.include?('effective_resources') }.present?
+        end
+      end
+
       def create_controller
         template 'controllers/controller.rb', resource.controller_file
       end
