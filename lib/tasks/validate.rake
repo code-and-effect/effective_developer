@@ -6,7 +6,7 @@ task :validate, [:model] => :environment do |t, args|
   args.with_defaults(:model => 'all')
 
   Rails.application.eager_load!
-  klasses = ActiveRecord::Base.descendants.sort { |a, b| a.name <=> b.name }
+  klasses = ActiveRecord::Base.descendants.reject { |klass| klass.abstract_class? }.sort { |a, b| a.name <=> b.name }
 
   if args.model != 'all'
     klasses.delete_if { |klass| klass.name.downcase != args.model.singularize.downcase }
