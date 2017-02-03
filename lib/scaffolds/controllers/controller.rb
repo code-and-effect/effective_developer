@@ -122,7 +122,8 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
       <%= slice.map { |att| permitted_param_for(att.name) }.join(', ') %><%= ',' if (((index+1) * 8) < attributes.length || resource.nested_resources.present?) %>
 <% end -%>
 <% resource.nested_resources.each_with_index do |nested_resource, index| -%>
-      <%= nested_resource.name %>_attributes: [:id, :_destroy, <%= (nested_resource.belong_tos_attributes + nested_resource.attributes).map { |att| ':' + att.name.to_s }.join(', ') %>]<%= ',' if index < resource.nested_resources.length-1 %>
+<% nested = Effective::Resource.new(nested_resource) -%>
+      <%= nested.name %>_attributes: [:id, :_destroy, <%= (nested.belong_tos_attributes + nested.attributes).map { |att| ':' + att.name.to_s }.join(', ') %>]<%= ',' if index < resource.nested_resources.length-1 %>
 <% end -%>
     )
   end
