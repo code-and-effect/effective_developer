@@ -8,4 +8,4 @@
       = link_to_add_association(f, :<%= nested_resource.plural_name %>, partial: '<%= [resource.namespace.presence, nested_resource.plural_name].compact.join('/') %>/fields') do
         %button.btn.btn-success
           %span.glyphicon.glyphicon-plus-sign
-          Add another <%= nested_resource.name.titleize.downcase %>
+          Add another <%= nested_resource.name.to_s.titleize.downcase %>
