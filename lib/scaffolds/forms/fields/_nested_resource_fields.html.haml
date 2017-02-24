@@ -1,9 +1,9 @@
 .row.nested-fields
-<% resource.belong_tos_attributes.each do |attribute| -%>
+<% nested_resource.belong_tos_attributes.each do |attribute| -%>
   .col-sm-2<%= render_field(attribute, depth: 1).sub('  ', '') -%>
 
 <% end -%>
-<% resource.attributes.each do |attribute| -%>
+<% nested_resource.attributes.each do |attribute| -%>
   .col-sm-2<%= render_field(attribute, depth: 1).sub('  ', '') -%>
 
 <% end -%>
