@@ -10,7 +10,7 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
     @page_title = '<%= resource.plural_name.titleize %>'
     authorize! :index, <%= resource.class_name %>
 
-    @datatable = <%= resource.namespaced_class_name.pluralize %>Datatable.new(params[:scopes])
+    @datatable = <%= resource.namespaced_class_name.pluralize %>Datatable.new(self)
   end
 
 <% end -%>
