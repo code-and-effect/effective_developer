@@ -7,7 +7,7 @@ class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Data
     col :updated_at, visible: false
 <% end -%>
 <% if attributes.find { |att| att.name == 'created_at' } -%>
-    col :updated_at, visible: false
+    col :created_at, visible: false
 <% end -%>
 <% if attributes.find { |att| att.name == 'id' } -%>
     col :id, visible: false
