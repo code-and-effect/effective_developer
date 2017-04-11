@@ -37,6 +37,11 @@ namespace :pg do
 
     puts "=== Loading #{args.file_name} into local '#{db['database']}' database"
 
+    # bin/rails db:environment:set RAILS_ENV=development
+    if Rails.env != 'production'
+      ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
+    end
+
     Rake::Task['db:drop'].invoke
     Rake::Task['db:create'].invoke
 

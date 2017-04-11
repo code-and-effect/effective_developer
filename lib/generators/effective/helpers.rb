@@ -50,8 +50,8 @@ module Effective
         attributes.map { |att| "#{att.name}:#{att.type}" }
       end
 
-      def resource_attributes
-        klass_attributes = resource.klass_attributes
+      def resource_attributes(all: false)
+        klass_attributes = resource.klass_attributes(all: all)
 
         if klass_attributes.blank?
           if ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations(ActiveRecord::Migrator.migrations_paths)).pending_migrations.present?
@@ -59,7 +59,7 @@ module Effective
             system('bundle exec rake db:migrate') if migrate.to_s.include?('y')
           end
 
-          klass_attributes = resource.klass_attributes
+          klass_attributes = resource.klass_attributes(all: all)
         end
 
         klass_attributes.presence || resource.written_attributes

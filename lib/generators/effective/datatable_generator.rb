@@ -19,7 +19,7 @@ module Effective
       class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
       def assign_attributes
-        @attributes = invoked_attributes.presence || resource_attributes
+        @attributes = invoked_attributes.presence || resource_attributes(all: true)
         self.class.send(:attr_reader, :attributes)
       end
 
