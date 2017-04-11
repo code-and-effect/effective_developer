@@ -1,19 +1,25 @@
 class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Datatable
-<% if resource.scopes.present? -%>
-  filters do<% ([:all] + resource.scopes).uniq.each_with_index do |scope, index| %>
-    scope :<%= scope -%><%= ', default: true' if index == 0 -%>
-<% end %>
-  end
+
+  datatable do
+    order :<%= (attributes.find { |att| att.name == 'updated_at' } || attributes.first).name %>
+
+<% if attributes.find { |att| att.name == 'updated_at' } -%>
+    col :updated_at, visible: false
+<% end -%>
+<% if attributes.find { |att| att.name == 'created_at' } -%>
+    col :updated_at, visible: false
+<% end -%>
+<% if attributes.find { |att| att.name == 'id' } -%>
+    col :id, visible: false
 
 <% end -%>
-  datatable do
-    order :<%= (attributes.find { |att| att.name == 'updated_at' } || attributes.first).name -%>, :desc
-
 <% resource.belong_tos.each do |reference| -%>
     col :<%= reference.name %>
 <% end -%>
-
-<% attributes.each do |attribute| -%>
+<% resource.nested_resources.each do |reference| -%>
+    col :<%= reference.name %>
+<% end -%>
+<% attributes.reject { |att| ['created_at', 'updated_at', 'id'].include?(att.name) }.each do |attribute| -%>
     col :<%= attribute.name %>
 <% end -%>
 
@@ -28,14 +34,8 @@ class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Data
 <% end -%>
   end
 
-<% if resource.scopes.blank? -%>
   collection do
     <%= resource.class_name %>.all
   end
-<% else -%>
-  collection do
-    <%= resource.class_name %>.all
-  end
-<% end -%>
 
 end
