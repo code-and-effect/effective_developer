@@ -11,6 +11,7 @@
           <%= nested_resource.plural_name.titleize %>
 
 <% end -%>
+  %br
   .tab-content
     #<%= resource.name %>-tab.tab-pane.active{role: 'tabpanel'}
       = render 'form_<%= resource.name %>', f: f
@@ -19,6 +20,8 @@
     #<%= nested_resource.plural_name %>-tab.tab-pane{role: 'tabpanel'}
       = render 'form_<%= nested_resource.plural_name %>', f: f
 <% end -%>
+
+  %hr
 
   .form-actions
   <% if defined?(EffectiveResources) -%>
