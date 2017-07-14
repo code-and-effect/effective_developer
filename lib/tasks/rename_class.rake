@@ -42,15 +42,23 @@ task :rename_class, [:source, :target, :db] => :environment do |t, args|
   end
 
   # Search and replace in all files
+  subs = {
+    source.classify.pluralize => target.classify.pluralize,
+    source.classify => target.classify,
+    source.pluralize => target.pluralize,
+    source => target
+  }
+
+  if source.include?('_')
+    subs[source.gsub('_', '-')] ||= target
+  end
+
   Dir.glob('**/*.*').each do |path|
     next unless whitelist.any? { |ok| path.start_with?(ok) }
     next if blacklist.any? { |nope| path.start_with?(nope) }
 
     writer = Effective::CodeWriter.new(path) do |w|
-      w.gsub!(source.classify.pluralize, target.classify.pluralize)
-      w.gsub!(source.classify, target.classify)
-      w.gsub!(source.pluralize, target.pluralize)
-      w.gsub!(source, target)
+      subs.each { |k, v| w.gsub!(k, v) }
     end
 
     puts "updated: #{path}" if writer.changed?
