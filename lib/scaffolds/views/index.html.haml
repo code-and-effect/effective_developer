@@ -7,8 +7,6 @@
 <% end -%>
 <% if defined?(EffectiveDatatables) -%>
 - if @datatable.present?
-  = render_datatable_charts(@datatable)
-  = render_datatable_filters(@datatable)
   = render_datatable(@datatable)
 - else
   %p There are no <%= resource.plural_name %>.

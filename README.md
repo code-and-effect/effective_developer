@@ -112,6 +112,27 @@ or
 rake csv:import:scaffold[users]
 ```
 
+## rename_class
+
+Quickly rename a rails class throughout the entire app.
+
+The script considers the `.classify`, `.pluralize` and `.singularize` common usage patterns.
+
+Then performs a global search and replace, and renames files and directories.
+
+```ruby
+rake rename_class[account,team]
+```
+
+or
+
+```ruby
+rake rename_class[account,team,skipdb]
+```
+
+to skip any changes to database migrations.
+
+
 ## reset_pk_sequence
 
 If you ever run into the error `duplicate key violates unique constraint (id) error`, run this script:

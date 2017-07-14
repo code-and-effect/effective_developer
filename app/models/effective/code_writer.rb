@@ -12,12 +12,13 @@ module Effective
       @from = []
       @to = []
 
+      @changed = false
+
       @lines = File.open(filename).readlines
 
-      block.call(self)
-
-      File.open(filename, 'w') do |file|
-        lines.each { |line| file.write(line) }
+      if block_given?
+        block.call(self)
+        write!
       end
     end
 
@@ -90,7 +91,7 @@ module Effective
         end
       end
 
-      true
+      @changed = true
     end
 
     def insert_raw(content, index, depth = 0)
@@ -107,6 +108,8 @@ module Effective
 
         index += 1
       end
+
+      @changed = true
     end
 
     # Iterate over the lines with a depth, and passed the stripped line to the passed block
@@ -194,7 +197,25 @@ module Effective
       depth
     end
 
+    def changed?
+      @changed == true
+    end
+
+    def gsub!(source, target)
+      lines.each { |line| @changed = true if line.gsub!(source, target) }
+    end
+
     private
+
+    def write!
+      return false unless changed?
+
+      File.open(filename, 'w') do |file|
+        lines.each { |line| file.write(line) }
+      end
+
+      true
+    end
 
     def open?(content)
       stripped = ss(content)
