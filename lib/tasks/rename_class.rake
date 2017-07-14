@@ -28,7 +28,7 @@ task :rename_class, [:source, :target, :db] => :environment do |t, args|
     end
   end
 
-  # For every file in the app
+  # Rename any files in the app
   Dir.glob('**/*.*').each do |path|
     next unless whitelist.any? { |ok| path.start_with?(ok) }
     next if blacklist.any? { |nope| path.start_with?(nope) }
@@ -41,7 +41,7 @@ task :rename_class, [:source, :target, :db] => :environment do |t, args|
     end
   end
 
-  # For every file in the app
+  # Search and replace in all files
   Dir.glob('**/*.*').each do |path|
     next unless whitelist.any? { |ok| path.start_with?(ok) }
     next if blacklist.any? { |nope| path.start_with?(nope) }
