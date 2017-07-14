@@ -11,7 +11,7 @@ task :rename_class, [:source, :target, :db] => :environment do |t, args|
 
   puts "=== Renaming class '#{source.classify}' to '#{target.classify}'"
 
-  whitelist = ['app/', 'db/', 'lib/', 'test/'].compact
+  whitelist = ['app/', 'config/routes.rb', 'config/locales/', 'db/', 'lib/', 'test/'].compact
   blacklist = ['db/schema.rb', ('db/migrate' if args.db == 'skipdb')].compact
 
   # Rename any directories in the app
