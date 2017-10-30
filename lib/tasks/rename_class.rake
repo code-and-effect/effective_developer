@@ -65,3 +65,42 @@ task :rename_class, [:source, :target, :db] => :environment do |t, args|
   end
 
 end
+
+
+desc 'Rename a rails attribute to another'
+task :rename_attribute, [:source, :target, :db] => :environment do |t, args|
+  unless args.source.present? && args.target.present?
+    puts 'usage: rake attribute[expire,expire_after] (or rake attribute[expire,expire_after,skipdb] to skip database migrations)' and exit
+  end
+
+  source = args.source.to_s.downcase
+  target = args.target.to_s.downcase
+
+  puts "=== Renaming attribute '#{source}' to '#{target}'"
+
+  whitelist = ['app/', 'config/locales/', 'db/', 'lib/', 'test/'].compact
+  blacklist = ['db/schema.rb', ('db/migrate' if args.db == 'skipdb')].compact
+
+  # Search and replace in all files
+  subs = {
+    source.classify.pluralize => target.classify.pluralize,
+    source.classify => target.classify,
+    source => target
+  }
+
+  if source.include?('_')
+    subs[source.gsub('_', '-')] ||= target
+  end
+
+  Dir.glob('**/*.*').each do |path|
+    next unless whitelist.any? { |ok| path.start_with?(ok) }
+    next if blacklist.any? { |nope| path.start_with?(nope) }
+
+    writer = Effective::CodeWriter.new(path) do |w|
+      subs.each { |k, v| w.gsub!(k, v) }
+    end
+
+    puts "updated: #{path}" if writer.changed?
+  end
+end
+
