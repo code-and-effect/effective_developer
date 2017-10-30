@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+
+# Helper script to bundle a development copy of a gem.
+
+# > gem_develop effective_datatables
+
+# This script will:
+# 1. write a development path to the Gemfile
+# 2. run bundle
+# 3. type bundle exec rails server
+
+require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
+
+class GemDevelop
+  def gem_develop_path
+    (ENV['GEM_DEVELOP_PATH'] || '~/Sites').chomp('/')
+  end
+
+  def execute!(args)
+    @args = args
+
+    # Check for all the errors.
+    if args.length == 0
+      puts('Please specify one or more gems to develop')
+      exit
+    end
+
+    unless File.exist?('Gemfile')
+      puts 'Unable to proceed, Gemfile must be present in current directory'
+      puts "Please run gem_develop from a rails project's root directory"
+      exit
+    end
+
+    writer = Effective::CodeWriter.new('Gemfile') do |w|
+      args.each do |name|
+        if (line = w.find { |line| line.include?('effective_' + name) })
+          w.replace line, "gem 'effective_#{name}', path: '#{gem_develop_path}/effective_#{name}'\r\n"
+        elsif (line = w.find { |line| line.include?(name) })
+          w.replace line, "gem '#{name}', path: '#{gem_develop_path}/#{name}'\r\n"
+        else
+          puts "No gem matching #{name}"
+        end
+      end
+    end
+
+    exit unless writer.changed?
+
+    system('bundle')
+    bundle_exec_rails_server
+
+    true
+  end
+
+  private
+
+  def bundle_exec_rails_server
+    osascript('tell application "System Events" to keystroke "bundle exec rails server\r\n"')
+  end
+
+  def osascript(script)
+    begin # MacOS
+      system 'osascript', *script.split(/\n/).map { |line| ['-e', line] }.flatten
+    rescue => e
+    end
+  end
+
+end
+
+GemDevelop.new().execute!(ARGV)

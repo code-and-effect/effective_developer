@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+# Helper script to reset any locally developed gems
+
+# > gem_reset
+
+# This script will:
+# 1. write a development path to the Gemfile
+# 2. run bundle
+# 3. type bundle exec rails server
+
+require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
+
+class GemReset
+  REGEX = /^gem ['"](.\w+)['"](,.+)$/
+
+  def execute!(args)
+    @args = args
+
+    unless File.exist?('Gemfile')
+      puts 'Unable to proceed, Gemfile must be present in current directory'
+      puts "Please run gem_reset from a rails project's root directory"
+      exit
+    end
+
+    updated_gems = []
+
+    writer = Effective::CodeWriter.new('Gemfile') do |w|
+      w.select { |line| line.match(REGEX) }.each do |index|
+        line = w.lines[index]; matched = line.match(REGEX)
+
+        updated_gems << matched[1]
+        w.replace index, line.sub(matched[2], '')
+      end
+    end
+
+    if writer.changed?
+      puts("Resetting local gems: #{updated_gems.join(', ')}")
+    else
+      puts('No local gems found')
+      exit
+    end
+
+    system("bundle update #{updated_gems.join(' ')}")
+    bundle_exec_rails_server
+
+    true
+  end
+
+  private
+
+  def bundle_exec_rails_server
+    osascript('tell application "System Events" to keystroke "bundle exec rails server\r\n"')
+  end
+
+  def osascript(script)
+    begin # MacOS
+      system 'osascript', *script.split(/\n/).map { |line| ['-e', line] }.flatten
+    rescue => e
+    end
+  end
+
+end
+
+GemReset.new().execute!(ARGV)

@@ -205,6 +205,11 @@ module Effective
       lines.each { |line| @changed = true if line.gsub!(source, target) }
     end
 
+    def replace(index, content)
+      @changed = true
+      lines[index].replace(content.to_s)
+    end
+
     private
 
     def write!
