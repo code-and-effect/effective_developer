@@ -32,6 +32,36 @@ export PATH="$PATH:$HOME/effective_developer/bin"
 
 # Shell scripts
 
+## gem_develop
+
+A command line shell script to update a `Gemfile` and use any provided gems locally.
+
+This makes it very quick to swich to developing a gem locally.
+
+`gem_develop` should be run from the root directory of any rails app.
+
+```console
+> gem_develop effective_datatables effective_resources
+```
+
+to change:
+
+```ruby
+gem 'effective_datatables'
+gem 'effective_resources'
+```
+
+into:
+
+```ruby
+gem 'effective_datatables', path: '~/Sites/effective_datatables'
+gem 'effective_resources', path: '~/Sites/effective_resources'
+```
+
+and execute `bundle`.
+
+You can override the `~/Sites/` directory by setting `ENV['GEM_DEVELOP_PATH']`.
+
 ## gem_release
 
 A command line shell script that quickly bumps the version of any ruby gem.
@@ -51,6 +81,35 @@ To release a new gem version:
 ```console
 > gem_release 1.0.0
 ```
+
+## gem_reset
+
+A command line shell script to update a `Gemfile` to find any locally developed gems, and update them to the most current released version.
+
+`gem_reset` should be run from the root directory of any rails app.
+
+Just run with no arguments:
+
+```console
+> gem_reset
+```
+
+to change:
+
+```ruby
+gem 'effective_datatables', path: '~/Sites/effective_datatables'
+gem 'effective_resources', path: '~/Sites/effective_resources'
+```
+
+into:
+
+```ruby
+gem 'effective_datatables'
+gem 'effective_resources'
+```
+
+and execute `bundle update effective_datatables effective_resources`.
+
 
 ## gitreset
 
