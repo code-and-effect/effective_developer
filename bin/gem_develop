@@ -54,14 +54,9 @@ class GemDevelop
   private
 
   def bundle_exec_rails_server
-    osascript('tell application "System Events" to keystroke "bundle exec rails server\r\n"')
-  end
-
-  def osascript(script)
-    begin # MacOS
-      system 'osascript', *script.split(/\n/).map { |line| ['-e', line] }.flatten
-    rescue => e
-    end
+    system('osascript', '-e', 'tell application "System Events" to keystroke "bundle exec rails server"')
+    puts('')
+    puts('Press ENTER to run rails server')
   end
 
 end
