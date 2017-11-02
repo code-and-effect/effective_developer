@@ -42,18 +42,14 @@ class GemReset
     end
 
     system("bundle update #{updated_gems.join(' ')}")
-    bundle_exec_rails_server
+
+    `git add Gemfile`
+    `git add Gemfile.lock`
+    `git commit -m 'bundle update #{updated_gems.join(' ')}'`
 
     true
   end
 
-  private
-
-  def bundle_exec_rails_server
-    system('osascript', '-e', 'tell application "System Events" to keystroke "bundle exec rails server"')
-    puts('')
-    puts('Press ENTER to run rails server')
-  end
 
 end
 
