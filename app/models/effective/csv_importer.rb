@@ -9,11 +9,11 @@ module Effective
     AA=26;AB=27;AC=28;AD=29;AE=30;AF=31;AG=32;AH=33;AI=34;AJ=35;
     AK=36;AL=37;AM=38;AN=39;AO=40;AP=41;AQ=42;AR=43;AS=44;AT=45;
 
-    def initialize(csv_file = default_csv_file(), header: true)
+    def initialize(csv_file = default_csv_files(), header: true)
       @has_header_row = header
 
-      @csv_file = csv_file
-      raise "#{@csv_file} does not exist" unless File.exists?(@csv_file)
+      @csv_file = Array(csv_file).find { |csv_file| File.exists?(csv_file) }
+      raise "#{csv_file} does not exist" unless @csv_file
     end
 
     def columns
@@ -217,8 +217,12 @@ module Effective
 
     private
 
-    def default_csv_file
-      ("lib/csv_importers/data/#{self.class.name.gsub('CsvImporters::', '').underscore.gsub('_importer', '')}.csv")
+    def default_csv_files
+      [
+        ("lib/csv_importers/data/#{self.class.name.gsub('CsvImporters::', '').underscore.gsub('_importer', '')}.csv"),
+        ("lib/csv_importers/data/#{self.class.name.gsub('CsvImporters::', '').underscore.gsub('_importer', '').singularize}.csv"),
+        ("lib/csv_importers/data/#{self.class.name.gsub('CsvImporters::', '').underscore.gsub('s_importer', '').split('_').map.with_index { |str, index| (index == 0 ? str : str.upcase) }.join}.csv")
+      ]
     end
 
   end
