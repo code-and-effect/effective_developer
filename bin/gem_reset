@@ -12,7 +12,7 @@
 require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
 
 class GemReset
-  REGEX = /^gem ['"](.\w+)['"](,.+)$/
+  REGEX = /^gem ['"](.\w+)['"](, path:.+)$/
 
   def execute!(args)
     @args = args

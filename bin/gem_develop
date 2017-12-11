@@ -46,17 +46,8 @@ class GemDevelop
     exit unless writer.changed?
 
     system('bundle')
-    bundle_exec_rails_server
 
     true
-  end
-
-  private
-
-  def bundle_exec_rails_server
-    system('osascript', '-e', 'tell application "System Events" to keystroke "bundle exec rails server"')
-    puts('')
-    puts('Press ENTER to run rails server')
   end
 
 end
