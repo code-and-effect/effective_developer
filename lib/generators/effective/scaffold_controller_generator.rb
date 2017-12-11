@@ -30,9 +30,9 @@ module Effective
         Rails::Generators.invoke('effective:ability', [name] + invoked_actions)
       end
 
-      def invoke_menu
-        Rails::Generators.invoke('effective:menu', [name])
-      end
+      # def invoke_menu
+      #   Rails::Generators.invoke('effective:menu', [name])
+      # end
 
       def invoke_datatable
         unless invoked_actions.include?('index')

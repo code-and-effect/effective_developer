@@ -38,7 +38,11 @@ module Effective
       private
 
       def available_actions
-        %w(index new show edit)
+        if defined?(EffectiveResources) # We don't need any views!
+          []
+        else
+          %w(index new show edit)
+        end
       end
 
     end

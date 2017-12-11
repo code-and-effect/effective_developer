@@ -134,9 +134,9 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
     when 'Save'
       <%= resource.edit_path_helper %>
     when 'Save and Continue'
-      <%= resource.index_path %>
+      <%= resource.index_path_helper %>
     when 'Save and Add New'
-      <%= resource.new_path %>
+      <%= resource.new_path_helper %>
     else
       raise 'Unexpected redirect path'
     end

@@ -20,7 +20,7 @@ module Effective
         begin
           Effective::CodeWriter.new((['app/views'] + resource.namespaces + ['_navbar.html.haml']).join('/')) do |w|
             if w.find { |line, _| line == menu_content.last.strip }
-              say_status :identical, resource.index_path, :blue
+              say_status :identical, resource.action_path(:index), :blue
             else
               index = w.last { |line, _| line.start_with?('- if can?') }
 
@@ -29,7 +29,7 @@ module Effective
               end
 
               w.insert_raw(menu_content, index+1, w.depth_at(index))
-              say_status :menu, resource.index_path, :green
+              say_status :menu, resource.action_path(:index), :green
             end
           end
         rescue Errno::ENOENT
@@ -42,7 +42,7 @@ module Effective
         begin
           Effective::CodeWriter.new('lib/tasks/generate/effective_menus.rake') do |w|
             if w.find { |line, _| line == effective_menus_content }
-              say_status :identical, resource.index_path, :blue
+              say_status :identical, resource.action_path(:index), :blue
             else
               index = w.first { |line, _| line.start_with?('item') }
 
@@ -65,12 +65,12 @@ module Effective
         [
           "\n",
           "- if can? :manage, #{resource.class_name}",
-          "  %li= link_to '#{resource.plural_name.titleize}', #{resource.index_path}"
+          "  %li= link_to '#{resource.plural_name.titleize}', #{resource.action_path(:index)}"
         ]
       end
 
       def effective_menus_content
-        "item '#{resource.plural_name.titleize}', :#{resource.index_path}"
+        "item '#{resource.plural_name.titleize}', :#{resource.action_path(:index)}"
       end
 
     end

@@ -2,7 +2,7 @@
 
 <% if actions.include?('new') -%>
 - if can?(:new, <%= resource.class_name %>)
-  %p.text-right= link_to 'New <%= resource.human_name %>', <%= resource.new_path %>, class: 'btn btn-primary'
+  %p.text-right= link_to 'New <%= resource.human_name %>', <%= resource.action_path(:new) %>, class: 'btn btn-primary'
 
 <% end -%>
 <% if defined?(EffectiveDatatables) -%>
