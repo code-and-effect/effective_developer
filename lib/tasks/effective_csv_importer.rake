@@ -10,8 +10,8 @@
 
 # rake csv:import:posts (one task created per model)
 # rake csv:import:all
-# rake csv:import:scaffold
-# rake csv:import:scaffold[users]
+# rake csv:scaffold
+# rake csv:scaffold[users]
 # rake csv:export
 
 namespace :csv do
@@ -47,30 +47,32 @@ namespace :csv do
         Rake::Task["csv:import:#{importer}"].invoke
       end
     end
+  end
 
-    # rake csv:scaffold
-    # rake csv:scaffold[users]
-    desc 'Scaffold an Effective::CSVImporter for each /lib/csv_importers/data/*.csv file'
+  # rake csv:scaffold
+  # rake csv:scaffold[users]
+  desc 'Scaffold an Effective::CSVImporter for each /lib/csv_importers/data/*.csv file, defaults to all'
 
-    task :scaffold, [:file_name] => :environment do |t, args|
-      args.with_defaults(file_name: 'all')
+  task :scaffold, [:file_name] => :environment do |t, args|
+    args.with_defaults(file_name: 'all')
 
-      require 'csv'
+    require 'csv'
 
-      generator = ERB.new(File.read(File.dirname(__FILE__) + '/../scaffolds/importers/csv_importer.rb'))
-      letters = ('A'..'AT').to_a
+    generator = ERB.new(File.read(File.dirname(__FILE__) + '/../scaffolds/importers/csv_importer.rb'))
+    letters = ('A'..'AT').to_a
 
-      Dir['lib/csv_importers/data/*.csv'].each do |file|
-        csv_file = file.split('/').last.gsub('.csv', '')
+    Dir['lib/csv_importers/data/*.csv'].each do |file|
+      csv_file = file.split('/').last.gsub('.csv', '')
 
-        next if (Array(args.file_name) != ['all'] && Array(args.file_name).include?(csv_file) == false)
+      next if (Array(args.file_name) != ['all'] && Array(args.file_name).include?(csv_file) == false)
+      next if args.file_name == 'all' && File.exists?("#{Rails.root}/lib/csv_importers/#{csv_file}_importer.rb")
 
-        klass = csv_file.classify.pluralize
-        columns = CSV.open(file, 'r') { |csv| csv.first }
+      klass = csv_file.classify.pluralize
+      columns = CSV.open(file, 'r') { |csv| csv.first }
 
-        File.open("#{Rails.root}/lib/csv_importers/#{csv_file}_importer.rb", 'w') do |file|
-          file.write generator.result(binding)
-        end
+      File.open("#{Rails.root}/lib/csv_importers/#{csv_file}_importer.rb", 'w') do |file|
+        file.write generator.result(binding)
+        puts "created lib/csv_importers/#{csv_file}_importer.rb"
       end
     end
   end

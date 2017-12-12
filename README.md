@@ -162,13 +162,13 @@ rake csv:import:foos
 Scaffolds an `Effective::CSVImporter` file for each .csv file in `/lib/csv_importers/data/*.csv`
 
 ```ruby
-rake csv:import:scaffold
+rake csv:scaffold
 ```
 
 or
 
 ```ruby
-rake csv:import:scaffold[users]
+rake csv:scaffold[users]
 ```
 
 ## rename_class
