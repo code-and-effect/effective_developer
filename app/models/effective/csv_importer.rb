@@ -148,7 +148,19 @@ module Effective
         @current_row = row
 
         begin
-          yield
+          exception = false
+
+          ActiveRecord::Base.transaction do
+            begin
+              yield
+            rescue => e
+              exception = e
+              raise ActiveRecord::Rollback
+            end
+          end
+
+          raise exception if exception
+
           print colorize('.', :green)
         rescue => e
           error(e.message)
