@@ -131,14 +131,6 @@ A command line script to delete any git branch that has already been merged into
 > gitsweep
 ```
 
-## BFG Repo-Cleaner
-
-A command line script that calls [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) to remove sensitive data from the git repository history.
-
-```console
-> bfg --delete-files id_rsa.pub
-```
-
 # Rake scripts
 
 ## csv:export
