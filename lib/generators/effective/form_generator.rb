@@ -28,28 +28,32 @@ module Effective
 
       def create_default_form
         if resource.nested_resources.blank?
-          template 'forms/default/_form.html.haml', resource.view_file('form', partial: true)
+          template "#{forms_path}/default/_form.html.haml", resource.view_file('form', partial: true)
         end
       end
 
       def create_tabpanel_form
         if resource.nested_resources.present?
-          template 'forms/tabpanel/_form.html.haml', resource.view_file('form', partial: true)
-          template 'forms/tabpanel/_tab_fields.html.haml', resource.view_file("form_#{resource.name}", partial: true)
+          template "#{forms_path}/tabpanel/_form.html.haml", resource.view_file('form', partial: true)
+          template "#{forms_path}/tabpanel/_tab_fields.html.haml", resource.view_file("form_#{resource.name}", partial: true)
         end
 
         class_eval { attr_accessor :nested_resource }
 
         resource.nested_resources.each do |nested_resource|
           @nested_resource = nested_resource
-          template 'forms/tabpanel/_tab_nested_resource.html.haml', resource.view_file("form_#{nested_resource.plural_name}", partial: true)
+          template "#{forms_path}/tabpanel/_tab_nested_resource.html.haml", resource.view_file("form_#{nested_resource.plural_name}", partial: true)
 
           @nested_resource = Effective::Resource.new(nested_resource)
-          template 'forms/fields/_nested_resource_fields.html.haml', File.join('app/views', resource.namespace.to_s, (resource.namespace.present? ? '' : resource.class_path), nested_resource.name.to_s.underscore.pluralize, '_fields.html.haml')
+          template "#{forms_path}/fields/_nested_resource_fields.html.haml", File.join('app/views', resource.namespace.to_s, (resource.namespace.present? ? '' : resource.class_path), nested_resource.name.to_s.underscore.pluralize, '_fields.html.haml')
         end
       end
 
       protected
+
+      def forms_path
+        @forms_path ||= (defined?(EffectiveBootstrap) ? 'forms' : 'simple_form')
+      end
 
       def form_for
         if resource.namespaces.blank?
@@ -78,7 +82,7 @@ module Effective
         end
 
         html = ERB.new(
-          File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/fields/_field_#{partial}.html.haml")
+          File.read("#{File.dirname(__FILE__)}/../../scaffolds/#{forms_path}/fields/_field_#{partial}.html.haml")
         ).result(b).split("\n").map { |line| ('  ' * depth) + line }
 
         html.length > 1 ? (html.join("\n") + "\n") : html.join
