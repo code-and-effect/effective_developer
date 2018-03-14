@@ -1,4 +1,4 @@
-= effective_form_with(<%= form_for %>) do |f|
+= simple_form_for(<%= form_for %>) do |f|
 <% resource.belong_tos.each do |reference| -%>
 <%= render_field(reference, depth: 1) %>
 <% end -%>
@@ -6,8 +6,8 @@
 <%= render_field(attribute, depth: 1) %>
 <% end -%>
 
-<% if defined?(EffectiveBootstrap) -%>
-  = effective_submit(f)
+<% if defined?(EffectiveResources) -%>
+  = simple_form_submit(f)
 <% else -%>
   .form-actions
     = f.button :submit, 'Save', data: { disable_with: 'Saving...' }
