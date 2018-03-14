@@ -66,6 +66,8 @@ module Effective
       def render_field(attribute, depth: 0)
         b = binding
 
+        b.local_variable_set(:resource, resource)
+
         partial = case attribute
         when (ActiveRecord::Reflection::BelongsToReflection rescue false)
           b.local_variable_set(:reference, attribute)
