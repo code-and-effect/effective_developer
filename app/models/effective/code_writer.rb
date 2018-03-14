@@ -23,6 +23,14 @@ module Effective
     end
 
     # Returns true if the insert happened, nil if no insert
+    def insert_after_first(content, depth: nil, content_depth: nil, &block)
+      index = first(&block)
+      return nil unless index
+
+      insert(content, index, depth: depth, content_depth: content_depth)
+    end
+
+    # Returns true if the insert happened, nil if no insert
     def insert_after_last(content, depth: nil, content_depth: nil, &block)
       index = last(&block)
       return nil unless index

@@ -16,20 +16,20 @@ module Effective
         say_status :invoke, :menu, :white
       end
 
+      # layouts/_navbar.html.haml
       def create_menu
+        return unless resource.namespaces.blank?
+
         begin
-          Effective::CodeWriter.new((['app/views'] + resource.namespaces + ['_navbar.html.haml']).join('/')) do |w|
+          Effective::CodeWriter.new('app/views/layouts/_navbar.html.haml') do |w|
             if w.find { |line, _| line == menu_content.last.strip }
-              say_status :identical, resource.action_path(:index), :blue
+              say_status :identical, menu_path, :blue
             else
-              index = w.last { |line, _| line.start_with?('- if can?') }
-
-              if index.blank?
-                say_status(:skipped, :menu, :yellow) and return
+              if (w.insert_after_first(menu_content) { |line, _| line.start_with?('= nav_link_to') })
+                say_status :menu, menu_path, :green
+              else
+                say_status(:skipped, :menu, :yellow)
               end
-
-              w.insert_raw(menu_content, index+1, w.depth_at(index))
-              say_status :menu, resource.action_path(:index), :green
             end
           end
         rescue Errno::ENOENT
@@ -38,41 +38,48 @@ module Effective
         end
       end
 
-      def create_effective_menus
+      # layouts/_navbar_admin.html.haml
+      def create_admin_menu
+        return unless resource.namespaces == ['admin']
+
         begin
-          Effective::CodeWriter.new('lib/tasks/generate/effective_menus.rake') do |w|
-            if w.find { |line, _| line == effective_menus_content }
-              say_status :identical, resource.action_path(:index), :blue
+          Effective::CodeWriter.new('app/views/layouts/_navbar_admin.html.haml') do |w|
+            if w.find { |line, _| line == admin_menu_content.last.strip }
+              say_status :identical, menu_path, :blue
             else
-              index = w.first { |line, _| line.start_with?('item') }
+              index = w.last { |line, _| line.start_with?('- if can?') }
 
-              w.insert(effective_menus_content, index)
+              if index.blank?
+                say_status(:skipped, :menu, :yellow) and return
+              end
 
-              system('rake generate:effective_menus')
-
-              say_status :effective_menus, resource.plural_name + '_path', :green
+              w.insert_raw(admin_menu_content, index+1, w.depth_at(index))
+              say_status(:menu, menu_path, :green)
             end
           end
         rescue Errno::ENOENT
           # This will raise an error if the navbar file isn't present
-          say_status :skipped, :effective_menus, :yellow
+          say_status :skipped, :menu, :yellow
         end
       end
 
       private
 
       def menu_content
+        ["= nav_link_to '#{resource.plural_name.titleize}', #{menu_path}"]
+      end
+
+      def admin_menu_content
         [
           "\n",
           "- if can? :manage, #{resource.class_name}",
-          "  %li= link_to '#{resource.plural_name.titleize}', #{resource.action_path(:index)}"
+          "  = nav_link_to '#{resource.plural_name.titleize}', #{menu_path}"
         ]
       end
 
-      def effective_menus_content
-        "item '#{resource.plural_name.titleize}', :#{resource.action_path(:index)}"
+      def menu_path
+        [resource.namespace, resource.plural_name, 'path'].compact * '_'
       end
-
     end
   end
 end
