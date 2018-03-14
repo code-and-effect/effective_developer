@@ -1,7 +1,9 @@
 class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.namespace.try(:classify).presence, ApplicationController].compact.join('::') %>
+<% unless resource.namespace == 'admin' -%>
   before_action :authenticate_user! # Devise enforce user is present
-
+<% end -%>
 <% if use_effective_resources -%>
+
   include Effective::CrudController
 
 <% end -%>
@@ -116,6 +118,12 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
 <% end -%>
   protected
 
+<% if resource.namespace == 'admin' -%>
+  def <%= resource.name %>_params
+    params.require(:<%= resource.name %>).permit!
+  end
+<% end -%>
+<% if resource.namespace != 'admin' -%>
   def <%= resource.name %>_params
     params.require(:<%= resource.name %>).permit(:id,
 <% attributes.each_slice(8).with_index do |slice, index| -%>
@@ -127,6 +135,7 @@ class <%= resource.namespaced_class_name.pluralize %>Controller < <%= [resource.
 <% end -%>
     )
   end
+<% end -%>
 
 <% if !use_effective_resources -%>
   def redirect_path

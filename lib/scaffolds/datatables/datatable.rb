@@ -26,7 +26,7 @@ class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Data
 <% if non_crud_actions.present? -%>
     actions_col do |<%= singular_name %>|
 <% non_crud_actions.each_with_index do |action, index| -%>
-      glyphicon_to('ok', <%= resource.action_path_helper(action, at: false) %>, title: '<%= action.titleize %>')<%= ' +' if (index+1) < (invoked_actions - crud_actions).length %>
+      icon_to('ok', <%= resource.action_path_helper(action, at: false) %>, title: '<%= action.titleize %>')<%= ' +' if (index+1) < (invoked_actions - crud_actions).length %>
 <% end -%>
     end
 <% else -%>
@@ -35,7 +35,7 @@ class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Data
   end
 
   collection do
-    <%= resource.class_name %>.all
+    <%= resource.class_name %>.deep.all
   end
 
 end

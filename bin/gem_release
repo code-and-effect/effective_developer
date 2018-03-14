@@ -23,7 +23,7 @@ class GemRelease
 
     # Check for all the errors.
 
-    if args.length > 1
+    if args.length > 2
       puts('Invalid arguments')
       exit
     end
@@ -55,8 +55,8 @@ class GemRelease
 
     # Release a new gem version
     if next_version.nil? == false
-      `git checkout master`
-      `git pull origin master`
+      `git checkout #{current_branch}`
+      `git pull origin #{current_branch}`
 
       unless confirm("Releasing #{gem_name} #{next_version} (press y to continue): ")
         puts('aborted')
@@ -69,7 +69,7 @@ class GemRelease
       `git commit -m 'Version #{next_version}'`
 
       `git tag -a #{next_version} -m 'Version #{next_version}'`
-      `git push origin master --tags`
+      `git push origin #{current_branch} --tags`
 
       puts `gem build #{gem_name}.gemspec`
       puts `gem push #{gem_name}-#{next_version}.gem`
@@ -102,7 +102,11 @@ class GemRelease
   end
 
   def next_version
-    @args.first
+    @args[0]
+  end
+
+  def current_branch
+    @args[1] || 'master'
   end
 
   def confirm(message)
