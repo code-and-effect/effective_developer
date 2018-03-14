@@ -1,6 +1,7 @@
 # rails generate effective:menu NAME
 
 # Adds a menu to namespace/_navbar if present
+# Adds a menu to namespace/_navbar_admin if present
 # rails generate effective:menu Thing
 
 module Effective
