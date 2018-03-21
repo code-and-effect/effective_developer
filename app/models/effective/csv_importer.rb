@@ -81,7 +81,7 @@ module Effective
       value = value.to_s
 
       if column.ends_with?('?')  # Boolean
-        ::ActiveRecord::ConnectionAdapters::Column::TRUE_VALUES.include?(value)
+        truthy?(value)
       elsif column.ends_with?('_at')  # DateTime
         parse_datetime(column, value)
       elsif column.ends_with?('_on')  # Date
@@ -124,6 +124,43 @@ module Effective
       end
 
       obj
+    end
+
+    def assign_valid_email(user, at: 'example.com')
+      raise 'expected an object that responds to email=' unless user.respond_to?('email=')
+
+      user.email = user.email.to_s.strip.downcase.presence
+
+      if user.email.blank?
+        if user.respond_to?(:first_name) && user.respond_to?(:last_name)
+          user.email ||= [user.first_name.to_s.parameterize.presence, user.last_name.to_s.parameterize.presence].compact.join('.').presence
+        end
+
+        if user.respond_to?(:full_name)
+          user.email ||= user.full_name.to_s.parameterize.presence
+        end
+
+        if user.respond_to?(:name)
+          user.email ||= user.name.to_s.parameterize.presence
+        end
+
+        user.email ||= user.object_id
+
+        user.email = "#{user.email}@#{at.sub('@', '')}"
+      end
+
+      # Check for uniqueness
+      unique = 0
+      email = user.email
+
+      while user.class.where(email: email).present?
+        pieces = user.email.split('@')
+        email = pieces.first + "+#{(unique += 1)}@" + pieces.last
+      end
+
+      user.email = email
+
+      user
     end
 
     def log(message)
@@ -224,6 +261,14 @@ module Effective
         Time.zone.parse(value.to_s)
       rescue => e
         error("Unable to Time.zone.parse('#{value}'). Override parse_datetime() to parse your own time, something like:\n#{' ' * 6}def parse_datetime(col, value)\n#{' ' * 8}Time.strptime(value, '%m/%d/%Y %H:%M:%S').in_time_zone\n#{' ' * 6}end")
+      end
+    end
+
+    def truthy?(value)
+      if defined?(::ActiveRecord::ConnectionAdapters::Column::TRUE_VALUES)  # Rails <5
+        ::ActiveRecord::ConnectionAdapters::Column::TRUE_VALUES.include?(value)
+      else
+        ::ActiveRecord::Type::Boolean.new.cast(value)
       end
     end
 
