@@ -45,7 +45,6 @@ class GemReset
 
     `git add Gemfile`
     `git add Gemfile.lock`
-    `git commit -m 'bundle update #{updated_gems.join(' ')}'`
 
     true
   end
