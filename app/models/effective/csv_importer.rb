@@ -153,7 +153,7 @@ module Effective
       unique = 0
       email = user.email
 
-      while user.class.where(email: email).present?
+      while user.class.where(email: email).where.not(id: user.id).present?
         pieces = user.email.split('@')
         email = pieces.first + "+#{(unique += 1)}@" + pieces.last
       end
