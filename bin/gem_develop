@@ -35,8 +35,10 @@ class GemDevelop
       args.each do |name|
         if (line = w.find { |line| line.include?('effective_' + name) })
           w.replace line, "gem 'effective_#{name}', path: '#{gem_develop_path}/effective_#{name}'\r\n"
+          puts "Using local gem: effective_#{name}"
         elsif (line = w.find { |line| line.include?(name) })
           w.replace line, "gem '#{name}', path: '#{gem_develop_path}/#{name}'\r\n"
+          puts "Using local gem: #{name}"
         else
           puts "No gem matching #{name}"
         end
