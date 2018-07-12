@@ -54,7 +54,14 @@ module Effective
         klass_attributes = resource.klass_attributes(all: all)
 
         if klass_attributes.blank?
-          if ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations(ActiveRecord::Migrator.migrations_paths)).pending_migrations.present?
+
+          if ActiveRecord::Migration.respond_to?(:check_pending!)
+            pending = (ActiveRecord::Migration.check_pending! rescue true)
+          else
+            pending = ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations(ActiveRecord::Migrator.migrations_paths)).pending_migrations.present?
+          end
+
+          if pending
             migrate = ask("Unable to read the attributes of #{resource.klass || resource.name}. There are pending migrations. Run db:migrate now? [y/n]")
             system('bundle exec rake db:migrate') if migrate.to_s.include?('y')
           end
