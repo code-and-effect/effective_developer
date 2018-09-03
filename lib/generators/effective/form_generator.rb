@@ -6,6 +6,8 @@
 # rails generate effective:form Thing
 # rails generate effective:form Thing name:string description:text
 
+# rails generate effective:form Thing --tabbed false
+
 module Effective
   module Generators
     class FormGenerator < Rails::Generators::NamedBase
@@ -16,6 +18,7 @@ module Effective
       desc 'Creates a _form.html.haml in your app/views/model/ folder.'
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
+      class_option :tabbed, type: :string, default: 'true', banner: 'tabbed form'
 
       def assign_attributes
         @attributes = invoked_attributes.presence || resource_attributes
@@ -26,34 +29,20 @@ module Effective
         say_status :invoke, :form, :white
       end
 
-      def create_default_form
-        if resource.nested_resources.blank?
-          template "#{forms_path}/default/_form.html.haml", resource.view_file('form', partial: true)
+      def create_flat_form
+        unless options[:tabbed] == 'true'
+          template 'forms/default/_form.html.haml', resource.view_file('form', partial: true)
         end
       end
 
-      def create_tabpanel_form
-        if resource.nested_resources.present?
-          template "#{forms_path}/tabpanel/_form.html.haml", resource.view_file('form', partial: true)
-          template "#{forms_path}/tabpanel/_tab_fields.html.haml", resource.view_file("form_#{resource.name}", partial: true)
-        end
-
-        class_eval { attr_accessor :nested_resource }
-
-        resource.nested_resources.each do |nested_resource|
-          @nested_resource = nested_resource
-          template "#{forms_path}/tabpanel/_tab_nested_resource.html.haml", resource.view_file("form_#{nested_resource.plural_name}", partial: true)
-
-          @nested_resource = Effective::Resource.new(nested_resource)
-          template "#{forms_path}/fields/_nested_resource_fields.html.haml", File.join('app/views', resource.namespace.to_s, (resource.namespace.present? ? '' : resource.class_path), nested_resource.name.to_s.underscore.pluralize, '_fields.html.haml')
+      def create_tabbed_form
+        if options[:tabbed] == 'true'
+          template 'forms/tabpanel/_form.html.haml', resource.view_file('form', partial: true)
+          template 'forms/tabpanel/_form_resource.html.haml', resource.flat_view_file("form_#{resource.name}", partial: true)
         end
       end
 
       protected
-
-      def forms_path
-        @forms_path ||= (defined?(EffectiveBootstrap) ? 'forms' : 'simple_form')
-      end
 
       def form_for
         if resource.namespaces.blank?
@@ -78,13 +67,14 @@ module Effective
         when Effective::Resource
           b.local_variable_set(:nested_resource, attribute)
           'nested_resource'
-        else
-          b.local_variable_set(:attribute, attribute)
-          (attribute.type || :string).to_s
+        else # [:name, [:string]]
+          datatype = ((attribute.last || []).first || :string).to_s
+          b.local_variable_set(:attribute, attribute.first)
+          datatype
         end
 
         html = ERB.new(
-          File.read("#{File.dirname(__FILE__)}/../../scaffolds/#{forms_path}/fields/_field_#{partial}.html.haml")
+          File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/fields/_field_#{partial}.html.haml")
         ).result(b).split("\n").map { |line| ('  ' * depth) + line }
 
         html.length > 1 ? (html.join("\n") + "\n") : html.join

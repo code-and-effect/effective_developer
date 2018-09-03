@@ -30,15 +30,11 @@ module Effective
       end
 
       def to_s_attribute
-        attributes.find { |att| ['display_name', 'name', 'title', 'subject'].include?(att.name) }
-      end
-
-      def archived_attribute
-        attributes.find { |att| att.name == 'archived' && att.type == :boolean }
+        [:display_name, :name, :title, :subject].find { |att| invoked_attributes.key?(att) }
       end
 
       def max_attribute_name_length
-        @max_attribute_name_length ||= (attributes.map { |att| att.name.length }.max || 0)
+        @max_attribute_name_length ||= (invoked_attributes.keys.map { |att| att.to_s.length }.max || 0)
       end
 
     end

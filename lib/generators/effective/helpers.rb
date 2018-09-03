@@ -33,11 +33,15 @@ module Effective
       end
 
       # As per the command line invoked actions. These are Rails Generated Attributes
+      # { :name => [:string], ... }
       def invoked_attributes
         if respond_to?(:attributes)
-          attributes
+          attributes.inject({}) { |h, att| h[att.name.to_sym] = [att.type]; h }
         else
-          Array(options.attributes).compact.map { |att| Rails::Generators::GeneratedAttribute.parse(att) }
+          Array(options.attributes).compact.inject({}) do |h, att|
+            (name, type) = att.split(':')
+            h[name.to_sym] = [type.to_sym] if name && type; h
+          end
         end
       end
 
@@ -47,7 +51,7 @@ module Effective
 
       # Turns the GeneratedAttribute or Effective::Attribute into an array of strings
       def invokable(attributes)
-        attributes.map { |att| "#{att.name}:#{att.type}" }
+        attributes.map { |name, (type, _)| "#{name}:#{type}" }
       end
 
       def resource_attributes(all: false)
@@ -69,7 +73,7 @@ module Effective
           klass_attributes = resource.klass_attributes(all: all)
         end
 
-        klass_attributes.presence || resource.written_attributes
+        klass_attributes.presence || resource.model_attributes
       end
 
     end

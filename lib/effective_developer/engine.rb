@@ -7,5 +7,13 @@ module EffectiveDeveloper
       # Set up our defaults, as per our initializer template
       eval File.read("#{config.root}/config/effective_developer.rb")
     end
+
+    # Include acts_as_addressable concern and allow any ActiveRecord object to call it
+    initializer 'effective_developer.effective_resources' do |app|
+      ActiveSupport.on_load :effective_resource do
+        puts "The thing is #{self}"
+      end
+    end
+
   end
 end

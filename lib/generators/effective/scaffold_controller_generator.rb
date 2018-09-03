@@ -51,7 +51,7 @@ module Effective
           say_status(:skipped, :form, :yellow) and return
         end
 
-        Rails::Generators.invoke('effective:form', [name] + invoked_attributes)
+        Rails::Generators.invoke('effective:form', [name] + invoked_attributes_args)
       end
 
     end

@@ -1,0 +1,9 @@
+= effective_form_with(model: [(namespace if defined?(namespace)), <%= resource.name %>]) do |f|
+<% resource.belong_tos.each do |reference| -%>
+<%= render_field(reference, depth: 1) %>
+<% end -%>
+<% attributes.each do |attribute| -%>
+<%= render_field(attribute, depth: 1) %>
+<% end -%>
+
+  = effective_submit(f)

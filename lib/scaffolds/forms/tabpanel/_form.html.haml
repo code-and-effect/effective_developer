@@ -1,33 +1,13 @@
-= simple_form_for(<%= form_for %>) do |f|
-  %div{role: 'tabpanel'}
-    %ul.nav.nav-tabs{role: 'tablist'}
-      %li.active{role: 'presentation'}
-        %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= resource.name %>-tab', href: '#<%= resource.name %>-tab'}
-          <%= resource.human_name.titleize %>
+= tabs do
+  = tab '<%= resource.human_name.titleize %>' do
+    = render '/<%= resource.plural_name %>/form_<%= resource.name %>', <%= resource.name %>: <%= resource.name %>, namespace: <%= resource.namespace ? ":#{resource.namespace}" : 'nil' %>
 
-<% resource.nested_resources.each do |nested_resource| -%>
-      %li{role: 'presentation'}
-        %a{'data-toggle': 'tab', role: 'tab', 'aria-controls': '<%= nested_resource.plural_name %>-tab', href: '#<%= nested_resource.plural_name %>-tab'}
-          <%= nested_resource.plural_name.titleize %>
-
+  - if <%= resource.name %>.persisted?
+<%- resource.nested_resources.each do |nested_resource| -%>
+    = tab '<%= nested_resource.plural_name.titleize %>' do
+      = render_datatable(<%= nested_resource.klass.name %>Datatable.new(<%= resource.name %>_id: <%= resource.name %>.id))
+<%- end -%>
+<%- if resource.instance.respond_to?(:log_changes_datatable) -%>
+    = tab 'Logs' do
+      = render_datatable(<%= resource.name %>.log_changes_datatable)
 <% end -%>
-  %br
-  .tab-content
-    #<%= resource.name %>-tab.tab-pane.active{role: 'tabpanel'}
-      = render 'form_<%= resource.name %>', f: f
-
-<% resource.nested_resources.each do |nested_resource| -%>
-    #<%= nested_resource.plural_name %>-tab.tab-pane{role: 'tabpanel'}
-      = render 'form_<%= nested_resource.plural_name %>', f: f
-<% end -%>
-
-  %hr
-
-  .form-actions
-  <% if defined?(EffectiveResources) -%>
-  = simple_form_submit(f)
-  <% else -%>
-  = f.button :submit, 'Save', data: { disable_with: 'Saving...' }
-  = f.button :submit, 'Save and Continue', data: { disable_with: 'Saving...' }
-  = f.button :submit, 'Save and Add New', data: { disable_with: 'Saving...' }
-  <% end -%>
