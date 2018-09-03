@@ -1,5 +1,5 @@
 EffectiveDeveloper.setup do |config|
 
-  # Refresh classes on the fly
+  # This doesn't do anything. Yet.
   config.live = true
 end

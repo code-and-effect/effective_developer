@@ -26,22 +26,8 @@ module Effective
       end
 
       def create_views
-        (invoked_actions & available_actions).each do |action|
-          template "views/#{action}.html.haml", resource.view_file(action)
-        end
-
         if invoked_actions.include?('show') || non_crud_actions.present?
           template 'views/_resource.html.haml', resource.view_file(resource.name, partial: true)
-        end
-      end
-
-      private
-
-      def available_actions
-        if defined?(EffectiveResources) # We don't need any views!
-          []
-        else
-          %w(index new show edit)
         end
       end
 

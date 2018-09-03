@@ -1,3 +1,8 @@
+#   Effective::CodeWriter.new('Gemfile') do |w|
+#     @use_effective_resources = w.find { |line| line.include?('effective_resources') }.present?
+#   end
+# end
+
 module Effective
   class CodeWriter
 

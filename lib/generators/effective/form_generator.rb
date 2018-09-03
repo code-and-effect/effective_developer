@@ -18,7 +18,7 @@ module Effective
       desc 'Creates a _form.html.haml in your app/views/model/ folder.'
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
-      class_option :tabbed, type: :string, default: 'true', banner: 'tabbed form'
+      class_option :tabbed, type: :string, default: 'true'
 
       def assign_attributes
         @attributes = invoked_attributes.presence || resource_attributes
@@ -30,15 +30,15 @@ module Effective
       end
 
       def create_flat_form
-        unless options[:tabbed] == 'true'
-          template 'forms/default/_form.html.haml', resource.view_file('form', partial: true)
+        if options[:tabbed] == 'false'
+          template 'forms/flat/_form.html.haml', resource.view_file('form', partial: true)
         end
       end
 
       def create_tabbed_form
         if options[:tabbed] == 'true'
-          template 'forms/tabpanel/_form.html.haml', resource.view_file('form', partial: true)
-          template 'forms/tabpanel/_form_resource.html.haml', resource.flat_view_file("form_#{resource.name}", partial: true)
+          template 'forms/tabbed/_form.html.haml', resource.view_file('form', partial: true)
+          template 'forms/tabbed/_form_resource.html.haml', resource.flat_view_file("form_#{resource.name}", partial: true)
         end
       end
 
@@ -68,9 +68,20 @@ module Effective
           b.local_variable_set(:nested_resource, attribute)
           'nested_resource'
         else # [:name, [:string]]
+          name = attribute.first.to_s
           datatype = ((attribute.last || []).first || :string).to_s
-          b.local_variable_set(:attribute, attribute.first)
-          datatype
+
+          b.local_variable_set(:attribute, name)
+
+          if name.include?('price')
+            'price'
+          elsif name.include?('_url')
+            'url'
+          elsif name.include?('email')
+            'email'
+          else
+            datatype
+          end
         end
 
         html = ERB.new(
