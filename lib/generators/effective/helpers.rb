@@ -58,7 +58,6 @@ module Effective
         klass_attributes = resource.klass_attributes(all: all)
 
         if klass_attributes.blank?
-
           if ActiveRecord::Migration.respond_to?(:check_pending!)
             pending = (ActiveRecord::Migration.check_pending! rescue true)
           else
@@ -73,7 +72,7 @@ module Effective
           klass_attributes = resource.klass_attributes(all: all)
         end
 
-        klass_attributes.presence || resource.model_attributes
+        klass_attributes.presence || resource.model_attributes(all: all)
       end
 
     end
