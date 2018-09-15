@@ -73,6 +73,8 @@ class GemRelease
 
       puts `gem build #{gem_name}.gemspec`
       puts `gem push #{gem_name}-#{next_version}.gem`
+
+      `rm #{gem_name}-#{next_version}.gem`
     end
   end
 
