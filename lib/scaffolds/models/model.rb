@@ -8,9 +8,11 @@ class <%= resource.class_name %> < <%= parent_class_name.classify %>
 <% invoked_attributes.each do |name, (type, _)| -%>
     <%= name.to_s.ljust(max_attribute_name_length) %> :<%= type %>
 <% end -%>
+
+    timestamps
   end
 
-  scope :deep, -> { <%= resource.class_name %>.all }
+  scope :deep, -> { all }
 
 <% invoked_attributes.each do |name, (type, _)| -%>
   validates :<%= name %>, presence: true
