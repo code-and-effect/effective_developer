@@ -11,7 +11,7 @@ module EffectiveDeveloper
     # Include acts_as_addressable concern and allow any ActiveRecord object to call it
     initializer 'effective_developer.effective_resources' do |app|
       ActiveSupport.on_load :effective_resource do
-        Effective::Migrator.new(self).migrate!
+        #Effective::Migrator.new(self).migrate!
       end
     end
 

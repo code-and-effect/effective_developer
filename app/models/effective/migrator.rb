@@ -12,8 +12,6 @@ module Effective
 
     # Writes database migrations automatically based on effective_resources do ... end block
     def migrate!
-      return true
-
       table_attributes = resource.table_attributes
       model_attributes = resource.model_attributes
 
