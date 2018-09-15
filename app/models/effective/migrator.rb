@@ -12,6 +12,8 @@ module Effective
 
     # Writes database migrations automatically based on effective_resources do ... end block
     def migrate!
+      return true
+
       table_attributes = resource.table_attributes
       model_attributes = resource.model_attributes
 
@@ -39,18 +41,16 @@ module Effective
 
     private
 
-    # ActiveRecord::Tasks::DatabaseTasks.migrate
-
     def rails_migrate(filename, attributes)
       invokable = attributes.map { |name, (type, _)| "#{name}:#{type}" }
 
-      Rails.logger.info "PENDING!!!!!"
       pending = (ActiveRecord::Migration.check_pending! rescue true)
       ActiveRecord::Tasks::DatabaseTasks.migrate if pending
 
       # Can't get this to work
-      #Rails.logger.info "INVOKING!!!!!"
-      # Rails::Generators.invoke('migration', [filename] + invokable, behavior: :invoke, destination_root: Rails.root)
+      # Rails.logger.info "INVOKING!!!!!"
+      # binding.pry
+      # Rails::Generators.invoke('migration', [filename] + invokable, behavior: :invoke, destination_root: Rails.root, migration_paths: ['db/migrate'])
 
       system("rails generate migration #{filename} #{invokable.join(' ')}")
       ActiveRecord::Tasks::DatabaseTasks.migrate
