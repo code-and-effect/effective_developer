@@ -8,11 +8,10 @@ module EffectiveDeveloper
       eval File.read("#{config.root}/config/effective_developer.rb")
     end
 
-    # Include acts_as_addressable concern and allow any ActiveRecord object to call it
+    # Whenever the effective_resource do block is evaluated, check for changes
     initializer 'effective_developer.effective_resources' do |app|
       ActiveSupport.on_load :effective_resource do
-        Rails.logger.info "EFFECTIVE MIGRATOR GO"
-        Effective::ResourceMigrator.new(self).execute!
+        Effective::ResourceMigrator.new(self).migrate! if EffectiveDeveloper.live
       end
     end
 

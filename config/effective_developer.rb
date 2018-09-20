@@ -1,5 +1,5 @@
 EffectiveDeveloper.setup do |config|
-
-  # This doesn't do anything. Yet.
-  config.live = true
+  # Tracks changes to the effective_resource do .. end block
+  # And automatically writes database migration changes
+  config.live = false
 end

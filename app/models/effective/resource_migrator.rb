@@ -1,3 +1,5 @@
+require 'rails/generators/active_record/migration/migration_generator'
+
 module Effective
   class ResourceMigrator
     attr_accessor :resource  # The class level effective_resource do ... end object
@@ -13,9 +15,7 @@ module Effective
     end
 
     # Writes database migrations automatically based on effective_resources do ... end block
-    def execute!
-      puts 'execute!'
-
+    def migrate!
       table_attributes = resource.table_attributes
       model_attributes = resource.model_attributes
 
@@ -44,14 +44,11 @@ module Effective
     private
 
     def rails_migrate(filename, attributes)
-      invokable = attributes.map { |name, (type, _)| "#{name}:#{type}" }
+      # I don't need to check pending. But if I did:
+      #pending = (ActiveRecord::Migration.check_pending! rescue true)
+      #ActiveRecord::Tasks::DatabaseTasks.migrate if pending
 
-      pending = (ActiveRecord::Migration.check_pending! rescue true)
-      ActiveRecord::Tasks::DatabaseTasks.migrate if pending
-
-      require 'rails/generators/active_record/migration/migration_generator'
-
-      args = [filename] + invokable
+      args = [filename] + attributes.map { |name, (type, _)| "#{name}:#{type}" }
       options = {}
       config = { destination_root: Rails.root }
 
