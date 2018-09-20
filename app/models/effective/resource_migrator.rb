@@ -1,5 +1,5 @@
 module Effective
-  class Migrator
+  class ResourceMigrator
     attr_accessor :resource  # The class level effective_resource do ... end object
 
     def initialize(obj)
@@ -8,10 +8,14 @@ module Effective
       unless @resource.respond_to?(:model) && @resource.model.present?
         raise 'expected effective_resource or klass to have an effective_resource do ... end block defined'
       end
+
+      true
     end
 
     # Writes database migrations automatically based on effective_resources do ... end block
-    def migrate!
+    def execute!
+      puts 'execute!'
+
       table_attributes = resource.table_attributes
       model_attributes = resource.model_attributes
 
@@ -45,12 +49,13 @@ module Effective
       pending = (ActiveRecord::Migration.check_pending! rescue true)
       ActiveRecord::Tasks::DatabaseTasks.migrate if pending
 
-      # Can't get this to work
-      # Rails.logger.info "INVOKING!!!!!"
-      # binding.pry
-      # Rails::Generators.invoke('migration', [filename] + invokable, behavior: :invoke, destination_root: Rails.root, migration_paths: ['db/migrate'])
+      require 'rails/generators/active_record/migration/migration_generator'
 
-      system("rails generate migration #{filename} #{invokable.join(' ')}")
+      args = [filename] + invokable
+      options = {}
+      config = { destination_root: Rails.root }
+
+      ActiveRecord::Generators::MigrationGenerator.new(args, options, config).invoke_all
       ActiveRecord::Tasks::DatabaseTasks.migrate
 
       true

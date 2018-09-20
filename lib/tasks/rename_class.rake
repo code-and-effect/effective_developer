@@ -1,4 +1,4 @@
-# bundle exec rake rename_class[account, team]
+# bundle exec rake rename_class[account,team]
 
 desc 'Rename a rails class to another'
 task :rename_class, [:source, :target, :db] => :environment do |t, args|
