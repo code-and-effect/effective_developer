@@ -11,7 +11,7 @@ module EffectiveDeveloper
     # Whenever the effective_resource do block is evaluated, check for changes
     initializer 'effective_developer.effective_resources' do |app|
       ActiveSupport.on_load :effective_resource do
-        Effective::ResourceMigrator.new(self).migrate! if EffectiveDeveloper.live
+        Effective::LiveGenerator.new(self).generate! if EffectiveDeveloper.live
       end
     end
 

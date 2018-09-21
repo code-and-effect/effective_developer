@@ -1,7 +1,7 @@
 require 'rails/generators/active_record/migration/migration_generator'
 
 module Effective
-  class ResourceMigrator
+  class LiveGenerator
     attr_accessor :resource  # The class level effective_resource do ... end object
 
     def initialize(obj)
@@ -15,7 +15,7 @@ module Effective
     end
 
     # Writes database migrations automatically based on effective_resources do ... end block
-    def migrate!
+    def generate!
       table_attributes = resource.table_attributes
       model_attributes = resource.model_attributes
 
@@ -31,19 +31,23 @@ module Effective
       # Fields are not in database, but present in model.rb
       if(add_keys = (model_keys - table_keys)).present?
         Rails.logger.info "effective_developer migrate #{resource.plural_name}: add #{add_keys.to_sentence}"
-        rails_migrate("add_fields_to_#{resource.plural_name}", model_attributes.slice(*add_keys))
+        rails_migrate("add_ATTRIBUTES_to_#{resource.plural_name}", model_attributes.slice(*add_keys))
       end
 
       # Fields are in database, but no longer in our effective_resource do block
       if (remove_keys = (table_keys - model_keys)).present?
         Rails.logger.info "effective_developer migrate #{resource.plural_name}: remove #{remove_keys.to_sentence}"
-        rails_migrate("remove_fields_from_#{resource.plural_name}", table_attributes.slice(*remove_keys))
+        rails_migrate("remove_ATTRIBUTES_from_#{resource.plural_name}", table_attributes.slice(*remove_keys))
       end
     end
 
     private
 
     def rails_migrate(filename, attributes)
+      # The filename needs to be unique, but it shouldn't be annoyingly long
+      name = (attributes.keys.first(3) + [("and_#{attributes.length - 3}_more" if attributes.length > 3)]).compact.join('_')
+      filename.sub!('ATTRIBUTES', name)
+
       # I don't need to check pending. But if I did:
       #pending = (ActiveRecord::Migration.check_pending! rescue true)
       #ActiveRecord::Tasks::DatabaseTasks.migrate if pending
