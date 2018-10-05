@@ -45,7 +45,7 @@ module Effective
 
     def rails_migrate(filename, attributes)
       # The filename needs to be unique, but it shouldn't be annoyingly long
-      name = (attributes.keys.first(3) + [("and_#{attributes.length - 3}_more" if attributes.length > 3)]).compact.join('_')
+      name = (attributes.keys.first(2) + [("and_#{attributes.length - 2}_more" if attributes.length > 2)]).compact.join('_')
       filename.sub!('ATTRIBUTES', name)
 
       # I don't need to check pending. But if I did:
@@ -58,6 +58,7 @@ module Effective
 
       ActiveRecord::Generators::MigrationGenerator.new(args, options, config).invoke_all
       ActiveRecord::Tasks::DatabaseTasks.migrate
+      resource.klass.reset_column_information
 
       true
     end
