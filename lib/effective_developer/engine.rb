@@ -9,9 +9,12 @@ module EffectiveDeveloper
     end
 
     # Whenever the effective_resource do block is evaluated, check for changes
+    # https://stackoverflow.com/questions/13506690/how-to-determine-if-rails-is-running-from-cli-console-or-as-server
     initializer 'effective_developer.effective_resources' do |app|
-      ActiveSupport.on_load :effective_resource do
-        Effective::LiveGenerator.new(self).generate! if EffectiveDeveloper.live
+      if defined?(Rails::Server) && Rails.env.development? && EffectiveDeveloper.live
+        ActiveSupport.on_load :effective_resource do
+          Effective::LiveGenerator.new(self).generate!
+        end
       end
     end
 
