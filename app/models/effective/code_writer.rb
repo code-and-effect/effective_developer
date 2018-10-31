@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #   Effective::CodeWriter.new('Gemfile') do |w|
 #     @use_effective_resources = w.find { |line| line.include?('effective_resources') }.present?
 #   end
@@ -9,7 +11,7 @@ module Effective
     attr_reader :lines
     attr_reader :filename, :indent, :newline
 
-    def initialize(filename, indent: '  '.freeze, newline: "\n".freeze, &block)
+    def initialize(filename, indent: '  ', newline: "\n", &block)
       @filename = filename
       @indent = indent
       @newline = newline
@@ -238,13 +240,13 @@ module Effective
     def open?(content)
       stripped = ss(content)
 
-      [' do'].any? { |end_with| stripped.split('#').first.to_s.end_with?(end_with) } ||
-      ['class ', 'module ', 'def ', 'if '].any? { |start_with| stripped.start_with?(start_with) }
+      ['class ', 'module ', 'def ', 'if '].any? { |start_with| stripped.start_with?(start_with) } ||
+      (stripped.include?(' do') && !stripped.end_with?('end'))
     end
 
     def close?(content)
       stripped = ss(content, array_method: :last)
-      stripped.end_with?('end'.freeze) && !stripped.include?('do ')
+      stripped.end_with?('end') && !stripped.include?('do ')
     end
 
     def whitespace?(content)
@@ -266,7 +268,7 @@ module Effective
       when Integer then lines[value]
       when Array then value.send(array_method)
       else value
-      end.strip
+      end.to_s.split('#').first.to_s.strip
     end
   end
 end
