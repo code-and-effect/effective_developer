@@ -22,8 +22,12 @@ class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Data
 <% end -%>
 
 <% end -%>
-<% attributes.except(:created_at, :updated_at, :id).each do |name, _| -%>
+<% attributes.except(:created_at, :updated_at, :id, :archived).each do |name, _| -%>
     col :<%= name %>
+<% end -%>
+<% if attributes.key?(:archived) -%>
+
+    col :archived, search: { value: false }
 <% end -%>
 
     actions_col
