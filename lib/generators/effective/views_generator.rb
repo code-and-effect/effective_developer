@@ -17,7 +17,7 @@ module Effective
       class_option :attributes, type: :array, default: [], desc: 'Included form attributes, otherwise read from model'
 
       def assign_attributes
-        @attributes = invoked_attributes.presence || resource_attributes
+        @attributes = (invoked_attributes.presence || resource_attributes).except(:archived)
         self.class.send(:attr_reader, :attributes)
       end
 
