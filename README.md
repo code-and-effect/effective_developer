@@ -131,6 +131,14 @@ A command line script to delete any git branch that has already been merged into
 > gitsweep
 ```
 
+## killpuma
+
+# kill -9 the first running puma process. Bails out of SystemStackError (stack level too deep).
+
+```console
+> killpuma
+```
+
 # Rake scripts
 
 ## csv:export
