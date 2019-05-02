@@ -73,7 +73,17 @@ module Effective
 
           b.local_variable_set(:attribute, name)
 
-          if name.include?('price')
+          if datatype == 'string' && (resource.klass || NilClass).const_defined?(name.pluralize.upcase)
+            attribute_constant = "#{resource.klass.name}::#{name.pluralize.upcase}"
+            b.local_variable_set(:attribute_constant, attribute_constant)
+
+            'select_constant'
+          elsif datatype == :string && (resource.klass || NilClass).const_defined?(name.singularize.upcase)
+            attribute_constant = "#{resource.klass.name}::#{name.singularize.upcase}"
+            b.local_variable_set(:attribute_constant, attribute_constant)
+
+            'select_constant'
+          elsif name.include?('price')
             'price'
           elsif name.include?('_url')
             'url'
