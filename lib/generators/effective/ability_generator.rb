@@ -25,29 +25,10 @@ module Effective
         end
 
         Effective::CodeWriter.new('app/models/ability.rb') do |w|
-          if resource.namespaces.blank?
-            if w.find { |line, depth| depth == 2 && line == ability }
-              say_status :identical, ability, :blue
-            else
-              w.insert_after_last(ability) { |line, depth| depth == 2 && line.start_with?('can ') } ||
-              w.insert_before_last(ability) { |line, depth| depth == 2 && line.start_with?('if') } ||
-              w.insert_before_last(ability) { |line, depth| depth == 2 && line == 'end' }
-
-              say_status :ability, ability
-            end
-          end
-
-          resource.namespaces.each do |namespace|
-            w.within("if user.is?(:#{namespace})") do
-              if w.find { |line, depth| depth == 1 && line == ability }
-                say_status :identical, ability, :blue
-              else
-                w.insert_after_last(ability) { |line, depth| depth == 1 && line.start_with?('can ') } ||
-                w.insert_before_last(ability) { |line, depth| depth == 1 && line == 'end' }
-
-                say_status "#{namespace}_ability", ability
-              end
-            end
+          if w.find { |line, depth| depth == 2 && line == ability }
+            say_status :identical, ability, :blue
+          else
+            w.insert_into_first(ability) { |line, depth| line.start_with?('def initialize') }
           end
         end
       end

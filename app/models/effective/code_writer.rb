@@ -30,6 +30,14 @@ module Effective
     end
 
     # Returns true if the insert happened, nil if no insert
+    def insert_into_first(content, &block)
+      index = first(&block)
+      return nil unless index
+
+      insert_raw(content, index, depth_at(index) + 1)
+    end
+
+    # Returns true if the insert happened, nil if no insert
     def insert_after_first(content, depth: nil, content_depth: nil, &block)
       index = first(&block)
       return nil unless index
