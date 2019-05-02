@@ -1,1 +1,1 @@
-= f.select :<%= reference.foreign_key.presence || (reference.name.to_s + '_id') %>, <%= reference.name.to_s.classify %>.sorted.all
+= f.select :<%= reference.foreign_key.presence || (reference.name.to_s + '_id') %>, <%= (reference.options[:class_name] || reference.name).to_s.classify %>.sorted.all
