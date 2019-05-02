@@ -23,10 +23,10 @@ module Effective
 
         begin
           Effective::CodeWriter.new('app/views/layouts/_navbar.html.haml') do |w|
-            if w.find { |line, _| line == menu_content.last.strip }
+            if w.find { |line, _| line == menu_content.second.strip }
               say_status :identical, menu_path, :blue
             else
-              if (w.insert_after_first(menu_content) { |line, _| line.start_with?('= nav_link_to') })
+              if (w.insert_into_first(menu_content) { |line, _| line.include?('.navbar-nav') })
                 say_status :menu, menu_path, :green
               else
                 say_status(:skipped, :menu, :yellow)
@@ -45,17 +45,14 @@ module Effective
 
         begin
           Effective::CodeWriter.new('app/views/layouts/_navbar_admin.html.haml') do |w|
-            if w.find { |line, _| line == admin_menu_content.last.strip }
+            if w.find { |line, _| line == menu_content.second.strip }
               say_status :identical, menu_path, :blue
             else
-              index = w.last { |line, _| line.start_with?('- if can?') }
-
-              if index.blank?
-                say_status(:skipped, :menu, :yellow) and return
+              if (w.insert_into_first(menu_content) { |line, _| line.include?('.navbar-nav') })
+                say_status :menu, menu_path, :green
+              else
+                say_status(:skipped, :menu, :yellow)
               end
-
-              w.insert_raw(admin_menu_content, index+1, w.depth_at(index))
-              say_status(:menu, menu_path, :green)
             end
           end
         rescue Errno::ENOENT
@@ -67,14 +64,10 @@ module Effective
       private
 
       def menu_content
-        ["= nav_link_to '#{resource.plural_name.titleize}', #{menu_path}"]
-      end
-
-      def admin_menu_content
         [
-          "\n",
-          "- if can? :manage, #{resource.class_name}",
-          "  = nav_link_to '#{resource.plural_name.titleize}', #{menu_path}"
+          "- if can? :index, #{resource.class_name}",
+          "  = nav_link_to '#{resource.plural_name.titleize}', #{menu_path}",
+          "\n"
         ]
       end
 
