@@ -133,7 +133,7 @@ A command line script to delete any git branch that has already been merged into
 
 ## killpuma
 
-# kill -9 the first running puma process. Bails out of SystemStackError (stack level too deep).
+`kill -9` the first running puma process. Bails out of SystemStackError (stack level too deep).
 
 ```console
 > killpuma
