@@ -46,7 +46,7 @@ do
     found=`git diff Gemfile | grep + | grep "path:"`
     found2=`git diff Gemfile | grep + | grep ":path"`
 
-    if [ -n "$found" ] or [-n "$found2"]; then
+    if [ -n "$found" ] || [-n "$found2"]; then
       echo >&2 "Found path: in Gemfile, not pushing"; exit 0
     fi
 
