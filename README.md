@@ -30,6 +30,12 @@ and add the following to your `PATH` (edit your ~/.bashrc or ~/.profile):
 export PATH="$PATH:$HOME/effective_developer/bin"
 ```
 
+To use the included git hooks for all git repos, run the following:
+
+```
+git config --global core.hooksPath ~/effective_developer/githooks
+```
+
 # Shell scripts
 
 ## gem_develop
@@ -138,6 +144,15 @@ A command line script to delete any git branch that has already been merged into
 ```console
 > killpuma
 ```
+
+# Git hooks
+
+## pre-push
+
+Prevents pushing git commits that have the following bad patterns:
+
+- Gemfile includes 'path: ' gems
+- binding.pry
 
 # Rake scripts
 
