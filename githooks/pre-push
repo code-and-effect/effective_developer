@@ -35,7 +35,7 @@ do
     fi
 
     # Check for binding.pry
-    found=`git diff | grep - | grep binding.pry`
+    found=`git diff | grep + | grep binding.pry`
 
     if [ -n "$found" ]; then
       echo >&2 "Found binding.pry, not pushing"; exit 1
