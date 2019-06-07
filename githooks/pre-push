@@ -38,19 +38,19 @@ do
     found=`git diff | grep + | grep binding.pry`
 
     if [ -n "$found" ]; then
-      echo >&2 "Found binding.pry, not pushing"; exit 1
+      echo >&2 "GIT PUSH BLOCKED: Found binding.pry"; exit 1
     fi
 
     # Check for Gemfile locally bundled gems 
-    found=`git diff Gemfile | grep + | grep "path:"`
-    found2=`git diff Gemfile | grep + | grep ":path"`
+    found=`git diff -- Gemfile | grep + | grep "path:"`
+    found2=`git diff -- Gemfile | grep + | grep ":path"`
 
     if [ -n "$found" ]; then
-      echo >&2 "Found path: in Gemfile, not pushing"; exit 1
+      echo >&2 "GIT PUSH BLOCKED: Found path: in Gemfile"; exit 1
     fi
 
     if [ -n "$found2" ]; then
-      echo >&2 "Found :path in Gemfile, not pushing"; exit 1
+      echo >&2 "GIT PUSH BLOCKED: Found :path in Gemfile"; exit 1
     fi
     
   fi
