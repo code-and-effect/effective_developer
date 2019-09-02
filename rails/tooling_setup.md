@@ -74,4 +74,3 @@ Open your `settings.json` through the command palette and set your tab size.
   ## Sync your settings
   
   Installing [Settings Sync](https://marketplace.visualstudio.com/items?itemName=Shan.code-settings-sync) is recommended to preserve your settings and extensions across machines and installs.
-  
