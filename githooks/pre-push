@@ -41,7 +41,11 @@ do
       echo >&2 "GIT PUSH BLOCKED: Found binding.pry"; exit 1
     fi
 
+<<<<<<< HEAD
     # Check for Gemfile locally bundled gems
+=======
+    # Check for Gemfile locally bundled gems 
+>>>>>>> be7ae70c5a78ce6c3c71f9eb428e2b7251aa8c11
     found=`git diff -- Gemfile | grep + | grep "path:"`
     found2=`git diff -- Gemfile | grep + | grep ":path"`
 

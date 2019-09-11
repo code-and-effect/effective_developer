@@ -352,7 +352,7 @@ A huge head start to the interesting part of the code.
 
 Scaffolding is the fastest way to build a CRUD rails app.
 
-The effective scaffolds generally follow the same pattern as the (rails generate)[http://guides.rubyonrails.org/command_line.html#rails-generate] commands.
+The effective scaffolds generally follow the same pattern as the [rails generate](http://guides.rubyonrails.org/command_line.html#rails-generate) commands.
 
 To create an entire CRUD resource from the command line:
 
@@ -387,9 +387,11 @@ class Post < ApplicationRecord
   belongs_to :category
 
   # Attributes
-  # title        :string
-  # body         :text
-  # published_at :datetime
+  effective_resources do
+    title        :string
+    body         :text
+    published_at :datetime
+  end
 
   validates :title, presence: true
   validates :description, presence: true
