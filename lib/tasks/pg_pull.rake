@@ -45,7 +45,7 @@ namespace :pg do
     Rake::Task['db:drop'].invoke
     Rake::Task['db:create'].invoke
 
-    if system("pg_restore --no-acl --no-owner -h localhost -U #{db['username']} -d #{db['database']} #{args.file_name}")
+    if system("pg_restore --no-acl --no-owner --clean --if-exists -h localhost -U #{db['username']} -d #{db['database']} #{args.file_name}")
       puts "Loading database completed"
     else
       puts "Error loading database"
