@@ -38,6 +38,12 @@ git config --global core.hooksPath ~/effective_developer/githooks
 
 # Shell scripts
 
+To use the included command line shell scripts:
+
+```console
+export PATH="$PATH:$HOME/effective_developer/bin"
+```
+
 ## gem_develop
 
 A command line shell script to update a `Gemfile` and use any provided gems locally.
@@ -146,6 +152,12 @@ A command line script to delete any git branch that has already been merged into
 ```
 
 # Git hooks
+
+To use the included git hooks for all git repos, run the following:
+
+```
+git config --global core.hooksPath ~/effective_developer/githooks
+```
 
 ## pre-push
 
