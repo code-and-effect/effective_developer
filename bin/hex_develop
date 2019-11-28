@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+
+# Helper script to develop locally a hex library.
+
+# > hex_develop ex_effective_bootstrap
+
+# This script will:
+# 1. write a development path to the mix.exs
+
+require 'fileutils'
+require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
+
+class HexDevelop
+  def hex_develop_path
+    (ENV['HEX_DEVELOP_PATH'] || '~/Sites').chomp('/')
+  end
+
+  def execute!(args)
+    @args = args
+
+    # Check for all the errors.
+    if args.length == 0
+      puts('Please specify one or more deps to develop')
+      exit
+    end
+
+    unless File.exist?('mix.exs')
+      puts 'Unable to proceed, mix.exs must be present in current directory'
+      puts "Please run hex_develop from a phoenix project's root directory"
+      exit
+    end
+
+    writer = Effective::CodeWriter.new('mix.exs') do |w|
+      args.each do |name|
+        if (line = w.find { |line| line.include?('{:ex_effective_' + name) })
+          content = w.lines[line].gsub(/{.+}/, "{:ex_effective_#{name}, path: \"#{hex_develop_path}/ex_effective_#{name}\"}")
+          w.replace line, content
+          link_local_path("ex_effective_#{name}")
+
+          puts "Using local deps: ex_effective_#{name}"
+        elsif (line = w.find { |line| line.include?('{:' + name) })
+          content = w.lines[line].gsub(/{.+}/, "{:#{name}, path: \"#{hex_develop_path}/#{name}\"}")
+          w.replace line, content
+          link_local_path(name)
+
+          puts "Using local deps: ex_effective_#{name}"
+        else
+          puts "No deps matching #{name}"
+        end
+      end
+    end
+
+    exit unless writer.changed?
+
+    system('mix deps.get')
+
+    true
+  end
+
+  def link_local_path(name)
+    dep_path = "./deps/#{name}"
+
+    FileUtils.remove_dir(dep_path) if Dir.exist?(dep_path)
+    `ln -sf #{hex_develop_path}/#{name}/ #{dep_path}`
+  end
+
+end
+
+HexDevelop.new().execute!(ARGV)

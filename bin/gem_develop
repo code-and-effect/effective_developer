@@ -7,7 +7,6 @@
 # This script will:
 # 1. write a development path to the Gemfile
 # 2. run bundle
-# 3. type bundle exec rails server
 
 require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
 
