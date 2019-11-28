@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+# Helper script to reset any locally developed deps
+
+# > hex_reset
+
+# This script will:
+# 1. replace any development paths in mix.exs
+
+require 'fileutils'
+require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
+
+class HexReset
+  REGEX = /{:(.\w+)(, ?path:.+)}/
+
+  def execute!(args)
+    @args = args
+
+    unless File.exist?('mix.exs')
+      puts "Unable to proceed, mix.exs must be present in current directory"
+      puts "Please run hex_develop from a phoenix project's root directory"
+      exit
+    end
+
+    updated_deps = []
+
+    writer = Effective::CodeWriter.new('mix.exs') do |w|
+      w.select { |line| line.match(REGEX) }.each do |index|
+        line = w.lines[index]; matched = line.match(REGEX)
+
+        updated_deps << matched[1]
+        w.replace index, line.sub(matched[2], ', ">= 0.0.0"')
+
+        unlink_local_path(matched[1])
+      end
+    end
+
+    if writer.changed?
+      puts("Resetting local deps: #{updated_deps.join(', ')}")
+    else
+      puts('No local deps found')
+      exit
+    end
+
+    system('mix deps.get')
+
+    true
+  end
+
+  def unlink_local_path(name)
+    # Delete the _build files
+    build_path = "./_build/dev/lib/#{name}"
+
+    if Dir.exist?(build_path)
+      FileUtils.remove_dir(build_path)
+    end
+
+    # Delete the deps files
+    deps_path = "./deps/#{name}"
+
+    if Dir.exist?(deps_path)
+      FileUtils.remove_dir(deps_path)
+    end
+  end
+
+end
+
+HexReset.new().execute!(ARGV)

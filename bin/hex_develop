@@ -58,10 +58,23 @@ class HexDevelop
   end
 
   def link_local_path(name)
-    dep_path = "./deps/#{name}"
+    # Delete the _build files
+    build_path = "./_build/dev/lib/#{name}"
 
-    FileUtils.remove_dir(dep_path) if Dir.exist?(dep_path)
-    `ln -sf #{hex_develop_path}/#{name}/ #{dep_path}`
+    if Dir.exist?(build_path)
+      FileUtils.remove_dir(build_path)
+    end
+
+    # Delete the deps files
+    deps_path = "./deps/#{name}"
+
+    if Dir.exist?(deps_path)
+      FileUtils.remove_dir(deps_path)
+    end
+
+    # ln -sf local_path deps_path
+    local_path = "#{hex_develop_path}/#{name}/"
+    `ln -sf #{local_path} #{deps_path}`
   end
 
 end

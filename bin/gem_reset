@@ -5,9 +5,9 @@
 # > gem_reset
 
 # This script will:
-# 1. write a development path to the Gemfile
+# 1. replace any development paths in the Gemfile
 # 2. run bundle
-# 3. type bundle exec rails server
+# 3. git add Gemfile and Gemfile.lock
 
 require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
 
