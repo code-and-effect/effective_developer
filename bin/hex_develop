@@ -6,6 +6,9 @@
 
 # This script will:
 # 1. write a development path to the mix.exs
+# 2. delete the compiled _build/dev/lib/name/ folder for this library
+# 3. delete the existing deps/name/ folder for this library
+# 4. ln -sf deps/name/ ~/Sites/name to link the app deps folder to the local development folder
 
 require 'fileutils'
 require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"

@@ -6,6 +6,9 @@
 
 # This script will:
 # 1. replace any development paths in mix.exs
+# 2. delete the compiled _build/dev/lib/name/ folder for this library
+# 3. delete the existing deps/name/ folder or link for this library
+# 4. mix deps.get
 
 require 'fileutils'
 require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"

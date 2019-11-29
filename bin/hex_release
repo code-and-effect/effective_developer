@@ -9,13 +9,14 @@
 # > hex_release 1.0.1
 
 # All files must be committed
-# The old version should still be present in version.rb
+# The old version should still be present in mix.exs and/or package.json
 
 # This script will:
 # 1. write the given new version to mix.exs
-# 2. commit mix.exs with a tag and a message
-# 3. git push origin master
-# 4. mix hex.publish
+# 2. write the given new version to package.json and assets/package.json
+# 3. git commit those files with a tag and a message
+# 4. git push origin master
+# 5. mix hex.publish
 
 require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
 
