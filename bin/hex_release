@@ -20,13 +20,12 @@
 require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
 
 class HexRelease
-  REGEX = /@version \"(.+)\"/
+  MIX_REGEX = /@version \"(.+)\"/
 
   def execute!(args)
     @args = args
 
     # Check for all the errors.
-
     if args.length > 2
       puts('Invalid arguments')
       exit
@@ -45,7 +44,8 @@ class HexRelease
     end
 
     if (current_version || '').length < 2
-      puts "Unable to read mix.exs @version constant"; exit
+      puts "Unable to read mix.exs @version constant"
+      exit
     end
 
     if next_version.nil?
@@ -53,7 +53,7 @@ class HexRelease
       exit
     end
 
-    # Release a new gem version
+    # Release a new hex version
     if next_version.nil? == false
       `git checkout #{current_branch}`
       `git pull origin #{current_branch}`
@@ -63,7 +63,9 @@ class HexRelease
         exit
       end
 
-      write_next_version
+      write_mix_exs
+      write_package_json('package.json')
+      write_package_json('assets/package.json')
 
       `git add mix.exs`
       `git commit -m 'Version #{next_version}'`
@@ -83,11 +85,17 @@ class HexRelease
   end
 
   def current_version
-    @current_version ||= Effective::CodeWriter.new('mix.exs') do |w|
-      if (line = w.find { |line| line.include?('@version') })
-        return w.lines[line].match(REGEX)[1]
+    @current_version ||= begin
+      current_version = nil
+
+      Effective::CodeWriter.new('mix.exs') do |w|
+        if (line = w.find { |line| line.include?('@version') })
+          current_version = w.lines[line].match(MIX_REGEX)[1]
+        end
       end
-    end; nil
+
+      current_version
+    end
   end
 
   def next_version
@@ -103,9 +111,20 @@ class HexRelease
     STDIN.gets.chomp.downcase == 'y'
   end
 
-  def write_next_version
+  def write_mix_exs
     Effective::CodeWriter.new('mix.exs') do |w|
       if (line = w.find { |line| line.include?('@version') })
+        content = w.lines[line].gsub(current_version, next_version)
+        w.replace line, content
+      end
+    end
+  end
+
+  def write_package_json(filename)
+    return unless File.exist?(filename)
+
+    Effective::CodeWriter.new(filename) do |w|
+      if (line = w.find { |line| line.include?("\"version\": \"#{current_version}\"") })
         content = w.lines[line].gsub(current_version, next_version)
         w.replace line, content
       end
