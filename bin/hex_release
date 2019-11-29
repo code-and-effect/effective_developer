@@ -1,0 +1,117 @@
+#!/usr/bin/env ruby
+
+# Helper script to release a new hex library version.
+
+# To print the current library version:
+# > hex_release
+
+# To release a new version:
+# > hex_release 1.0.1
+
+# All files must be committed
+# The old version should still be present in version.rb
+
+# This script will:
+# 1. write the given new version to mix.exs
+# 2. commit mix.exs with a tag and a message
+# 3. git push origin master
+# 4. mix hex.publish
+
+require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
+
+class HexRelease
+  REGEX = /@version \"(.+)\"/
+
+  def execute!(args)
+    @args = args
+
+    # Check for all the errors.
+
+    if args.length > 2
+      puts('Invalid arguments')
+      exit
+    end
+
+    if uncommitted_files.length > 0
+      puts 'Unable to proceed, the following files must be committed:'
+      puts(uncommitted_files)
+      exit
+    end
+
+    unless File.exist?('mix.exs')
+      puts 'Unable to proceed, a mix.exs file must be present in current directory'
+      puts "Please run hex_release from a hex library's root directory"
+      exit
+    end
+
+    if (current_version || '').length < 2
+      puts "Unable to read mix.exs @version constant"; exit
+    end
+
+    if next_version.nil?
+      puts "Current version is: #{current_version}"
+      exit
+    end
+
+    # Release a new gem version
+    if next_version.nil? == false
+      `git checkout #{current_branch}`
+      `git pull origin #{current_branch}`
+
+      unless confirm("Releasing #{next_version} (press y to continue): ")
+        puts('aborted')
+        exit
+      end
+
+      write_next_version
+
+      `git add mix.exs`
+      `git commit -m 'Version #{next_version}'`
+
+      `git tag -a #{next_version} -m 'Version #{next_version}'`
+      `git push origin #{current_branch} --tags`
+
+      system("mix hex.publish")
+    end
+
+  end
+
+  private
+
+  def uncommitted_files
+    @uncommitted ||= `git status --porcelain`
+  end
+
+  def current_version
+    @current_version ||= Effective::CodeWriter.new('mix.exs') do |w|
+      if (line = w.find { |line| line.include?('@version') })
+        return w.lines[line].match(REGEX)[1]
+      end
+    end; nil
+  end
+
+  def next_version
+    @args[0]
+  end
+
+  def current_branch
+    @args[1] || 'master'
+  end
+
+  def confirm(message)
+    print(message + ' ')
+    STDIN.gets.chomp.downcase == 'y'
+  end
+
+  def write_next_version
+    Effective::CodeWriter.new('mix.exs') do |w|
+      if (line = w.find { |line| line.include?('@version') })
+        content = w.lines[line].gsub(current_version, next_version)
+        w.replace line, content
+      end
+    end
+  end
+
+end
+
+HexRelease.new().execute!(ARGV)
