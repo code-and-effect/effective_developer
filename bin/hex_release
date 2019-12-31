@@ -59,6 +59,13 @@ class HexRelease
       `git checkout #{current_branch}`
       `git pull origin #{current_branch}`
 
+      # npm --prefix ./assets run build
+
+      unless confirm("Did you generate the #{next_version} js and css assets? (press y to continue): ")
+        puts('aborted')
+        exit
+      end
+
       unless confirm("Releasing #{next_version} (press y to continue): ")
         puts('aborted')
         exit
@@ -69,6 +76,9 @@ class HexRelease
       write_package_json('assets/package.json')
 
       `git add mix.exs`
+      `git add package.json`
+      `git add assets/package.json`
+
       `git commit -m 'Version #{next_version}'`
 
       `git tag -a #{next_version} -m 'Version #{next_version}'`
