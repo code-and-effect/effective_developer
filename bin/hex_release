@@ -65,7 +65,7 @@ class HexRelease
       end
 
       write_mix_exs
-      write_readme
+      write_readme_md
       write_package_json('package.json')
       write_package_json('assets/package.json')
       write_javascript_version('assets/js/form/base.js')
@@ -130,7 +130,7 @@ class HexRelease
     `git add mix.exs`
   end
 
-  def write_readme
+  def write_readme_md
     return unless File.exist?('README.md')
 
     Effective::CodeWriter.new('README.md') do |w|
