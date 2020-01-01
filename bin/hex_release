@@ -59,25 +59,18 @@ class HexRelease
       `git checkout #{current_branch}`
       `git pull origin #{current_branch}`
 
-      # npm --prefix ./assets run build
-
-      unless confirm("Did you generate the #{next_version} js and css assets? (press y to continue): ")
-        puts('aborted')
-        exit
-      end
-
       unless confirm("Releasing #{next_version} (press y to continue): ")
         puts('aborted')
         exit
       end
 
       write_mix_exs
+      write_readme
       write_package_json('package.json')
       write_package_json('assets/package.json')
+      write_javascript_version('assets/js/form/base.js')
 
-      `git add mix.exs`
-      `git add package.json`
-      `git add assets/package.json`
+      webpack
 
       `git commit -m 'Version #{next_version}'`
 
@@ -93,6 +86,10 @@ class HexRelease
 
   def uncommitted_files
     @uncommitted ||= `git status --porcelain`
+  end
+
+  def name
+    Dir.pwd.split('/').last
   end
 
   def current_version
@@ -129,6 +126,21 @@ class HexRelease
         w.replace line, content
       end
     end
+
+    `git add mix.exs`
+  end
+
+  def write_readme
+    return unless File.exist?('README.md')
+
+    Effective::CodeWriter.new('README.md') do |w|
+      if (line = w.find { |line| line.include?(', "~> ' + current_version + '"}') })
+        content = w.lines[line].gsub(current_version, next_version)
+        w.replace line, content
+      end
+    end
+
+    `git add README.md`
   end
 
   def write_package_json(filename)
@@ -140,6 +152,30 @@ class HexRelease
         w.replace line, content
       end
     end
+
+    `git add #{filename}`
+  end
+
+  def write_javascript_version(filename)
+    return unless File.exist?(filename)
+
+    Effective::CodeWriter.new(filename) do |w|
+      if (line = w.find { |line| line.include?("version() { return \"#{current_version}\"; }") })
+        content = w.lines[line].gsub(current_version, next_version)
+        w.replace line, content
+      end
+    end
+
+    `git add #{filename}`
+  end
+
+  def webpack
+    return unless File.exist?('assets/package.json')
+    return unless File.exist?("assets/js/#{name}.js")
+
+    `npm --prefix ./assets run deploy`
+    `git add priv/static/#{name}.css`
+    `git add priv/static/#{name}.js`
   end
 
 end
