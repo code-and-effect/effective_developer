@@ -1,5 +1,5 @@
 module CsvImporters
-  class <%= klass %>Importer < Effective::CSVImporter
+  class <%= klass %>Importer < Effective::CsvImporter
     def columns
       {<% columns.each_with_index do |column, index| %>
         <%= column.to_s.underscore.tap { |name| [' ', '/', '(', ')', '__'].each { |str| name.gsub!(str, '_') } }.to_sym %>: <%= (letters[index] || index) %><%= ',' unless (index+1) == columns.length %><% end %>

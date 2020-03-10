@@ -186,7 +186,7 @@ rake csv:import:foos
 
 ## csv:import::scaffold
 
-Scaffolds an `Effective::CSVImporter` file for each .csv file in `/lib/csv_importers/data/*.csv`
+Scaffolds an `Effective::CsvImporter` file for each .csv file in `/lib/csv_importers/data/*.csv`
 
 ```ruby
 rake csv:scaffold
@@ -278,7 +278,7 @@ rake validate[post]
 
 ## CSV Importer
 
-Extend a class from `Effective::CSVImporter` to quickly build a csv importer.
+Extend a class from `Effective::CsvImporter` to quickly build a csv importer.
 
 Put your importer in `lib/csv_importers/users_importer.rb` and the data in `lib/csv_importers/data/users.csv`.  Both filenames should be pluralized.
 
@@ -299,7 +299,7 @@ Inside the script, there are a few helpful functions:
 
 ```ruby
 module CsvImporters
-  class UsersImporter < Effective::CSVImporter
+  class UsersImporter < Effective::CsvImporter
     def columns
       {
         email: A,
