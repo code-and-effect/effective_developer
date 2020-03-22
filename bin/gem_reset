@@ -27,10 +27,13 @@ class GemReset
 
     writer = Effective::CodeWriter.new('Gemfile') do |w|
       w.select { |line| line.match(REGEX) }.each do |index|
-        line = w.lines[index]; matched = line.match(REGEX)
+        line = w.lines[index]
+        matched = line.match(REGEX)
 
-        updated_gems << matched[1]
-        w.replace index, line.sub(matched[2], '')
+        if matched
+          updated_gems << matched[1]
+          w.replace index, line.sub(matched[2], '')
+        end
       end
     end
 
