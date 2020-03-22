@@ -129,7 +129,8 @@ module Effective
     def assign_valid_email(user, at: 'example.com')
       raise 'expected an object that responds to email=' unless user.respond_to?('email=')
 
-      user.email = user.email.to_s.strip.downcase.presence
+      user.email = user.email.to_s.strip.downcase.gsub(' ', '').presence
+      user.email = user.email.split(' or ').first if user.email.include?(' or ')
 
       if user.email.blank?
         if user.respond_to?(:first_name) && user.respond_to?(:last_name)
