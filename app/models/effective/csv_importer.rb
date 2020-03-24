@@ -204,7 +204,7 @@ module Effective
           print colorize('.', :green)
         rescue => e
           error(e.message)
-          puts row
+          row.to_h.each { |k, v| puts("#{k}=#{v}") }
           puts e.backtrace.first(3)
         end
 
