@@ -97,4 +97,58 @@ namespace :pg do
     puts 'Cloning database complete'
   end
 
+  desc 'Copies a local database table to production (--remote heroku by default) database'
+  task :push_table, [:table, :remote] => :environment do |t, args|
+    args.with_defaults(:remote => 'heroku')
+
+    if args.table.blank?
+      puts "Error, no table name specified. Expected usage: rake pg:push_table[prices]"; exit
+    end
+
+    # Find and parse my heroku database info
+    regex = Regexp.new(/postgres:\/\/(\w+):(\w+)@(.+):(\d+)\/(\w+)/)
+    url = `heroku config --remote #{args.remote} | grep DATABASE_URL`
+    info = url.match(regex)
+
+    if info.blank? || info.length != 6
+      puts "Unable to find heroku DATABASE_URL"
+      puts "Expected \"heroku config --remote #{args.remote} | grep DATABASE_URL\" to be present"
+      exit
+    end
+
+    heroku = { username: info[1], password: info[2], host: info[3], port: info[4], database: info[5] }
+
+    # Confirm destructive operation
+    puts "WARNING: this task will overwrite the #{args.table} database table on #{args.remote}. Proceed? (y/n)"
+    (puts 'Aborted' and exit) unless STDIN.gets.chomp.downcase == 'y'
+
+    puts "=== Cloning local table '#{args.table}' to remote #{args.remote} database"
+
+    # Dump my local database table
+    db = ActiveRecord::Base.configurations[Rails.env]
+    tmpfile = "tmp/#{args.table}.sql"
+
+    unless system("pg_dump --data-only --table=#{args.table} -h localhost -U '#{db['username']}' '#{db['database']}' > #{tmpfile}")
+      puts "Error dumping local database table"; exit
+    end
+
+    # Now restore it to heroku
+    psql = "export PGPASSWORD=#{heroku[:password]}; psql -h #{heroku[:host]} -p #{heroku[:port]} -U #{heroku[:username]} #{heroku[:database]}"
+    delete = args.table.split(',').map { |table| "DELETE FROM #{table}" }.join(';')
+
+    unless system("#{psql} -c \"#{delete}\"")
+      puts "Error deleting remote table data"; exit
+    end
+
+    unless system("#{psql} < #{tmpfile}")
+      puts "Error pushing table to remote database"; exit
+    end
+
+    # Delete tmpfile
+    File.delete(tmpfile)
+
+    # Finished
+    puts "Pushing #{args.table} database table complete"
+  end
+
 end
