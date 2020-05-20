@@ -6,17 +6,60 @@ namespace :pg do
   # bundle exec rake pg:pull[158.204.33.124]
   desc 'Creates a new backup on remote server and downloads it to latest.dump'
   task :pull, [:remote] => :environment do |t, args|
+
+    # Heroku mode
     if `git remote -v | grep heroku`.length > 0
-      Rake::Task['heroku:pg:pull'].invoke(args[:remote])
-    elsif (args[:remote] || ENV['HATCHBOX_IP']).to_s.count('.') == 3
-      Rake::Task['hatchbox:pg:pull'].invoke(args[:remote])
-    else
-      puts "Unable to find pg:pull provider."
-      puts "Please add a heroku git remote or a HATCHBOX_IP environment variable and try again"
-      abort
+      args.with_defaults(remote: 'heroku')
+
+      puts "=== Pulling remote '#{args.remote}' database into latest.dump"
+
+      # Create a backup on heroku
+      unless system("heroku pg:backups:capture --remote #{args.remote}")
+        abort("Error capturing heroku backup")
+      end
+
+      # Download it to local
+      unless system("curl -o latest.dump `heroku pg:backups:public-url --remote #{args.remote}`")
+        abort("Error downloading database")
+      end
+
+      # Load it
+      Rake::Task['pg:load'].invoke
+      exit
     end
 
-    Rake::Task['pg:load'].invoke
+    # Hatchbox mode
+    if (ENV['HATCHBOX_IP'] || args[:remote]).count('.') == 3
+      args.with_defaults(
+        remote: ENV.fetch('HATCHBOX_IP'),
+        app: ENV['HATCHBOX_APP'] || `pwd`.split('/').last.chomp,
+        user: ENV['HATCHBOX_USER'] || 'deploy'
+      )
+
+      puts "=== Pulling hatchbox '#{args.remote}' #{args.app} database into latest.dump"
+
+      # SSH into hatchbox and call rake pg:save there to create latest.dump
+      unless(result = `ssh #{args.user}@#{args.remote} << EOF
+        cd ~/#{args.app}/current/
+        bundle exec rake pg:save[latest.dump]
+      `).include?('Saving database completed') # The output of pg:save down below
+        puts("Error calling ssh #{args.user}@#{args.remote} and running rake pg:save on hatchbox from ~/#{args.app}/current/")
+        abort(result)
+      end
+
+      # SCP to copy the hatchkbox latest.dump to local
+      unless system("scp deploy@159.203.32.114:~/cab/current/latest.dump ./")
+        abort("Error downloading database")
+      end
+
+      # Load it
+      Rake::Task['pg:load'].invoke
+      exit
+    end
+
+    puts "Unable to find pg:pull provider."
+    puts "Please add a heroku git remote or a HATCHBOX_IP environment variable and try again"
+    abort
   end
 
   # Drops and re-creates the local database then initializes database with latest.dump
@@ -60,7 +103,7 @@ namespace :pg do
       { username: uri.user, password: uri.password, host: uri.host, port: (uri.port || 5432), database: uri.path.sub('/', '') }
     else
       config = ActiveRecord::Base.configurations[Rails.env]
-      { username: (config['username'] || `whoami`), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
+      { username: (config['username'] || `whoami`.chomp), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
     end
 
     puts "=== Saving local '#{db[:database]}' database to #{args.file_name}"
