@@ -12,14 +12,13 @@ namespace :heroku do
 
       Bundler.with_clean_env do
         unless system("heroku pg:backups:capture --remote #{args.remote}")
-          puts("Error capturing heroku backup")
-          exit
+          abort("Error capturing heroku backup")
         end
 
         if system("curl -o latest.dump `heroku pg:backups:public-url --remote #{args.remote}`")
-          puts "Downloading database completed"
+          puts("Downloading database completed")
         else
-          puts "Error downloading database"
+          abort("Error downloading database")
         end
       end
     end

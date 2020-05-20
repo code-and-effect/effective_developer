@@ -9,6 +9,8 @@ namespace :hatchbox do
       args.with_defaults(remote: ENV['HATCHBOX_IP'])
 
       puts "=== Pulling remote '#{args.remote}' database into latest.dump"
+
+      #scp deploy@159.203.32.114:~/cab/current/latest.dump ./
     end
 
   end

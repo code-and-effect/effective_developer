@@ -13,7 +13,7 @@ namespace :pg do
     else
       puts "Unable to find pg:pull provider."
       puts "Please add a heroku git remote or a HATCHBOX_IP environment variable and try again"
-      exit
+      abort
     end
 
     Rake::Task['pg:load'].invoke
@@ -43,7 +43,7 @@ namespace :pg do
     if system("export PGPASSWORD=#{db[:password]}; pg_restore --no-acl --no-owner --clean --if-exists -h #{db[:host]} -U #{db[:username]} -d #{db[:database]} #{args.file_name}")
       puts "Loading database completed"
     else
-      puts "Error loading database"
+      abort "Error loading database"
     end
   end
 
@@ -54,14 +54,10 @@ namespace :pg do
     args.with_defaults(:file_name => 'latest.dump')
 
     db = if ENV['DATABASE_URL'].to_s.length > 0
-      regex = Regexp.new(/postgres:\/\/(\w+):(\w+)@(.+):(\d+)\/(\w+)/)
-      info = ENV['DATABASE_URL'].match(regex)
+      uri = URI.parse(ENV['DATABASE_URL']) rescue nil
+      abort("Invalid DATABASE_URL") unless uri.present?
 
-      if info.blank? || info.length != 6
-        puts("Invalid DATABASE_URL") and exit
-      end
-
-      { username: info[1], password: info[2], host: info[3], port: info[4], database: info[5] }
+      { username: uri.user, password: uri.password, host: uri.host, port: (uri.port || 5432), database: uri.path.sub('/', '') }
     else
       config = ActiveRecord::Base.configurations[Rails.env]
       { username: (config['username'] || `whoami`), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
@@ -72,7 +68,7 @@ namespace :pg do
     if system("export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.file_name}")
       puts "Saving database completed"
     else
-      puts "Error saving database"
+      abort "Error saving database"
     end
   end
 
@@ -85,20 +81,17 @@ namespace :pg do
 
     Bundler.with_clean_env do
       unless system("heroku pg:backups:capture --remote #{args.source_remote}")
-        puts "Error capturing heroku backup"
-        exit
+        abort "Error capturing heroku backup"
       end
 
       url = (`heroku pg:backups:public-url --remote #{args.source_remote}`).chomp
 
       unless (url || '').length > 0
-        puts "Error reading public-url from remote #{args.source_remote}"
-        exit
+        abort "Error reading public-url from remote #{args.source_remote}"
       end
 
       unless system("heroku pg:backups:restore '#{url}' DATABASE_URL --remote #{args.target_remote}")
-        puts "Error cloning heroku backup"
-        exit
+        abort "Error cloning heroku backup"
       end
     end
 
@@ -110,7 +103,7 @@ namespace :pg do
     args.with_defaults(:remote => 'heroku')
 
     if args.table.blank?
-      puts "Error, no table name specified. Expected usage: rake pg:push_table[prices]"; exit
+      abort "Error, no table name specified. Expected usage: rake pg:push_table[prices]"
     end
 
     # Find and parse my heroku database info
@@ -121,14 +114,14 @@ namespace :pg do
     if info.blank? || info.length != 6
       puts "Unable to find heroku DATABASE_URL"
       puts "Expected \"heroku config --remote #{args.remote} | grep DATABASE_URL\" to be present"
-      exit
+      abort
     end
 
     heroku = { username: info[1], password: info[2], host: info[3], port: info[4], database: info[5] }
 
     # Confirm destructive operation
     puts "WARNING: this task will overwrite the #{args.table} database table on #{args.remote}. Proceed? (y/n)"
-    (puts 'Aborted' and exit) unless STDIN.gets.chomp.downcase == 'y'
+    abort('Aborted') unless STDIN.gets.chomp.downcase == 'y'
 
     puts "=== Cloning local table '#{args.table}' to remote #{args.remote} database"
 
@@ -137,7 +130,7 @@ namespace :pg do
     tmpfile = "tmp/#{args.table}.sql"
 
     unless system("pg_dump --data-only --table=#{args.table} -h localhost -U '#{db['username']}' '#{db['database']}' > #{tmpfile}")
-      puts "Error dumping local database table"; exit
+      abort "Error dumping local database table"
     end
 
     # Now restore it to heroku
@@ -145,11 +138,11 @@ namespace :pg do
     delete = args.table.split(',').map { |table| "DELETE FROM #{table}" }.join(';')
 
     unless system("#{psql} -c \"#{delete}\"")
-      puts "Error deleting remote table data"; exit
+      abort "Error deleting remote table data"
     end
 
     unless system("#{psql} < #{tmpfile}")
-      puts "Error pushing table to remote database"; exit
+      abort "Error pushing table to remote database"
     end
 
     # Delete tmpfile
