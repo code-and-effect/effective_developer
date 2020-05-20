@@ -48,7 +48,7 @@ namespace :pg do
       end
 
       # SCP to copy the hatchkbox latest.dump to local
-      unless system("scp deploy@159.203.32.114:~/cab/current/latest.dump ./")
+      unless system("scp #{args.user}@#{args.remote}:~/#{args.app}/current/latest.dump ./")
         abort("Error downloading database")
       end
 
