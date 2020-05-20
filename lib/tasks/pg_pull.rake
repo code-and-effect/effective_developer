@@ -1,26 +1,19 @@
 namespace :pg do
-  # Creates a new backup on heroku, downloads that backup to latest.dump, and then calls pg:load
+  # Creates a new backup on remote server, downloads that backup to latest.dump, and then calls pg:load
   #
   # bundle exec rake pg:pull
   # bundle exec rake pg:pull[staging]
-  desc 'Pulls a newly captured backup from heroku (--remote heroku by default) and calls pg:load'
+  # bundle exec rake pg:pull[158.204.33.124]
+  desc 'Creates a new backup on remote server and downloads it to latest.dump'
   task :pull, [:remote] => :environment do |t, args|
-    args.with_defaults(:remote => 'heroku')
-
-    puts "=== Pulling remote '#{args.remote}' database into latest.dump"
-
-    Bundler.with_clean_env do
-      unless system("heroku pg:backups:capture --remote #{args.remote}")
-        puts "Error capturing heroku backup"
-        exit
-      end
-
-      if system("curl -o latest.dump `heroku pg:backups:public-url --remote #{args.remote}`")
-        puts "Downloading database completed"
-      else
-        puts "Error downloading database"
-        exit
-      end
+    if `git remote -v | grep heroku`.length > 0
+      Rake::Task['heroku:pg:pull'].invoke(args[:remote])
+    elsif (args[:remote] || ENV['HATCHBOX_IP']).to_s.count('.') == 3
+      Rake::Task['hatchbox:pg:pull'].invoke(args[:remote])
+    else
+      puts "Unable to find pg:pull provider."
+      puts "Please add a heroku git remote or a HATCHBOX_IP environment variable and try again"
+      exit
     end
 
     Rake::Task['pg:load'].invoke
@@ -33,9 +26,11 @@ namespace :pg do
   desc 'Loads a postgresql .dump file into the development database (latest.dump by default)'
   task :load, [:file_name] => :environment do |t, args|
     args.with_defaults(:file_name => 'latest.dump')
-    db = ActiveRecord::Base.configurations[Rails.env]
 
-    puts "=== Loading #{args.file_name} into local '#{db['database']}' database"
+    config = ActiveRecord::Base.configurations[Rails.env]
+    db = { username: (config['username'] || `whoami`), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
+
+    puts "=== Loading #{args.file_name} into local '#{db[:database]}' database"
 
     # bin/rails db:environment:set RAILS_ENV=development
     if Rails.env != 'production'
@@ -45,7 +40,7 @@ namespace :pg do
     Rake::Task['db:drop'].invoke
     Rake::Task['db:create'].invoke
 
-    if system("pg_restore --no-acl --no-owner --clean --if-exists -h localhost -U #{db['username']} -d #{db['database']} #{args.file_name}")
+    if system("export PGPASSWORD=#{db[:password]}; pg_restore --no-acl --no-owner --clean --if-exists -h #{db[:host]} -U #{db[:username]} -d #{db[:database]} #{args.file_name}")
       puts "Loading database completed"
     else
       puts "Error loading database"
@@ -57,11 +52,24 @@ namespace :pg do
   desc 'Saves the development database to a postgresql .dump file (latest.dump by default)'
   task :save, [:file_name] => :environment do |t, args|
     args.with_defaults(:file_name => 'latest.dump')
-    db = ActiveRecord::Base.configurations[Rails.env]
 
-    puts "=== Saving local '#{db['database']}' database to #{args.file_name}"
+    db = if ENV['DATABASE_URL'].to_s.length > 0
+      regex = Regexp.new(/postgres:\/\/(\w+):(\w+)@(.+):(\d+)\/(\w+)/)
+      info = ENV['DATABASE_URL'].match(regex)
 
-    if system("pg_dump -Fc --no-acl --no-owner -h localhost -U '#{db['username']}' '#{db['database']}' > #{args.file_name}")
+      if info.blank? || info.length != 6
+        puts("Invalid DATABASE_URL") and exit
+      end
+
+      { username: info[1], password: info[2], host: info[3], port: info[4], database: info[5] }
+    else
+      config = ActiveRecord::Base.configurations[Rails.env]
+      { username: (config['username'] || `whoami`), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
+    end
+
+    puts "=== Saving local '#{db[:database]}' database to #{args.file_name}"
+
+    if system("export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.file_name}")
       puts "Saving database completed"
     else
       puts "Error saving database"
