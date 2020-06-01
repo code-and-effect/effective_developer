@@ -72,6 +72,7 @@ namespace :pg do
 
     config = ActiveRecord::Base.configurations[Rails.env]
     db = { username: (config['username'] || `whoami`), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
+    db.transform_values! { |v| v.respond_to?(:chomp) ? v.chomp : v }
 
     puts "=== Loading #{args.file_name} into local '#{db[:database]}' database"
 
@@ -105,6 +106,8 @@ namespace :pg do
       config = ActiveRecord::Base.configurations[Rails.env]
       { username: (config['username'] || `whoami`.chomp), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
     end
+
+    db.transform_values! { |v| v.respond_to?(:chomp) ? v.chomp : v }
 
     puts "=== Saving local '#{db[:database]}' database to #{args.file_name}"
 
