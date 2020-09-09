@@ -1,4 +1,5 @@
 require 'effective_resources'
+require 'rails/generators'
 require 'generators/effective/helpers'
 require 'effective_developer/engine'
 require 'effective_developer/version'
