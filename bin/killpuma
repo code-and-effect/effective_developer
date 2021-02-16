@@ -1,5 +1,7 @@
 #!/bin/bash
 
 # kill -9 the first running puma process
+# kill -9 the first running rails process
 
 kill -9 $(ps aux | grep puma | grep tcp:// | grep -v grep | head -1 | awk '{print $2}')
+kill -9 $(ps aux | grep rails | grep -v grep | head -1 | awk '{print $2}')

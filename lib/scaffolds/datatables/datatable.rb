@@ -1,13 +1,7 @@
 class <%= resource.namespaced_class_name.pluralize %>Datatable < Effective::Datatable
 
-  bulk_actions do
-    bulk_action 'Delete selected', <%= [resource.namespaces, resource, 'path'].flatten.compact.join('_') %>(:ids), data: { method: :delete, confirm: 'Really delete selected?' }
-  end
-
   datatable do
     order :updated_at
-
-    bulk_actions_col
 
     col :updated_at, visible: false
     col :created_at, visible: false
