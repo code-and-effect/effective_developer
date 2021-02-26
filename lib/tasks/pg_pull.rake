@@ -66,25 +66,60 @@ namespace :pg do
   #
   # bundle exec rake pg:load => Will replace the current database with latest.dump
   # bundle exec rake pg:load[something.dump] => Will replace the current database with something.dump
+  # bundle exec rake pg:load filename=latest.dump database=example
   desc 'Loads a postgresql .dump file into the development database (latest.dump by default)'
-  task :load, [:file_name] => :environment do |t, args|
-    args.with_defaults(:file_name => 'latest.dump')
+  task :load, [:filename] => :environment do |t, args|
+    defaults = { database: nil, filename: 'latest.dump' }
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'] }
+    keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
+    args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
+    # Validate filename
+    unless File.exists?(Rails.root + args.filename)
+      puts "#{args.filename || none} does not exist"; exit
+    end
+
+    # Validate Config
     config = ActiveRecord::Base.configurations[Rails.env]
+    configs = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env)
+
+    if configs.length > 1 && args.database.blank?
+      puts "Multiple database configs exist for #{Rails.env} environment."
+      puts "Please run bundle exec rake pg:load database=x"
+      puts "Where x is one of: #{configs.map { |config| config.name }.to_sentence}"
+      exit
+    end
+
+    if configs.length > 1 && args.database.present?
+      config = configs.find { |config| config.name == args.database }
+    end
+
+    if config.blank?
+      puts "Unable to find Rails database config for #{Rails.env}. Exiting."; exit
+    end
+
+    config = config.configuration_hash if config.respond_to?(:configuration_hash)
+    config = config.stringify_keys
+
     db = { username: (config['username'] || `whoami`), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
     db.transform_values! { |v| v.respond_to?(:chomp) ? v.chomp : v }
 
-    puts "=== Loading #{args.file_name} into local '#{db[:database]}' database"
+    puts "=== Loading #{args.filename} into local '#{db[:database]}' database"
 
     # bin/rails db:environment:set RAILS_ENV=development
     if Rails.env != 'production'
       ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
     end
 
-    Rake::Task['db:drop'].invoke
-    Rake::Task['db:create'].invoke
+    if configs.length > 1
+      Rake::Task["db:drop:#{args.database}"].invoke
+      Rake::Task["db:create:#{args.database}"].invoke
+    else
+      Rake::Task['db:drop'].invoke
+      Rake::Task['db:create'].invoke
+    end
 
-    if system("export PGPASSWORD=#{db[:password]}; pg_restore --no-acl --no-owner --clean --if-exists -h #{db[:host]} -U #{db[:username]} -d #{db[:database]} #{args.file_name}")
+    if system("export PGPASSWORD=#{db[:password]}; pg_restore --no-acl --no-owner --clean --if-exists -h #{db[:host]} -U #{db[:username]} -d #{db[:database]} #{args.filename}")
       puts "Loading database completed"
     else
       abort "Error loading database"
@@ -94,8 +129,8 @@ namespace :pg do
   # bundle exec rake pg:save => Will dump the database to latest.dump
   # bundle exec rake pg:save[something.dump] => Will dump the database to something.dump
   desc 'Saves the development database to a postgresql .dump file (latest.dump by default)'
-  task :save, [:file_name] => :environment do |t, args|
-    args.with_defaults(:file_name => 'latest.dump')
+  task :save, [:filename] => :environment do |t, args|
+    args.with_defaults(:filename => 'latest.dump')
 
     db = if ENV['DATABASE_URL'].to_s.length > 0
       uri = URI.parse(ENV['DATABASE_URL']) rescue nil
@@ -109,9 +144,9 @@ namespace :pg do
 
     db.transform_values! { |v| v.respond_to?(:chomp) ? v.chomp : v }
 
-    puts "=== Saving local '#{db[:database]}' database to #{args.file_name}"
+    puts "=== Saving local '#{db[:database]}' database to #{args.filename}"
 
-    if system("export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.file_name}")
+    if system("export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.filename}")
       puts "Saving database completed"
     else
       abort "Error saving database"
