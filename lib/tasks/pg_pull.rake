@@ -69,7 +69,7 @@ namespace :pg do
   # bundle exec rake pg:load filename=latest.dump database=example
   desc 'Loads a postgresql .dump file into the development database (latest.dump by default)'
   task :load, [:filename] => :environment do |t, args|
-    defaults = { database: nil, filename: 'latest.dump' }
+    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
     env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'] }
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
     args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
@@ -130,7 +130,10 @@ namespace :pg do
   # bundle exec rake pg:save[something.dump] => Will dump the database to something.dump
   desc 'Saves the development database to a postgresql .dump file (latest.dump by default)'
   task :save, [:filename] => :environment do |t, args|
-    args.with_defaults(:filename => 'latest.dump')
+    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'] }
+    keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
+    args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
     db = if ENV['DATABASE_URL'].to_s.length > 0
       uri = URI.parse(ENV['DATABASE_URL']) rescue nil
@@ -138,7 +141,28 @@ namespace :pg do
 
       { username: uri.user, password: uri.password, host: uri.host, port: (uri.port || 5432), database: uri.path.sub('/', '') }
     else
+      # Validate Config
       config = ActiveRecord::Base.configurations[Rails.env]
+      configs = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env)
+
+      if configs.length > 1 && args.database.blank?
+        puts "Multiple database configs exist for #{Rails.env} environment."
+        puts "Please run bundle exec rake pg:save database=x"
+        puts "Where x is one of: #{configs.map { |config| config.name }.to_sentence}"
+        exit
+      end
+
+      if configs.length > 1 && args.database.present?
+        config = configs.find { |config| config.name == args.database }
+      end
+
+      if config.blank?
+        puts "Unable to find Rails database config for #{Rails.env}. Exiting."; exit
+      end
+
+      config = config.configuration_hash if config.respond_to?(:configuration_hash)
+      config = config.stringify_keys
+
       { username: (config['username'] || `whoami`.chomp), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
     end
 
