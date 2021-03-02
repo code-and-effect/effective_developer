@@ -34,8 +34,10 @@ module Effective
       end
 
       def create_flat_form
-        if options[:tabbed] == 'false'
-          template 'forms/flat/_form.html.haml', resource.view_file('form', partial: true)
+        with_resource_tenant do
+          if options[:tabbed] == 'false'
+            template 'forms/flat/_form.html.haml', resource.view_file('form', partial: true)
+          end
         end
       end
 

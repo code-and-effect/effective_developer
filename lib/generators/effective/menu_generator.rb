@@ -13,6 +13,10 @@ module Effective
 
       desc 'Adds a menu link to an existing _navbar.html.haml'
 
+      def validate_resource
+        exit unless resource_valid?
+      end
+
       def invoke_menu
         say_status :invoke, :menu, :white
       end
@@ -22,7 +26,7 @@ module Effective
         return unless resource.namespaces.blank?
 
         begin
-          Effective::CodeWriter.new('app/views/layouts/_navbar.html.haml') do |w|
+          Effective::CodeWriter.new(resource.menu_file) do |w|
             if w.find { |line, _| line == menu_content.second.strip }
               say_status :identical, menu_path, :blue
             else
@@ -44,7 +48,7 @@ module Effective
         return unless resource.namespaces == ['admin']
 
         begin
-          Effective::CodeWriter.new('app/views/layouts/_navbar_admin.html.haml') do |w|
+          Effective::CodeWriter.new(resource.admin_menu_file) do |w|
             if w.find { |line, _| line == menu_content.second.strip }
               say_status :identical, menu_path, :blue
             else
@@ -72,7 +76,8 @@ module Effective
       end
 
       def menu_path
-        [resource.namespace, resource.plural_name, 'path'].compact * '_'
+        path = [resource.namespace, resource.plural_name, 'path'].compact * '_'
+        resource.tenant.present? ? "#{resource.tenant}.#{path}" : path
       end
     end
   end

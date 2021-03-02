@@ -15,20 +15,26 @@ module Effective
 
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
 
+      def validate_resource
+        exit unless resource_valid?
+      end
+
       def invoke_ability
         say_status :invoke, :ability, :white
       end
 
       def create_ability
-        unless File.exists?('app/models/ability.rb')
+        unless File.exists?(resource.abilities_file)
           say_status(:skipped, :ability, :yellow) and return
         end
 
-        Effective::CodeWriter.new('app/models/ability.rb') do |w|
-          if w.find { |line, depth| depth == 2 && line == ability }
+        Effective::CodeWriter.new(resource.abilities_file) do |w|
+          if w.find { |line, depth| (depth == 2 || depth == 3) && line == ability }
             say_status :identical, ability, :blue
           else
-            w.insert_into_first(ability) { |line, depth| line.start_with?('def initialize') }
+            w.insert_into_first(ability + "\n") { |line, depth| line.start_with?('def initialize') || line.end_with?('abilities(user)') }
+
+            say_status :ability, ability
           end
         end
       end
@@ -55,7 +61,13 @@ module Effective
             abilities = '[' + abilities.map { |action| ':' + action }.join(', ') + ']'
           end
 
-          "can #{abilities}, #{resource.class_name}"
+          name = if resource.module_name.present?
+            resource.class_name.split('::').last
+          else
+            resource.class_name
+          end
+
+          "can #{abilities}, #{name}"
         )
       end
     end

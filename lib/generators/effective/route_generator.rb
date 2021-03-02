@@ -15,6 +15,10 @@ module Effective
 
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
 
+      def validate_resource
+        exit unless resource_valid?
+      end
+
       def invoke_route
         say_status :invoke, :route, :white
       end
@@ -22,7 +26,7 @@ module Effective
       def create_route
         blocks = []
 
-        Effective::CodeWriter.new('config/routes.rb') do |w|
+        Effective::CodeWriter.new(resource.routes_file) do |w|
           resource.namespaces.each do |namespace|
             index = nil
 
@@ -54,7 +58,7 @@ module Effective
 
       def resources
         @resources ||= (
-          resources = "resources :#{plural_name}"
+          resources = "resources :#{resource.plural_name}"
 
           if ((crud_actions - ['show']) == invoked_actions)
             resources << ', except: [:show]'

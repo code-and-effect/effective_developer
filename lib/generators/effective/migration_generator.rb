@@ -18,6 +18,10 @@ module Effective
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
       class_option :database, type: :string, desc: "Database to generate the migration for"
 
+      def validate_resource
+        exit unless resource_valid?
+      end
+
       def invoke_migration
         say_status :invoke, :migration, :white
       end
@@ -31,14 +35,13 @@ module Effective
           return
         end
 
-        if resource.klass.blank?
-          say_status(:error, "Unable to find model. Please create an #{name}.rb model file and try again", :red)
-          return
-        end
+        return if with_resource_tenant do
+          table_name = resource.klass.table_name
 
-        if resource.klass_attributes.present?
-          say_status(:error, "#{resource.klass.name} attributes already exist. We can't migrate (yet). Exiting.", :red)
-          return
+          if ActiveRecord::Base.connection.table_exists?(table_name)
+            say_status(:error, "#{table_name} table already exist. We can't migrate (yet). Exiting.", :red)
+            true
+          end
         end
 
         if resource.model_attributes.blank?
