@@ -49,7 +49,7 @@ module Effective
           return
         end
 
-        args = ["create_#{plural_name}"] + invokable(resource.model_attributes)
+        args = ["create_#{plural_name}"] + invokable(resource.model_attributes) - timestamps
         args += ["--database", options['database']] if options['database']
 
         if options['database'].blank? && defined?(Tenant)

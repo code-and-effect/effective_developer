@@ -4,7 +4,7 @@
 
 # Generates a datatable
 # rails generate effective:datatable Thing
-# rails generate effective:controller Thing name:string description:text
+# rails generate effective:datatable Thing name:string description:text
 
 module Effective
   module Generators
@@ -36,7 +36,10 @@ module Effective
           say_status(:skipped, :datatable, :yellow) and return
         end
 
-        template 'datatables/datatable.rb', resource.datatable_file
+        with_resource_tenant do
+          template 'datatables/datatable.rb', resource.datatable_file
+        end
+
       end
 
     end
