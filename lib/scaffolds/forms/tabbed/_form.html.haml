@@ -1,6 +1,6 @@
 = tabs do
   = tab '<%= resource.human_name.titleize %>' do
-    = render '/<%= resource.plural_name %>/form_<%= resource.name %>', <%= resource.name %>: <%= resource.name %>, namespace: <%= resource.namespace ? ":#{resource.namespace}" : 'nil' %>
+    = render '/<%= resource.view_file_path("form_#{resource.name}") %>', <%= resource.name %>: <%= resource.name %>
 
 <%- if resource.nested_resources.present? || resource.instance.respond_to?(:log_changes_datatable) %>
   - if <%= resource.name %>.persisted?

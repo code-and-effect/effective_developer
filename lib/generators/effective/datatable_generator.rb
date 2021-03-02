@@ -18,6 +18,10 @@ module Effective
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
       class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
+      def validate_resource
+        exit unless resource_valid?
+      end
+
       def assign_attributes
         @attributes = invoked_attributes.presence || resource_attributes(all: true)
         self.class.send(:attr_reader, :attributes)

@@ -20,6 +20,10 @@ module Effective
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
       class_option :tabbed, type: :string, default: 'true'
 
+      def validate_resource
+        exit unless resource_valid?
+      end
+
       def assign_attributes
         @attributes = invoked_attributes.presence || resource_attributes
         self.class.send(:attr_reader, :attributes)
@@ -36,9 +40,11 @@ module Effective
       end
 
       def create_tabbed_form
-        if options[:tabbed] == 'true'
-          template 'forms/tabbed/_form.html.haml', resource.view_file('form', partial: true)
-          template 'forms/tabbed/_form_resource.html.haml', resource.flat_view_file("form_#{resource.name}", partial: true)
+        with_resource_tenant do
+          if options[:tabbed] == 'true'
+            template 'forms/tabbed/_form.html.haml', resource.view_file('form', partial: true)
+            template 'forms/tabbed/_form_resource.html.haml', resource.view_file("form_#{resource.name}", partial: true)
+          end
         end
       end
 

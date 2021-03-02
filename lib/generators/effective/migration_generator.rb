@@ -16,21 +16,44 @@ module Effective
       desc 'Creates a migration.'
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
+      class_option :database, type: :string, desc: "Database to generate the migration for"
 
       def invoke_migration
         say_status :invoke, :migration, :white
       end
 
+      # rails generate effective:migration courses body:text --database example
       def create_migration
         if invoked_attributes.present?
-          Rails::Generators.invoke('migration', ["create_#{plural_name}"] + (invokable(invoked_attributes) | timestamps))
-        elsif resource.klass_attributes.present?
-          raise 'klass_attributes already exist.  We cant migrate (yet). Exiting.'
-        elsif resource.model_attributes.present?
-          Rails::Generators.invoke('migration', ["create_#{plural_name}"] + invokable(resource.model_attributes))
-        else
-          raise 'You need to specify some attributes or have a model file present'
+          args = ["create_#{plural_name}"] + (invokable(invoked_attributes) | timestamps)
+          args += ["--database", options['database']] if options['database']
+          Rails::Generators.invoke('migration', args)
+          return
         end
+
+        if resource.klass.blank?
+          say_status(:error, "Unable to find model. Please create an #{name}.rb model file and try again", :red)
+          return
+        end
+
+        if resource.klass_attributes.present?
+          say_status(:error, "#{resource.klass.name} attributes already exist. We can't migrate (yet). Exiting.", :red)
+          return
+        end
+
+        if resource.model_attributes.blank?
+          say_status(:error, "No model attributes present. Please add the effective_resource do ... end block and try again", :red)
+          return
+        end
+
+        args = ["create_#{plural_name}"] + invokable(resource.model_attributes)
+        args += ["--database", options['database']] if options['database']
+
+        if options['database'].blank? && defined?(Tenant)
+          args += ["--database", resource.klass.name.split('::').first.downcase]
+        end
+
+        Rails::Generators.invoke('migration', args)
       end
 
       protected

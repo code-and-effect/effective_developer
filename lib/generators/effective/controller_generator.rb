@@ -17,6 +17,10 @@ module Effective
       argument :actions, type: :array, default: ['crud'], banner: 'action action'
       class_option :attributes, type: :array, default: [], desc: 'Included permitted params, otherwise read from model'
 
+      def validate_resource
+        exit unless resource_valid?
+      end
+
       def assign_actions
         @actions = invoked_actions
       end

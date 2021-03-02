@@ -1,4 +1,8 @@
-= effective_form_with(model: [(namespace if defined?(namespace)), <%= resource.name %>]) do |f|
+<% if resource.namespace.present? -%>
+= effective_form_with(model: [:<%= resource.namespace %>, <%= resource.name %>]) do |f|
+<% else -%>
+= effective_form_with(model: :<%= resource.name %>) do |f|
+<% end -%>
 <% resource.belong_tos.each do |reference| -%>
 <%= render_field(reference, depth: 1) %>
 <% end -%>
