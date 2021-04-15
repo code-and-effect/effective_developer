@@ -32,7 +32,7 @@ namespace :pg do
     if `git remote -v | grep heroku`.length > 0
       args.with_defaults(remote: 'heroku')
 
-      puts "=== Pulling remote '#{args.remote}' database into #{args.filename}"
+      puts "=== Pulling remote '#{args.remote}' #{args.database} database into #{args.filename}"
 
       # Create a backup on heroku
       unless system("heroku pg:backups:capture --remote #{args.remote}")
@@ -57,7 +57,7 @@ namespace :pg do
         user: ENV['HATCHBOX_USER'] || 'deploy'
       )
 
-      puts "=== Pulling hatchbox '#{args.remote}' #{args.app} database into #{args.filename}"
+      puts "=== Pulling hatchbox '#{args.remote}' #{args.app} #{args.database} database into #{args.filename}"
 
       # SSH into hatchbox and call rake pg:save there to create latest.dump
       unless(result = `ssh -T #{args.user}@#{args.remote} << EOF
