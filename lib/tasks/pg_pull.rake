@@ -4,14 +4,35 @@ namespace :pg do
   # bundle exec rake pg:pull
   # bundle exec rake pg:pull[staging]
   # bundle exec rake pg:pull[158.204.33.124]
+
+  # bundle exec rake pg:pull
+  # bundle exec rake pg:pull[staging]
+  # bundle exec rake pg:pull[158.204.33.124]
+  # bundle exec rake pg:pull filename=latest.dump database=example
+  # DATABASE=example bundle exec rake pg:load
   desc 'Creates a new backup on remote server and downloads it to latest.dump'
   task :pull, [:remote] => :environment do |t, args|
+    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'] }
+    keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
+    args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
+
+    # Validate Config
+    config = ActiveRecord::Base.configurations[Rails.env]
+    configs = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env)
+
+    if configs.length > 1 && args.database.blank?
+      puts "Multiple database configs exist for #{Rails.env} environment."
+      puts "Please run bundle exec rake pg:pull database=x"
+      puts "Where x is one of: #{configs.map { |config| config.name }.to_sentence}"
+      exit
+    end
 
     # Heroku mode
     if `git remote -v | grep heroku`.length > 0
       args.with_defaults(remote: 'heroku')
 
-      puts "=== Pulling remote '#{args.remote}' database into latest.dump"
+      puts "=== Pulling remote '#{args.remote}' database into #{args.filename}"
 
       # Create a backup on heroku
       unless system("heroku pg:backups:capture --remote #{args.remote}")
@@ -19,12 +40,12 @@ namespace :pg do
       end
 
       # Download it to local
-      unless system("curl -o latest.dump `heroku pg:backups:public-url --remote #{args.remote}`")
+      unless system("curl -o #{args.filename} `heroku pg:backups:public-url --remote #{args.remote}`")
         abort("Error downloading database")
       end
 
       # Load it
-      Rake::Task['pg:load'].invoke
+      Rake::Task['pg:load'].invoke(*args)
       exit
     end
 
@@ -36,24 +57,24 @@ namespace :pg do
         user: ENV['HATCHBOX_USER'] || 'deploy'
       )
 
-      puts "=== Pulling hatchbox '#{args.remote}' #{args.app} database into latest.dump"
+      puts "=== Pulling hatchbox '#{args.remote}' #{args.app} database into #{args.filename}"
 
       # SSH into hatchbox and call rake pg:save there to create latest.dump
-      unless(result = `ssh #{args.user}@#{args.remote} << EOF
+      unless(result = `ssh -T #{args.user}@#{args.remote} << EOF
         cd ~/#{args.app}/current/
-        bundle exec rake pg:save[latest.dump]
+        bundle exec rake pg:save database=#{args.database} filename=#{args.filename}
       `).include?('Saving database completed') # The output of pg:save down below
         puts("Error calling ssh #{args.user}@#{args.remote} and running rake pg:save on hatchbox from ~/#{args.app}/current/")
         abort(result)
       end
 
       # SCP to copy the hatchkbox latest.dump to local
-      unless system("scp #{args.user}@#{args.remote}:~/#{args.app}/current/latest.dump ./")
+      unless system("scp #{args.user}@#{args.remote}:~/#{args.app}/current/#{args.filename} ./")
         abort("Error downloading database")
       end
 
       # Load it
-      Rake::Task['pg:load'].invoke
+      Rake::Task['pg:load'].invoke(*args)
       exit
     end
 
@@ -67,6 +88,7 @@ namespace :pg do
   # bundle exec rake pg:load => Will replace the current database with latest.dump
   # bundle exec rake pg:load[something.dump] => Will replace the current database with something.dump
   # bundle exec rake pg:load filename=latest.dump database=example
+  # DATABASE=example bundle exec rake pg:load
   desc 'Loads a postgresql .dump file into the development database (latest.dump by default)'
   task :load, [:filename] => :environment do |t, args|
     defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
@@ -105,19 +127,6 @@ namespace :pg do
     db.transform_values! { |v| v.respond_to?(:chomp) ? v.chomp : v }
 
     puts "=== Loading #{args.filename} into local '#{db[:database]}' database"
-
-    # bin/rails db:environment:set RAILS_ENV=development
-    if Rails.env != 'production'
-      ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
-    end
-
-    if configs.length > 1
-      Rake::Task["db:drop:#{args.database}"].invoke
-      Rake::Task["db:create:#{args.database}"].invoke
-    else
-      Rake::Task['db:drop'].invoke
-      Rake::Task['db:create'].invoke
-    end
 
     if system("export PGPASSWORD=#{db[:password]}; pg_restore --no-acl --no-owner --clean --if-exists -h #{db[:host]} -U #{db[:username]} -d #{db[:database]} #{args.filename}")
       puts "Loading database completed"
