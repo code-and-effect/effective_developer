@@ -50,7 +50,7 @@ namespace :pg do
     end
 
     # Hatchbox mode
-    if (ENV['HATCHBOX_IP'] || args[:remote]).count('.') == 3
+    if (ENV['HATCHBOX_IP'] || args[:remote]).to_s.count('.') == 3
       args.with_defaults(
         remote: ENV.fetch('HATCHBOX_IP'),
         app: ENV['HATCHBOX_APP'] || `pwd`.split('/').last.chomp,
