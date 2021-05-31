@@ -228,12 +228,16 @@ module Effective
       lines.each { |line| @changed = true if line.gsub!(source, target) }
     end
 
+    def remove(from:, to:)
+      raise('expected from to be less than to') unless from.present? && to.present? && (from < to)
+      @changed = true
+      (to - from).times { lines.delete_at(from) }
+    end
+
     def replace(index, content)
       @changed = true
       lines[index].replace(content.to_s)
     end
-
-    private
 
     def write!
       return false unless changed?
@@ -244,6 +248,8 @@ module Effective
 
       true
     end
+
+    private
 
     def open?(content)
       stripped = ss(content)

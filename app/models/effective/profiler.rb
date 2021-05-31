@@ -32,7 +32,5 @@ module Effective
       retval
     end
 
-
   end
-
 end
