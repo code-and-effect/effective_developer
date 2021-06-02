@@ -24,7 +24,7 @@ module Effective
           elsif writer.find { |line| line.include?('form_for') }
             upgrade_form_for(writer, resource)
           else
-            next # Nothign to do
+            next # Nothing to do
           end
 
           writer.write!
@@ -91,7 +91,7 @@ module Effective
         writer.replace(line, content)
       end
 
-      # Replace f.submit with f.save
+      # Replace f.submit
       writer.all { |line| line.include?("#{letter}.submit") }.each do |line|
         content = writer.lines[line]
 
