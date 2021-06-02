@@ -37,13 +37,17 @@ module Effective
 
     private
 
-    SIMPLE_FORM_FOR_REGEX = /simple_form_for( |\()(\[:\w+, ?\w+\])?((\w+),)?.+do \|(\w+)\|/
-    SIMPLE_FORM_INPUT_ATTRIBUTE = /\.input( |\():(\w+),?/
+    SIMPLE_FORM_FOR_REGEX = /simple_form_for( |\()(\[:[^,]+, ?[^,]+\])?(([^,]+),)?.+do \|(\w+)\|/
+    SIMPLE_FORM_INPUT_ATTRIBUTE = /\.input( |\():(\w+)(,|$)/
     SIMPLE_FORM_INPUT_AS_ONE = /(as: :(\w+))/
     SIMPLE_FORM_INPUT_AS_TWO = /(:as => :(\w+))/
+    SIMPLE_FORM_INPUT_COLLECTION_ONE = /(collection: ([^,]+?))(,|$)/
+    SIMPLE_FORM_INPUT_COLLECTION_TWO = /(:collection => :([^,]+?))(,|$)/
 
     def upgrade_simple_form(writer, resource)
       puts "Upgrading simple form: #{writer.filename}"
+
+      letter = nil
 
       # Replace simple_form_for
       writer.all { |line| line.include?('simple_form_for') }.each do |line|
@@ -68,11 +72,17 @@ module Effective
         raise("unable to match simple_form_for input attribute from\n#{content}") unless attribute.present?
 
         as = content.match(SIMPLE_FORM_INPUT_AS_ONE) || content.match(SIMPLE_FORM_INPUT_AS_TWO)
+        collection = content.match(SIMPLE_FORM_INPUT_COLLECTION_ONE) || content.match(SIMPLE_FORM_INPUT_COLLECTION_TWO)
 
         if as.present?
-          content.sub!("#{as[0]}, ", '')
-          content.sub!("#{as[0]},", '')
-          content.sub!(as[0], '')
+          content.sub!(",#{as[0]}", '')
+          content.sub!(", #{as[0]}", '')
+        end
+
+        if collection.present?
+          content.sub!(",#{collection[0]}", ',')
+          content.sub!(", #{collection[0]}", ',')
+          content.sub!(attribute[0], "#{attribute[0]} #{collection[2]},")
         end
 
         input_type = find_input_type(resource: resource, attribute: attribute[2], as: (as[2] if as))
@@ -81,12 +91,29 @@ module Effective
         writer.replace(line, content)
       end
 
-      # .form-actions
-      # = f.submit 'Save and Create Another', class: 'btn btn-primary'
-      # = f.submit 'Save and Edit Content', class: 'btn btn-primary'
-      # = f.submit 'Save', class: 'btn btn-default'
-      # = link_to 'Cancel', admin_canadian_tax_planners_path
+      # Replace f.submit with f.save
+      writer.all { |line| line.include?("#{letter}.submit") }.each do |line|
+        content = writer.lines[line]
 
+        content.sub!("#{letter}.submit", "#{letter}.save")
+        writer.replace(line, content)
+      end
+
+      # Replace f.button :submit
+      writer.all { |line| line.include?(".button :submit,") }.each do |line|
+        content = writer.lines[line]
+
+        content.sub!(".button :submit,", ".submit")
+        writer.replace(line, content)
+      end
+
+      # Replace .form-actions
+      writer.all { |line| line == '.form-actions' }.each do |line|
+        content = writer.lines[line]
+
+        content.sub!('.form-actions', "= #{letter}.submit do")
+        writer.replace(line, content)
+      end
     end
 
     def upgrade_formtastic(writer, resource)
@@ -101,6 +128,7 @@ module Effective
       input_type = (as || resource.sql_type(attribute)).to_s
 
       case input_type
+      when 'asset_box_simple_form' then 'file_field'
       when 'effective_date_picker' then 'date_field'
       when 'select', 'effective_select' then 'select'
       when 'boolean' then 'check_box'
@@ -108,7 +136,7 @@ module Effective
       when 'string' then 'text_field'
       when 'integer' then 'number_field'
       else
-        raise("unknown input type for #{attribute} of type #{input_type}")
+        raise("unknown input type for :#{attribute} of type #{input_type}")
       end
     end
 
