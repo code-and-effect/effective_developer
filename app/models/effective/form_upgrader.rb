@@ -38,7 +38,7 @@ module Effective
     private
 
     SIMPLE_FORM_FOR_REGEX = /simple_form_for( |\()(\[:[^,]+, ?[^,]+\])?(([^,]+),)?.+do \|(\w+)\|/
-    SIMPLE_FORM_INPUT_ATTRIBUTE = /\.input( |\():(\w+)(,|$)/
+    SIMPLE_FORM_INPUT_ATTRIBUTE = /\.input( |\():(\w+)/
     SIMPLE_FORM_INPUT_AS_ONE = /(as: :(\w+))/
     SIMPLE_FORM_INPUT_AS_TWO = /(:as => :(\w+))/
     SIMPLE_FORM_INPUT_COLLECTION_ONE = /(collection: ([^,]+?))(,|$)/
@@ -48,6 +48,7 @@ module Effective
       puts "Upgrading simple form: #{writer.filename}"
 
       letter = nil
+      model = nil
 
       # Replace simple_form_for
       writer.all { |line| line.include?('simple_form_for') }.each do |line|
@@ -63,6 +64,23 @@ module Effective
 
         content.sub!(original, "effective_form_with(model: #{model}) do |#{letter}|")
         writer.replace(line, content)
+      end
+
+      # Try to figure out klass again if its missing from filename
+      if resource.klass.blank? && model.present?
+        name = model.sub('[', '').sub(']', '').sub(' ', '').split(',').map do |value|
+          value.sub('current_', '').sub('@', '').sub(':', '')
+        end
+
+        resource = Effective::Resource.new(name)
+      end
+
+      if resource.klass.blank? && writer.filename.include?('/devise/')
+        resource = Effective::Resource.new('user')
+      end
+
+      if resource.klass.blank?
+        puts " => Warning: Unable to determine klass of #{model}"
       end
 
       # Replace .input
@@ -88,6 +106,14 @@ module Effective
         input_type = find_input_type(resource: resource, attribute: attribute[2], as: (as[2] if as))
 
         content.sub!('input', input_type)
+        writer.replace(line, content)
+      end
+
+      # Replace simple_fields_for
+      writer.all { |line| line.include?(".simple_fields_for") }.each do |line|
+        content = writer.lines[line]
+
+        content.sub!(".simple_fields_for", ".has_many")
         writer.replace(line, content)
       end
 
@@ -129,14 +155,41 @@ module Effective
 
       case input_type
       when 'asset_box_simple_form' then 'file_field'
-      when 'effective_date_picker' then 'date_field'
-      when 'select', 'effective_select' then 'select'
+      when 'belongs_to', 'belongs_to_polymorphic' then 'select'
       when 'boolean' then 'check_box'
-      when 'text' then 'text_area'
-      when 'string' then 'text_field'
+      when 'check_boxes' then 'checks'
+      when 'date' then 'date_field'
+      when 'datetime' then 'datetime_field'
+      when 'decimal' then 'float_field'
+      when 'effective_ckeditor_text_area' then 'rich_text_area' # I guess
+      when 'effective_date_picker' then 'date_field'
+      when 'effective_date_time_picker' then 'datetime_field'
+      when 'effective_email' then 'email_field'
+      when 'effective_price' then 'price_field'
+      when 'effective_radio_buttons' then 'radios'
+      when 'effective_select' then 'select'
+      when 'effective_static_control' then 'static_field'
+      when 'effective_tel' then 'phone_field'
+      when 'effective_time_picker' then 'time_field'
+      when 'effective_url' then 'url_field'
+      when 'email' then 'email_field'
+      when 'file' then 'file_field'
+      when 'hidden' then 'hidden_field'
       when 'integer' then 'number_field'
+      when 'number' then 'number_field'
+      when 'password' then 'password_field'
+      when 'phone' then 'phone_field'
+      when 'price' then 'price_field'
+      when 'radio_buttons' then 'radios'
+      when 'search' then 'search_field'
+      when 'select' then 'select'
+      when 'static_control' then 'static_field'
+      when 'string' then 'text_field'
+      when 'tel', 'telephone' then 'phone_field'
+      when 'text' then 'text_area'
+      when 'url' then 'url_field'
       else
-        raise("unknown input type for :#{attribute} of type #{input_type}")
+        raise("unknown input type #{input_type} (for attribute :#{attribute})")
       end
     end
 
