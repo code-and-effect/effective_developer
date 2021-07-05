@@ -3,44 +3,83 @@
 # 1. Put in the has_attached_files to each model to be upgraded
 # 2. Remove the acts_as_asset_box
 
+require 'timeout'
+
 module Effective
   class AssetReplacer
     include ActiveStorage::Blob::Analyzable
 
-    def replace!
-      raise('expected effective assets') unless defined?(Effective::Asset)
-      raise('expected active storage') unless defined?(ActiveStorage)
+    BATCH_SIZE = 500
+    TIMEOUT = 120
 
+    def replace!(force: false)
       verify!
-      puts 'All attachment classes verified. Continuing...'
 
-      Effective::Attachment.all.find_each do |attachment|
-        print('.')
+      attachments_to_process().find_in_batches(batch_size: BATCH_SIZE).each do |attachments|
+        wait_for_active_job!
 
-        asset = attachment.asset
-        attachable = attachment.attachable
-        next if asset.blank? || attachable.blank?
+        puts "\nEnqueuing #{attachments.length} attachments with ids #{attachments.first.id} to #{attachments.last.id}"
 
-        box = attachment.box.singularize
-        boxes = attachment.box
+        attachments.each do |attachment|
+          asset = attachment.asset
+          attachable = attachment.attachable
+          next if asset.blank? || attachable.blank?
 
-        one = attachable.respond_to?(box) && attachable.send(box).kind_of?(ActiveStorage::Attached::One)
-        many = attachable.respond_to?(boxes) && attachable.send(boxes).kind_of?(ActiveStorage::Attached::Many)
+          box = attachment.box.singularize
+          boxes = attachment.box
 
-        begin
-          replace_effective_asset(asset, attachable, (one ? box : boxes))
-        rescue => e
-          puts "\nError with attachment id=#{attachment.id}: #{e}\n"
+          one = attachable.respond_to?(box) && attachable.send(box).kind_of?(ActiveStorage::Attached::One)
+          many = attachable.respond_to?(boxes) && attachable.send(boxes).kind_of?(ActiveStorage::Attached::Many)
+          box = (one ? box : boxes)
+
+          unless force
+            existing = Array(attachable.send(box))
+
+            if existing.any? { |obj| obj.respond_to?(:filename) && obj.filename.to_s == asset.file_name }
+              puts("Skipping: #{attachable.class.name} #{attachable.id} #{box} #{asset.file_name}. Already exists."); next
+            end
+          end
+
+          Effective::AssetReplacerJob.perform_later(attachment, box)
         end
       end
 
-      puts 'All Done. Have a great day.'
+      puts "\nAll Done. Have a great day."
       true
     end
 
-    private
+    # This is called on the background by the AssetReplacerJob
+    def replace_attachment!(attachment, box)
+      raise('expected an Effective::Attachment') unless attachment.kind_of?(Effective::Attachment)
+      puts("Processing attachment ##{attachment.id}")
+
+      asset = attachment.asset
+      attachable = attachment.attachable
+
+      attachable.upgrading = true if attachable.respond_to?(:upgrading=)
+
+      Timeout.timeout(TIMEOUT) do
+        attachable.send(box).attach(
+          io: URI.open(asset.url),
+          filename: asset.file_name,
+          content_type: asset.content_type.presence,
+          identify: (asset.content_type.blank?)
+        )
+
+        attachment.update_column(:replaced, true)
+      end
+
+      true
+    end
 
     def verify!
+      raise('expected effective assets') unless defined?(Effective::Asset)
+      raise('expected active storage') unless defined?(ActiveStorage)
+
+      unless Effective::Attachment.new.respond_to?(:replaced?)
+        raise('please add a replaced boolean to Effective::Attachment. add_column :attachments, :replaced, :boolean')
+      end
+
       (Effective::Attachment.all.pluck(:attachable_type, :box).uniq).each do |name, boxes|
         next if name.blank? || boxes.blank?
 
@@ -67,27 +106,37 @@ module Effective
         end
       end
 
+      puts 'All attachment classes verified.'
+
       true
     end
 
-    def replace_effective_asset(asset, attachable, box, force: false)
-      raise("attachable #{attachable.class.name} does not respond to #{box}") unless attachable.respond_to?(box)
+    def reset!
+      Effective::Attachment.update_all(replaced: false)
+    end
 
-      existing = Array(attachable.send(box))
+    private
 
-      if !force && existing.any? { |obj| obj.respond_to?(:filename) && obj.filename.to_s == asset.file_name }
-        puts("Skipping: #{attachable.class.name} #{attachable.id} #{box} #{asset.file_name}. Already exists.")
-        return true
+    def wait_for_active_job!
+      while(true)
+        if(jobs = enqueued_jobs_count) > (BATCH_SIZE / 10)
+          print '.'; sleep(2)
+        else
+          break
+        end
       end
+    end
 
-      attachable.upgrading = true if attachable.respond_to?(:upgrading=)
+    def attachments_to_process
+      Effective::Attachment.all.where(replaced: [nil, false]).order(:id).where('id < ?', 10000)
+    end
 
-      attachable.send(box).attach(
-        io: URI.open(asset.url),
-        filename: asset.file_name,
-        content_type: asset.content_type.presence,
-        identify: (asset.content_type.blank?)
-      )
+    def enqueued_jobs_count
+      if Rails.application.config.active_job.queue_adapter == :sidekiq
+        Sidekiq::Stats.new.enqueued.to_i
+      else
+        ActiveJob::Base.queue_adapter.enqueued_jobs.count
+      end
     end
 
   end
