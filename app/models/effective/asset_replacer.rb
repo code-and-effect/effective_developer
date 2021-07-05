@@ -12,10 +12,12 @@ module Effective
     BATCH_SIZE = 500
     TIMEOUT = 120
 
-    def replace!(force: false)
+    def replace!(skip_existing: false)
       verify!
 
-      attachments_to_process().find_in_batches(batch_size: BATCH_SIZE).each do |attachments|
+      attachments = attachments_to_process().to_a
+
+      while(true)
         wait_for_active_job!
 
         puts "\nEnqueuing #{attachments.length} attachments with ids #{attachments.first.id} to #{attachments.last.id}"
@@ -32,16 +34,22 @@ module Effective
           many = attachable.respond_to?(boxes) && attachable.send(boxes).kind_of?(ActiveStorage::Attached::Many)
           box = (one ? box : boxes)
 
-          unless force
+          if skip_existing
             existing = Array(attachable.send(box))
 
             if existing.any? { |obj| obj.respond_to?(:filename) && obj.filename.to_s == asset.file_name }
-              puts("Skipping: #{attachable.class.name} #{attachable.id} #{box} #{asset.file_name}. Already exists."); next
+              puts("Skipping existing #{attachable.class.name} #{attachable.id} #{box} #{asset.file_name}.")
+              next
             end
           end
 
           Effective::AssetReplacerJob.perform_later(attachment, box)
         end
+
+        attachments = attachments_to_process().where.not(id: attachments.map(&:id))
+        break if attachments.to_a.blank?
+
+        GC.start
       end
 
       puts "\nAll Done. Have a great day."
@@ -56,7 +64,7 @@ module Effective
       asset = attachment.asset
       attachable = attachment.attachable
 
-      attachable.upgrading = true if attachable.respond_to?(:upgrading=)
+      attachable.replacing_asset = true if attachable.respond_to?(:replacing_asset=)
 
       Timeout.timeout(TIMEOUT) do
         attachable.send(box).attach(
@@ -120,15 +128,20 @@ module Effective
     def wait_for_active_job!
       while(true)
         if(jobs = enqueued_jobs_count) > (BATCH_SIZE / 10)
-          print '.'; sleep(2)
+          print '.'; sleep(3)
         else
           break
         end
       end
     end
 
+    # The last BATCH_SIZE attachments
     def attachments_to_process
-      Effective::Attachment.all.where(replaced: [nil, false]).order(:id).where('id < ?', 10000)
+      Effective::Attachment.all
+        .includes(:asset)
+        .where(replaced: [nil, false])
+        .reorder(id: :desc)
+        .limit(BATCH_SIZE)
     end
 
     def enqueued_jobs_count
