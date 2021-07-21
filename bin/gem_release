@@ -18,6 +18,8 @@
 # 4. gem build and gem push to rubygems
 
 class GemRelease
+  SKIP_RUBYGEMS = ['effective_article_editor']
+
   def execute!(args)
     @args = args
 
@@ -54,28 +56,31 @@ class GemRelease
     end
 
     # Release a new gem version
-    if next_version.nil? == false
-      `git checkout #{current_branch}`
-      `git pull origin #{current_branch}`
+    `git checkout #{current_branch}`
+    `git pull origin #{current_branch}`
 
-      unless confirm("Releasing #{gem_name} #{next_version} (press y to continue): ")
-        puts('aborted')
-        exit
-      end
-
-      write_next_version
-
-      `git add #{gem_version_file}`
-      `git commit -m 'Version #{next_version}'`
-
-      `git tag -a #{next_version} -m 'Version #{next_version}'`
-      `git push origin #{current_branch} --tags`
-
-      puts `gem build #{gem_name}.gemspec`
-      puts `gem push #{gem_name}-#{next_version}.gem`
-
-      `rm #{gem_name}-#{next_version}.gem`
+    unless confirm("Releasing #{gem_name} #{next_version} (press y to continue): ")
+      puts('aborted')
+      exit
     end
+
+    write_next_version
+
+    `git add #{gem_version_file}`
+    `git commit -m 'Version #{next_version}'`
+
+    `git tag -a #{next_version} -m 'Version #{next_version}'`
+    `git push origin #{current_branch} --tags`
+
+    if SKIP_RUBYGEMS.include?(gem_name)
+      puts "Skipping rubygems gem push"
+      exit
+    end
+
+    puts `gem build #{gem_name}.gemspec`
+    puts `gem push #{gem_name}-#{next_version}.gem`
+
+    `rm #{gem_name}-#{next_version}.gem`
   end
 
   private
