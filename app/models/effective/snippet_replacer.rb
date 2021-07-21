@@ -12,30 +12,32 @@ module Effective
       raise('expected active storage') unless defined?(ActiveStorage)
 
       Effective::Region.with_snippets.find_each do |region|
-        region.snippet_objects.each do |snippet|
-          print('.')
-
-          begin
-            case snippet.class.name
-            when 'Effective::Snippets::EffectiveAsset'
-              replace_effective_asset(region, snippet)
-            else
-              raise("unsupported snippet: #{snippet.class.name}")
-            end
-          rescue => e
-            puts "\nError: #{e}\n"
-            remove_snippet(region, snippet)
-          end
-        end
-
-        region.save!
+        Effective::SnippetReplacerJob.perform_later(region)
       end
 
-      puts 'All Done. Have a great day.'
+      puts 'All Done. Background jobs are running. Have a great day.'
       true
     end
 
-    private
+    def replace_region!(region)
+      region.snippet_objects.each do |snippet|
+        print('.')
+
+        begin
+          case snippet.class.name
+          when 'Effective::Snippets::EffectiveAsset'
+            replace_effective_asset(region, snippet)
+          else
+            raise("unsupported snippet: #{snippet.class.name}")
+          end
+        rescue => e
+          puts "\nError: #{e}\n"
+          remove_snippet(region, snippet)
+        end
+      end
+
+      region.save!
+    end
 
     def replace_effective_asset(region, snippet)
       asset = snippet.asset
@@ -60,7 +62,6 @@ module Effective
       region.content.sub!("[#{snippet.id}]", '')
       region.snippets.delete(snippet.id)
     end
-
 
   end
 end
