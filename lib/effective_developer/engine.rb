@@ -2,9 +2,6 @@ module EffectiveDeveloper
   class Engine < ::Rails::Engine
     engine_name 'effective_developer'
 
-    config.autoload_paths += Dir["#{config.root}/models/jobs/"]
-    config.eager_load_paths += Dir["#{config.root}/models/jobs/"]
-
     # Set up our default configuration options.
     initializer 'effective_developer.defaults', before: :load_config_initializers do |app|
       # Set up our defaults, as per our initializer template
