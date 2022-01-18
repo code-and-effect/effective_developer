@@ -100,7 +100,7 @@ class GemRelease
   end
 
   def gem_version_file_contents
-    @gem_version_file_contents ||= (File.read(gem_version_file) rescue '')
+    @gem_version_file_contents ||= File.read(gem_version_file)
   end
 
   def current_version
