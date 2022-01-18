@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+
+# Helper script to rename files and folders
+
+# > deep_rename organizations classifieds
+
+# This script will:
+# 1. Rename all folders and files in the working directory
+
+require 'fileutils'
+
+class DeepRenameFiles
+
+  def execute!(args)
+    # Check for all the errors.
+    unless args.length == 2
+      puts('Invalid arguments. Try deep_rename_files foo bar'); exit
+    end
+
+    rename_folders!(args.first, args.last)
+    rename_files!(args.first, args.last)
+  end
+
+  def rename_folders!(source, target)
+    puts "Deep renaming folders"
+
+    Dir.glob(Dir.pwd + '/**/*').each do |path|
+      next unless File.directory?(path)
+
+      changed = path.gsub(source, target)
+
+      if path != changed
+        puts "folder: #{path.gsub(Dir.pwd, '')} => #{changed.gsub(Dir.pwd, '')}"
+        FileUtils.mv(path, changed)
+      end
+    end
+  end
+
+  def rename_files!(source, target)
+    puts "Deep renaming files"
+
+    Dir.glob(Dir.pwd + '/**/*').each do |path|
+      next if File.directory?(path)
+
+      changed = path.gsub(source, target)
+
+      if path != changed
+        puts "file: #{path.gsub(Dir.pwd, '')} => #{changed.gsub(Dir.pwd, '')}"
+        File.rename(path, changed)
+      end
+    end
+  end
+
+end
+
+DeepRenameFiles.new().execute!(ARGV)

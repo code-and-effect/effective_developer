@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+# > deep_rename_content organizations classifieds
+
+# This script will:
+# 1. Replace matching content in all files
+
+require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
+
+class DeepRenameContent
+
+  def execute!(args)
+    # Check for all the errors.
+    unless args.length == 2
+      puts('Invalid arguments. Try deep_rename_content foo bar'); exit
+    end
+
+    rename_content!(args.first, args.last)
+  end
+
+  def rename_content!(source, target)
+    # Search and replace content
+    puts "Deep renaming content"
+
+    subs = {
+      source => target,
+      source.split('_').map(&:capitalize).join => target.split('_').map(&:capitalize).join
+    }
+
+    Dir.glob(Dir.pwd + '/**/*').each do |path|
+      next if File.directory?(path)
+
+      writer = Effective::CodeWriter.new(path) do |w|
+        subs.each { |k, v| w.gsub!(k, v) }
+      end
+
+      puts "updated: #{path.gsub(Dir.pwd, '')}" if writer.changed?
+    end
+  end
+end
+
+DeepRenameContent.new().execute!(ARGV)

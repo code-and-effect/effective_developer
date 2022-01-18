@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+# > deep_rename organizations classifieds
+
+system("deep_rename_files #{ARGV.join(' ')}")
+system("deep_rename_content #{ARGV.join(' ')}")
