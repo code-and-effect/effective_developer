@@ -18,8 +18,8 @@ namespace :pg do
     args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
     # Validate Config
-    config = ActiveRecord::Base.configurations[Rails.env]
     configs = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env)
+    config = configs.first
 
     if configs.length > 1 && args.database.blank?
       puts "Multiple database configs exist for #{Rails.env} environment."
@@ -102,8 +102,8 @@ namespace :pg do
     end
 
     # Validate Config
-    config = ActiveRecord::Base.configurations[Rails.env]
     configs = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env)
+    config = configs.first
 
     if configs.length > 1 && args.database.blank?
       puts "Multiple database configs exist for #{Rails.env} environment."
@@ -151,8 +151,8 @@ namespace :pg do
       { username: uri.user, password: uri.password, host: uri.host, port: (uri.port || 5432), database: uri.path.sub('/', '') }
     else
       # Validate Config
-      config = ActiveRecord::Base.configurations[Rails.env]
       configs = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env)
+      config = configs.first
 
       if configs.length > 1 && args.database.blank?
         puts "Multiple database configs exist for #{Rails.env} environment."
