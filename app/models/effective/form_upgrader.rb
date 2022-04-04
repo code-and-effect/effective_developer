@@ -38,6 +38,8 @@ module Effective
     private
 
     SIMPLE_FORM_FOR_REGEX = /simple_form_for( |\()(\[:[^,]+, ?[^,]+\])?(([^,]+),)?.+do \|(\w+)\|/
+    SIMPLE_FORM_FOR_REGEX2 = /simple_form_for\((\w+).+?\) do \|(\w+)\|/
+
     SIMPLE_FORM_INPUT_ATTRIBUTE = /\.input( |\():(\w+)/
     SIMPLE_FORM_INPUT_AS_ONE = /(as: :(\w+))/
     SIMPLE_FORM_INPUT_AS_TWO = /(:as => :(\w+))/
@@ -53,17 +55,38 @@ module Effective
       # Replace simple_form_for
       writer.all { |line| line.include?('simple_form_for') }.each do |line|
         content = writer.lines[line]
+
+        # Try first time
         matched = content.match(SIMPLE_FORM_FOR_REGEX)
-        raise("unable to match simple_form_for from:\n#{content}") unless matched.present?
 
-        original = matched[0]
-        model = matched[2] || matched[4]
-        letter = matched[5]
+        if matched.present?
+          original = matched[0]
+          model = matched[2] || matched[4]
+          letter = matched[5]
 
-        raise("unable to determine simple_form_for subject from:\n#{content}") unless original && model && letter
+          if original && model && letter
+            content.sub!(original, "effective_form_with(model: #{model}) do |#{letter}|")
+            writer.replace(line, content)
+            next
+          end
+        end
 
-        content.sub!(original, "effective_form_with(model: #{model}) do |#{letter}|")
-        writer.replace(line, content)
+        # Try second time
+        matched = content.match(SIMPLE_FORM_FOR_REGEX2)
+
+        if matched.present?
+          original = matched[0]
+          model = matched[1]
+          letter = matched[2]
+
+          if original && model && letter
+            content.sub!(original, "effective_form_with(model: #{model}) do |#{letter}|")
+            writer.replace(line, content)
+            next
+          end
+        end
+
+        puts("unable to determine simple_form_for subject from:\n#{content}")
       end
 
       # Try to figure out klass again if its missing from filename
@@ -189,7 +212,8 @@ module Effective
       when 'text' then 'text_area'
       when 'url' then 'url_field'
       else
-        raise("unknown input type #{input_type} (for attribute :#{attribute})")
+        puts("unknown input type #{input_type} (for attribute :#{attribute})")
+        'text_field'
       end
     end
 
