@@ -189,11 +189,10 @@ namespace :pg do
   desc 'Clones the production (--remote heroku by default) database to staging (--remote staging by default)'
   task :clone, [:source_remote, :target_remote] => :environment do |t, args|
     args.with_defaults(:source_remote => 'heroku', :target_remote => 'staging')
-    db = ActiveRecord::Base.configurations[Rails.env]
 
     puts "=== Cloning remote '#{args.source_remote}' to '#{args.target_remote}'"
 
-    Bundler.with_clean_env do
+    Bundler.with_unbundled_env do
       unless system("heroku pg:backups:capture --remote #{args.source_remote}")
         abort "Error capturing heroku backup"
       end
@@ -240,7 +239,7 @@ namespace :pg do
     puts "=== Cloning local table '#{args.table}' to remote #{args.remote} database"
 
     # Dump my local database table
-    db = ActiveRecord::Base.configurations[Rails.env]
+    db = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).first
     tmpfile = "tmp/#{args.table}.sql"
 
     unless system("pg_dump --data-only --table=#{args.table} -h localhost -U '#{db['username']}' '#{db['database']}' > #{tmpfile}")
