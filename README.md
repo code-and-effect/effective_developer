@@ -238,6 +238,12 @@ rake pg:pull
 rake pg:pull[staging]
 ```
 
+By default, any data in the `logs` table will be excluded. To include the logs data:
+
+```ruby
+rake pg:pull logs=true
+```
+
 ## pg:load
 
 Drops and re-creates the local database then initializes database with the contents of latest.dump
