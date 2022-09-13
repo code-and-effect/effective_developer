@@ -8,12 +8,14 @@ namespace :pg do
   # bundle exec rake pg:pull
   # bundle exec rake pg:pull[staging]
   # bundle exec rake pg:pull[158.204.33.124]
+  # bundle exec rake pg:pull logs=true
   # bundle exec rake pg:pull filename=latest.dump database=example
+  # bundle exec rake pg:pull filename=latest.dump database=example logs=true
   # DATABASE=example bundle exec rake pg:load
   desc 'Creates a new backup on remote server and downloads it to latest.dump'
   task :pull, [:remote] => :environment do |t, args|
     defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
-    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'] }
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'] }
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
     args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
@@ -62,7 +64,7 @@ namespace :pg do
       # SSH into hatchbox and call rake pg:save there to create latest.dump
       unless(result = `ssh -T #{args.user}@#{args.remote} << EOF
         cd ~/#{args.app}/current/
-        bundle exec rake pg:save database=#{args.database} filename=#{args.filename}
+        bundle exec rake pg:save database=#{args.database} filename=#{args.filename} logs=#{args.logs}
       `).include?('Saving database completed') # The output of pg:save down below
         puts("Error calling ssh #{args.user}@#{args.remote} and running rake pg:save on hatchbox from ~/#{args.app}/current/")
         abort(result)
@@ -140,7 +142,7 @@ namespace :pg do
   desc 'Saves the development database to a postgresql .dump file (latest.dump by default)'
   task :save, [:filename] => :environment do |t, args|
     defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
-    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'] }
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'] }
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
     args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
@@ -179,7 +181,9 @@ namespace :pg do
 
     puts "=== Saving local '#{db[:database]}' database to #{args.filename}"
 
-    if system("export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.filename}")
+    exclude_table_data = "--exclude-table-data=logs" unless (args.logs == 'true')
+
+    if system("export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner #{exclude_table_data} -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.filename}")
       puts "Saving database completed"
     else
       abort "Error saving database"
