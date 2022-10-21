@@ -130,10 +130,12 @@ namespace :pg do
 
     puts "=== Loading #{args.filename} into local '#{db[:database]}' database"
 
-    if system("export PGPASSWORD=#{db[:password]}; pg_restore --no-acl --no-owner --clean --if-exists -h #{db[:host]} -U #{db[:username]} -d #{db[:database]} #{args.filename}")
-      puts "Loading database completed"
+    command = "export PGPASSWORD=#{db[:password]}; pg_restore --no-acl --no-owner --clean --if-exists -h #{db[:host]} -U #{db[:username]} -d #{db[:database]} #{args.filename}"
+
+    if system(command)
+      puts "\nLoading database completed"
     else
-      abort "Error loading database"
+      abort "\nLoading database completed with errors. It probably worked just fine."
     end
   end
 
@@ -183,7 +185,9 @@ namespace :pg do
 
     exclude_table_data = "--exclude-table-data=logs" unless (args.logs == 'true')
 
-    if system("export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner #{exclude_table_data} -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.filename}")
+    command = "export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner #{exclude_table_data} -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.filename}"
+
+    if system(command)
       puts "Saving database completed"
     else
       abort "Error saving database"
