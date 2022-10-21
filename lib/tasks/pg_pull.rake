@@ -146,7 +146,7 @@ namespace :pg do
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
     args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
-    db = if ENV['DATABASE_URL'].to_s.length > 0
+    db = if ENV['DATABASE_URL'].to_s.length > 0 && args.database.blank?
       uri = URI.parse(ENV['DATABASE_URL']) rescue nil
       abort("Invalid DATABASE_URL") unless uri.present?
 
