@@ -174,7 +174,7 @@ namespace :pg do
       config = config.configuration_hash if config.respond_to?(:configuration_hash)
       config = config.stringify_keys
 
-      { username: (config['username'] || `whoami`.chomp), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'] }
+      { username: (config['username'] || `whoami`.chomp), password: config['password'], host: config['host'], port: (config['port'] || 5432), database: config['database'].to_s.sub('/', '') }
     end
 
     db.transform_values! { |v| v.respond_to?(:chomp) ? v.chomp : v }
