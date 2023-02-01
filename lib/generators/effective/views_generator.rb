@@ -31,8 +31,17 @@ module Effective
 
       def create_views
         if invoked_actions.include?('show') || non_crud_actions.present?
-          template 'views/_resource.html.haml', resource.view_file(resource.name, partial: true)
+          if admin_effective_scaffold?
+            template "#{scaffold_path}/views/_resource.html.haml", resource.admin_effective_view_file(resource.name, partial: true)
+          else
+            template "#{scaffold_path}/views/_resource.html.haml", resource.view_file(resource.name, partial: true)
+          end
         end
+
+        if effective_scaffold?
+          template "#{scaffold_path}/views/_layout.html.haml", resource.view_file('layout', partial: true)
+        end
+
       end
 
     end

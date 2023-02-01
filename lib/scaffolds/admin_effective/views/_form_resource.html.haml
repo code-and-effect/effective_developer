@@ -1,0 +1,13 @@
+<% if resource.namespace.present? -%>
+= effective_form_with(model: [:<%= resource.namespace %>, <%= resource.name %>], engine: true) do |f|
+<% else -%>
+= effective_form_with(model: <%= resource.name %>, engine: true) do |f|
+<% end -%>
+<% resource.belong_tos.each do |reference| -%>
+<%= render_field(reference, depth: 1) %>
+<% end -%>
+<% attributes.each do |attribute| -%>
+<%= render_field(attribute, depth: 1) %>
+<% end -%>
+
+  = effective_submit(f)

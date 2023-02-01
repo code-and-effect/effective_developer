@@ -37,7 +37,14 @@ module Effective
         end
 
         with_resource_tenant do
-          template 'datatables/datatable.rb', resource.datatable_file
+          if admin_effective_scaffold?
+            template "#{scaffold_path}/datatables/datatable.rb", resource.admin_effective_datatable_file
+          elsif effective_scaffold?
+            template "#{scaffold_path}/datatables/datatable.rb", resource.effective_datatable_file
+          else
+            template "#{scaffold_path}/datatables/datatable.rb", resource.datatable_file
+          end
+
         end
 
       end

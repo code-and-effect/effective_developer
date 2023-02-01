@@ -20,13 +20,13 @@ module Effective
       end
 
       def create_model
-        template 'models/model.rb', resource.model_file
+        template "#{scaffold_path}/models/model.rb", resource.model_file
       end
 
       protected
 
       def parent_class_name
-        options[:parent] || (Rails::VERSION::MAJOR > 4 ? 'ApplicationRecord' : 'ActiveRecord::Base')
+        options[:parent] || 'ApplicationRecord'
       end
 
       def to_s_attribute

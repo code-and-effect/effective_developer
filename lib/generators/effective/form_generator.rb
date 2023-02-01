@@ -18,7 +18,6 @@ module Effective
       desc 'Creates a _form.html.haml in your app/views/model/ folder.'
 
       argument :attributes, type: :array, default: [], banner: 'field[:type] field[:type]'
-      class_option :tabbed, type: :string, default: 'true'
 
       def validate_resource
         exit unless resource_valid?
@@ -33,20 +32,18 @@ module Effective
         say_status :invoke, :form, :white
       end
 
-      def create_flat_form
+      def create_form
         with_resource_tenant do
-          if options[:tabbed] == 'false'
-            template 'forms/flat/_form.html.haml', resource.view_file('form', partial: true)
+          if admin_effective_scaffold?
+            template "#{scaffold_path}/views/_form.html.haml", resource.admin_effective_view_file('form', partial: true)
+            template "#{scaffold_path}/views/_form_resource.html.haml", resource.admin_effective_view_file("form_#{resource.name}", partial: true)
+          elsif effective_scaffold?
+            template "#{scaffold_path}/views/_form_resource.html.haml", resource.view_file("form", partial: true)
+          else
+            template "#{scaffold_path}/views/_form.html.haml", resource.view_file('form', partial: true)
+            template "#{scaffold_path}/views/_form_resource.html.haml", resource.view_file("form_#{resource.name}", partial: true)
           end
-        end
-      end
 
-      def create_tabbed_form
-        with_resource_tenant do
-          if options[:tabbed] == 'true'
-            template 'forms/tabbed/_form.html.haml', resource.view_file('form', partial: true)
-            template 'forms/tabbed/_form_resource.html.haml', resource.view_file("form_#{resource.name}", partial: true)
-          end
         end
       end
 
@@ -103,7 +100,7 @@ module Effective
         end
 
         html = ERB.new(
-          File.read("#{File.dirname(__FILE__)}/../../scaffolds/forms/fields/_field_#{partial}.html.haml")
+          File.read("#{File.dirname(__FILE__)}/../../scaffolds/fields/_field_#{partial}.html.haml")
         ).result(b).split("\n").map { |line| ('  ' * depth) + line }
 
         html.length > 1 ? (html.join("\n") + "\n") : html.join

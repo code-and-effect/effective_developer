@@ -4,6 +4,36 @@ module Effective
 
       protected
 
+      # Based on the resource, effective or basic
+      def scaffold_path
+        return 'admin_effective' if admin_effective_scaffold?
+        return 'effective' if effective_scaffold?
+        'basic'
+      end
+
+      def admin_scaffold?
+        Array(resource.namespaces).include?('admin')
+      end
+
+      def admin_effective_scaffold?
+        admin_scaffold? &&  effective_scaffold?
+      end
+
+      def basic_scaffold?
+        resource.klass.name.start_with?('Effective::') == false
+      end
+
+      def effective_scaffold?
+        resource.klass.name.start_with?('Effective::')
+      end
+
+      # Returns effective_messaging if run from that directory to scaffold
+      def effective_gem_name
+        path = Dir.pwd.split('/').last.to_s
+        raise('effective gem name not supported') unless path.start_with?('effective_')
+        path
+      end
+
       # This is kind of a validate for the resource
       def resource_valid?
         if resource.klass.blank?

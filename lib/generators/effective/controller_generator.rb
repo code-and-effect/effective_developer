@@ -35,7 +35,12 @@ module Effective
       end
 
       def create_controller
-        template 'controllers/controller.rb', resource.controller_file
+        if admin_effective_scaffold?
+          template "#{scaffold_path}/controllers/controller.rb", resource.admin_effective_controller_file
+        else
+          template "#{scaffold_path}/controllers/controller.rb", resource.controller_file
+        end
+
       end
 
     end
