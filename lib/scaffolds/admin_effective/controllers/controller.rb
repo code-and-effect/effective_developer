@@ -1,5 +1,5 @@
 module Admin
-  class <%= resource.class_name.sub('Effective::', '') %>Controller < ApplicationController
+  class <%= resource.class_name.sub('Effective::', '') %>sController < ApplicationController
     before_action(:authenticate_user!) if defined?(Devise)
     before_action { EffectiveResources.authorize!(self, :admin, :<%= effective_gem_name %>) }
 

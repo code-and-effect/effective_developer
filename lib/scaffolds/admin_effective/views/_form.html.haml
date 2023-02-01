@@ -2,7 +2,7 @@
   = tab '<%= resource.human_name.titleize %>' do
     = render '<%= resource.view_file_path("form_#{resource.name}").sub('effective/', '') %>', <%= resource.name %>: <%= resource.name %>
 
-<%- if resource.nested_resources.present? || resource.instance.respond_to?(:log_changes_datatable) %>
+<%- if resource.nested_resources.present? || resource.instance.respond_to?(:logs_datatable) %>
   - if <%= resource.name %>.persisted?
 <%- resource.nested_resources.each do |nested_resource| -%>
     = tab '<%= nested_resource.plural_name.titleize %>' do
@@ -10,6 +10,6 @@
 
 <%- end -%>
 <% end -%>
-  - if <%= resource.name %>.persisted? && <%= resource.name %>.respond_to?(:log_changes_datatable)
+  - if <%= resource.name %>.persisted? && <%= resource.name %>.respond_to?(:logs_datatable)
     = tab 'Logs' do
-      = render_datatable(<%= resource.name %>.log_changes_datatable)
+      = render_datatable(<%= resource.name %>.logs_datatable)
