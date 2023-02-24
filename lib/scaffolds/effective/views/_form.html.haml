@@ -6,7 +6,7 @@
   - if <%= resource.name %>.persisted?
 <%- resource.nested_resources.each do |nested_resource| -%>
     = tab '<%= nested_resource.plural_name.titleize %>' do
-      = render_datatable(<%= nested_resource.klass.name %>Datatable.new(<%= resource.name %>_id: <%= resource.name %>.id))
+      = render_datatable(<%= nested_resource.klass.name %>Datatable.new(<%= resource.name %>: <%= resource.name %>))
 <%- end -%>
 <%- if resource.instance.respond_to?(:logs_datatable) -%>
     = tab 'Logs' do
