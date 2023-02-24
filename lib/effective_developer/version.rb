@@ -1,3 +1,3 @@
 module EffectiveDeveloper
-  VERSION = '0.6.16'.freeze
+  VERSION = '0.6.17'.freeze
 end
