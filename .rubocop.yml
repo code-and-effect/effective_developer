@@ -1,0 +1,14 @@
+# https://docs.rubocop.org/
+# https://github.com/rubocop/rubocop/blob/master/config/default.yml
+#
+# To use in a Rails app or ruby gem: create a .rubocop.yml in the root that contains:
+#
+# inherit_from:
+#   - https://github.com/code-and-effect/effective_developer/blob/master/.rubocop.yml
+
+Metrics/ModuleLength:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
