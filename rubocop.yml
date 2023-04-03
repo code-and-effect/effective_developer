@@ -16,6 +16,8 @@ Metrics/MethodLength:
   Enabled: false
 Metrics/ModuleLength:
   Enabled: false
+Metrics/PerceivedComplexity:
+  Max: 14
 Style/Alias:
   Enabled: false
 Style/Documentation:
