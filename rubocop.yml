@@ -6,17 +6,23 @@
 # inherit_from:
 #   - https://raw.githubusercontent.com/code-and-effect/effective_developer/master/rubocop.yml
 
-Metrics/ModuleLength:
-  Enabled: false
-Metrics/MethodLength:
+Metrics/AbcSize:
   Enabled: false
 Metrics/BlockLength:
   Enabled: false
-Metrics/AbcSize:
+Metrics/MethodLength:
+  Enabled: false
+Metrics/ModuleLength:
+  Enabled: false
+Style/Alias:
   Enabled: false
 Style/Documentation:
   Enabled: false
 Style/IfUnlessModifier:
+  Enabled: false
+Style/SymbolArray:
+  Enabled: false
+Style/WordArray:
   Enabled: false
 
 AllCops:

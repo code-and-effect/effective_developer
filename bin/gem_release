@@ -8,6 +8,9 @@
 # To release a new gem version:
 # > gem_release 1.0.1
 
+# To release a new gem version on a different branch:
+# > gem_release 1.0.1 bootstrap3
+
 # All files must be committed
 # The old version should still be present in version.rb
 
@@ -30,7 +33,7 @@ class GemRelease
       exit
     end
 
-    if uncommitted_files.length > 0
+    if uncommitted_files.length > 0 && next_version
       puts 'Unable to proceed, the following files must be committed:'
       puts(uncommitted_files)
       exit
