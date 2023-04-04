@@ -30,5 +30,6 @@ Style/WordArray:
   Enabled: false
 
 AllCops:
+  NewCops: enable
   Exclude:
     - 'db/**/*_schema.rb'
