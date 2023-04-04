@@ -24,6 +24,8 @@ Style/Documentation:
   Enabled: false
 Style/IfUnlessModifier:
   Enabled: false
+Style/MutableConstant:
+  Enabled: false
 Style/SymbolArray:
   Enabled: false
 Style/WordArray:
