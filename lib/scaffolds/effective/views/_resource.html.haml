@@ -1,13 +1,2 @@
 = render 'effective/<%= resource.plural_name %>/layout' do
-  %table.table
-    %tbody
-<% resource.belong_tos.each do |reference| -%>
-      %tr
-        %th <%= reference.name.to_s.titleize %>
-        %td= <%= resource.name %>.<%= reference.name %>
-<% end -%>
-<% attributes.each do |name, (type, _)| -%>
-      %tr
-        %th <%= name.to_s.titleize %>
-        %td= <%= resource.name %>.<%= name %>
-<% end -%>
+  = effective_table_with(<%= resource.name %>)
