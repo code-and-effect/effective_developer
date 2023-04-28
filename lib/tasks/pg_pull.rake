@@ -99,7 +99,7 @@ namespace :pg do
     args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
     # Validate filename
-    unless File.exists?(Rails.root + args.filename)
+    unless File.exist?(Rails.root + args.filename)
       puts "#{args.filename || none} does not exist"; exit
     end
 

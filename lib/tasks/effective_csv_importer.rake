@@ -20,7 +20,7 @@ namespace :csv do
     Dir['lib/csv_importers/*.rb'].each do |file|
       importer = file.sub('lib/csv_importers/', '').sub('_importer.rb', '')
       csv_file = "lib/csv_importers/data/#{importer}.csv"
-      next unless File.exists?(csv_file)
+      next unless File.exist?(csv_file)
 
       # rake csv:import:foo
       desc "Import #{importer} from #{csv_file}"
@@ -42,7 +42,7 @@ namespace :csv do
       Dir['lib/csv_importers/*.rb'].each do |file|
         importer = file.sub('lib/csv_importers/', '').sub('_importer.rb', '')
         csv_file = "lib/csv_importers/data/#{importer}.csv"
-        next unless File.exists?(csv_file)
+        next unless File.exist?(csv_file)
 
         Rake::Task["csv:import:#{importer}"].invoke
       end
@@ -65,7 +65,7 @@ namespace :csv do
       csv_file = file.split('/').last.gsub('.csv', '')
 
       next if (Array(args.file_name) != ['all'] && Array(args.file_name).include?(csv_file) == false)
-      next if args.file_name == 'all' && File.exists?("#{Rails.root}/lib/csv_importers/#{csv_file}_importer.rb")
+      next if args.file_name == 'all' && File.exist?("#{Rails.root}/lib/csv_importers/#{csv_file}_importer.rb")
 
       klass = csv_file.classify.pluralize
       columns = CSV.open(file, 'r') { |csv| csv.first }

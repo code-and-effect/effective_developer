@@ -12,7 +12,7 @@ module Effective
     def initialize(csv_file = default_csv_files(), header: true)
       @has_header_row = header
 
-      @csv_file = Array(csv_file).find { |csv_file| File.exists?(csv_file) }
+      @csv_file = Array(csv_file).find { |csv_file| File.exist?(csv_file) }
       raise "#{csv_file} does not exist" unless @csv_file
     end
 
