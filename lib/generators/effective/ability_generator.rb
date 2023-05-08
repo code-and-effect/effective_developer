@@ -24,7 +24,7 @@ module Effective
       end
 
       def create_ability
-        unless File.exists?(resource.abilities_file)
+        unless File.exist?(resource.abilities_file)
           say_status(:skipped, :ability, :yellow) and return
         end
 

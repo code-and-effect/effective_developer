@@ -18,7 +18,7 @@ module Effective
       class_option :actions, type: :array, default: ['crud'], desc: 'Included actions', banner: 'index show'
 
       def invoke_model
-        if File.exists?(resource.model_file)
+        if File.exist?(resource.model_file)
           say_status(:skipped, :model, :yellow) and return
         end
 
