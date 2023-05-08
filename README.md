@@ -1,5 +1,6 @@
 # Effective Developer
 
+
 This gem contains some developer quality of life scripts and rails helpers.
 
 ## Getting Started
@@ -438,6 +439,14 @@ rails generate effective:menu thing  # If app/views/*namespaces/_navbar.html.ham
 rails generate effective:datatable thing
 rails generate effective:views thing
 rails generate effective:form thing
+```
+
+## Replace SQL Example
+
+You can do this:
+
+```
+Region.update_all("snippets = REPLACE(snippets, 'ActionController::Parameters', 'ActiveSupport::HashWithIndifferentAccess')")
 ```
 
 ## License
