@@ -44,10 +44,10 @@ class GemReset
       exit
     end
 
-    system("bundle update #{updated_gems.join(' ')}")
+    system("bundle update --conservative #{updated_gems.join(' ')}")
 
-    `git add Gemfile`
-    `git add Gemfile.lock`
+    # `git add Gemfile`
+    # `git add Gemfile.lock`
 
     true
   end
