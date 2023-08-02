@@ -21,7 +21,7 @@
 # 4. gem build and gem push to rubygems
 
 class GemRelease
-  SKIP_RUBYGEMS = ['effective_article_editor']
+  SKIP_RUBYGEMS = ['effective_article_editor', 'effective_memberships', 'effective_cpd', 'effective_idv']
 
   def execute!(args)
     @args = args
@@ -76,7 +76,7 @@ class GemRelease
     `git push origin #{current_branch} --tags`
 
     if SKIP_RUBYGEMS.include?(gem_name)
-      puts "Skipping rubygems gem push"
+      puts "Skipping rubygems gem push. #{gem_name} is a private gem, not for release on rubygems."
       exit
     end
 
