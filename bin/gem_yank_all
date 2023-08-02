@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+
+# Yank every version of the gem from rubygems
+
+# > gem_yank_all effective_memberships
+
+class GemYankAll
+  def execute!(args)
+    @args = args
+
+    # Validate the name parameter
+    name = args.first.to_s
+
+    unless name.start_with?('effective_')
+      puts 'Unable to proceed, expected an effective_* gem to yank'
+      puts "Try: gem_yank_all effective_memberships"
+      exit
+    end
+
+    # Use gem info to discover all the versions
+    info = `gem info #{name} --remote --all`
+    versions = info.lines.grep(/\A#{Regexp.escape(name)} *\(/).first.to_s.gsub("#{name} (", '').gsub(')', '').split(/,\s+/)
+
+    # Validate versions
+    unless versions.length > 0
+      puts 'Unable to proceed, expected at least one version from gem info'
+      exit
+    end
+
+    versions.each do |version|
+      unless Gem::Version.correct?(version)
+        puts "Unable to proceed, gem version: #{version} is incorrect"
+        exit
+      end
+    end
+
+    puts "This action will yank all #{name} gem versions: #{versions.join(', ')}"
+    puts ""
+
+    unless confirm("Yanking all #{versions.length} versions of #{name} (press y to continue): ")
+      puts('aborted')
+      exit
+    end
+
+    versions.reverse_each do |version|
+      puts "Yanking version #{version}..."
+      system("gem yank #{name} --version #{version}")
+    end
+
+    puts "All done yanking #{name}"
+
+    true
+  end
+
+  def confirm(message)
+    print(message + ' ')
+    STDIN.gets.chomp.downcase == 'y'
+  end
+end
+
+GemYankAll.new().execute!(ARGV)
