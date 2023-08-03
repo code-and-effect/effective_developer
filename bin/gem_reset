@@ -12,6 +12,8 @@
 require "#{File.dirname(__FILE__)}/../app/models/effective/code_writer"
 
 class GemReset
+  PRIVATE_GEMS = ['effective_article_editor', 'effective_memberships', 'effective_cpd', 'effective_idv']
+
   REGEX = /^gem ['"](.\w+)['"](, path:.+)$/
 
   def execute!(args)
@@ -31,8 +33,20 @@ class GemReset
         matched = line.match(REGEX)
 
         if matched
-          updated_gems << matched[1]
-          w.replace index, line.sub(matched[2], '')
+          name = matched[1]
+          path = matched[2]
+
+          updated_gems << name
+
+          public_path = ''
+          private_path = ", git: 'https://github.com/code-and-effect/#{name}.git'"
+
+          if PRIVATE_GEMS.include?(name)
+            w.replace index, line.sub(path, private_path)
+          else
+            w.replace index, line.sub(path, public_path)
+          end
+
         end
       end
     end
@@ -45,9 +59,6 @@ class GemReset
     end
 
     system("bundle update --conservative #{updated_gems.join(' ')}")
-
-    # `git add Gemfile`
-    # `git add Gemfile.lock`
 
     true
   end
