@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+# Helper script to push a file to hatchbox
+# You have to set HATCHBOX_IP in your .zshrc or .bashrc
+
+# > hb_scp ./file.csv
+
+class HbScp
+  def execute!(args)
+    filename = args.first
+
+    if filename.nil?
+      puts "Requires a file argument. Try hb_scp ./latest.dump"; exit
+      exit
+    end
+
+    path = File.expand_path(filename)
+    system("scp #{path} #{hatchbox_user}@#{hatchbox_ip}:~/")
+
+    true
+  end
+
+  def hatchbox_user
+    ENV.fetch('HATCHBOX_USER', 'deploy')
+  end
+
+  def hatchbox_ip
+    ENV.fetch('HATCHBOX_IP')
+  end
+end
+
+HbScp.new().execute!(ARGV)

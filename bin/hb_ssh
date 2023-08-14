@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+# Helper script to ssh into hatchbox
+# You have to set HATCHBOX_IP in your .zshrc or .bashrc
+
+# > hb_ssh
+
+class HbSsh
+  def execute!(args)
+    system("ssh -t #{hatchbox_user}@#{hatchbox_ip}")
+  end
+
+  def hatchbox_user
+    ENV.fetch('HATCHBOX_USER', 'deploy')
+  end
+
+  def hatchbox_ip
+    ENV.fetch('HATCHBOX_IP')
+  end
+end
+
+HbSsh.new().execute!(ARGV)
