@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+# Helper script to pull latest staging, merge hatchbox2 and push to hatchbox2
+
+# > hb_deploy
+
+class HbDeploy
+  def execute!(args)
+
+    system("git checkout staging")
+    system("git pull origin staging")
+    system("git checkout hatchbox2")
+    system("git pull origin hatchbox2")
+    system("git merge staging")
+    system("git status")
+
+    unless confirm("Ready to push to hatchbox2 (press y to continue): ")
+      puts('aborted')
+      exit
+    end
+
+    system("git checkout hatchbox2")
+    system("git push origin hatchbox2")
+
+    puts "Deployed staging branch to hatchbox2"
+    true
+  end
+
+  def confirm(message)
+    print(message + ' ')
+    STDIN.gets.chomp.downcase == 'y'
+  end
+
+end
+
+HbDeploy.new().execute!(ARGV)
