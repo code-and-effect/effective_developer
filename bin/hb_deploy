@@ -7,8 +7,14 @@
 class HbDeploy
   def execute!(args)
 
+    unless Dir.pwd.end_with?('upside')
+      puts("Please run this command from the upside/ directory")
+      exit
+    end
+
     system("git checkout staging")
     system("git pull origin staging")
+    system("gitsweep")
     system("git checkout hatchbox2")
     system("git pull origin hatchbox2")
     system("git merge staging")

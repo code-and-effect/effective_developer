@@ -2,4 +2,4 @@
 
 # Deletes any branch that has already been merged into master & develop
 
-git branch --merged | grep -E -v '\*|master|develop' | xargs -n 1 git branch -d
+git branch --merged | grep -E -v '\*|master|develop|staging|hatchbox2' | xargs -n 1 git branch -d
