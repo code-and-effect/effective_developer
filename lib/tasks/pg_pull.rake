@@ -195,23 +195,29 @@ namespace :pg do
   end
 
   desc 'Clones the production (--remote heroku by default) database to staging (--remote staging by default)'
-  task :clone, [:source_remote, :target_remote] => :environment do |t, args|
-    args.with_defaults(:source_remote => 'heroku', :target_remote => 'staging')
+  task :clone, [:source, :target] => :environment do |t, args|
+    args.with_defaults(:source => nil, :target => nil)
 
-    puts "=== Cloning remote '#{args.source_remote}' to '#{args.target_remote}'"
+    if args.source.blank? || args.target.blank?
+      puts 'Need a source and target. Try: bundle exec rake "pg:clone[example,example-staging]"'
+      exit
+    end
+
+
+    puts "=== Cloning remote '#{args.source}' to '#{args.target}'"
 
     Bundler.with_unbundled_env do
-      unless system("heroku pg:backups:capture --remote #{args.source_remote}")
+      unless system("heroku pg:backups:capture --app #{args.source}")
         abort "Error capturing heroku backup"
       end
 
-      url = (`heroku pg:backups:public-url --remote #{args.source_remote}`).chomp
+      url = (`heroku pg:backups:public-url --app #{args.source}`).chomp
 
       unless (url || '').length > 0
-        abort "Error reading public-url from remote #{args.source_remote}"
+        abort "Error reading public-url from app #{args.source}"
       end
 
-      unless system("heroku pg:backups:restore '#{url}' DATABASE_URL --remote #{args.target_remote}")
+      unless system("heroku pg:backups:restore '#{url}' DATABASE_URL --app #{args.target}")
         abort "Error cloning heroku backup"
       end
     end
