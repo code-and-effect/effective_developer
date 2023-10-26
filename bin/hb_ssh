@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # Helper script to ssh into hatchbox
-# You have to set HATCHBOX_IP in your .zshrc or .bashrc
+# You have to set UPSIDE_HATCHBOX_IP in your .zshrc or .bashrc
 
 # > hb_ssh
 
@@ -15,7 +15,7 @@ class HbSsh
   end
 
   def hatchbox_ip
-    ENV.fetch('HATCHBOX_IP')
+    ENV.fetch('UPSIDE_HATCHBOX_IP')
   end
 end
 
