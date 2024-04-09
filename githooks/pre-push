@@ -53,6 +53,14 @@ do
       echo >&2 "GIT PUSH BLOCKED: Found :path in Gemfile"; exit 1
     fi
 
+    # Check for .rubocop.yml file and run bundle exec rubocop if present
+    if [ -f .rubocop.yml ]; then
+      bundle exec rubocop
+
+      if [ $? -ne 0 ]; then
+        echo >&2 "GIT PUSH BLOCKED: bundle exec rubocop offenses present. Run bundle exec rubocop -a to autocorrect."; exit 1
+      fi
+    fi
   fi
 done
 
