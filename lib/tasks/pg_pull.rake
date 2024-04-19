@@ -14,10 +14,10 @@ namespace :pg do
   # DATABASE=example bundle exec rake pg:load
   desc 'Creates a new backup on remote server and downloads it to latest.dump'
   task :pull, [:remote] => :environment do |t, args|
-    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump', logs: 'false' }
-    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'].to_s.presence }
+    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump', logs: 'false' }.compact
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'] }.compact
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
-    args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
+    args.with_defaults(defaults.merge(env_keys).merge(keywords))
 
     # Validate Config
     configs = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env)
@@ -93,10 +93,10 @@ namespace :pg do
   # DATABASE=example bundle exec rake pg:load
   desc 'Loads a postgresql .dump file into the development database (latest.dump by default)'
   task :load, [:filename] => :environment do |t, args|
-    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
-    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'] }
+    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }.compact
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'] }.compact
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
-    args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
+    args.with_defaults(defaults.merge(env_keys).merge(keywords))
 
     # Validate filename
     unless File.exist?(Rails.root + args.filename)
@@ -143,10 +143,10 @@ namespace :pg do
   # bundle exec rake pg:save[something.dump] => Will dump the database to something.dump
   desc 'Saves the development database to a postgresql .dump file (latest.dump by default)'
   task :save, [:filename] => :environment do |t, args|
-    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump', logs: 'false' }
-    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'].to_s.presence }
+    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump', logs: 'false' }.compact
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'] }.compact
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
-    args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
+    args.with_defaults(defaults.merge(env_keys).merge(keywords))
 
     db = if ENV['DATABASE_URL'].to_s.length > 0 && args.database.blank?
       uri = URI.parse(ENV['DATABASE_URL']) rescue nil
