@@ -14,8 +14,8 @@ namespace :pg do
   # DATABASE=example bundle exec rake pg:load
   desc 'Creates a new backup on remote server and downloads it to latest.dump'
   task :pull, [:remote] => :environment do |t, args|
-    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
-    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'] }
+    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump', logs: 'false' }
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'].to_s.presence }
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
     args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
@@ -59,7 +59,7 @@ namespace :pg do
         user: ENV['HATCHBOX_USER'] || 'deploy'
       )
 
-      puts "=== Pulling hatchbox '#{args.remote}' #{args.app} #{args.database} database into #{args.filename}"
+      puts "=== Pulling hatchbox '#{args.remote}' #{args.app} #{args.database} database into #{args.filename} with#{'out' unless args.logs.to_s == 'true'} logs"
 
       # SSH into hatchbox and call rake pg:save there to create latest.dump
       unless(result = `ssh -T #{args.user}@#{args.remote} << EOF
@@ -143,8 +143,8 @@ namespace :pg do
   # bundle exec rake pg:save[something.dump] => Will dump the database to something.dump
   desc 'Saves the development database to a postgresql .dump file (latest.dump by default)'
   task :save, [:filename] => :environment do |t, args|
-    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump' }
-    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'] }
+    defaults = { database: nil, filename: (ENV['DATABASE'] || 'latest') + '.dump', logs: 'false' }
+    env_keys = { database: ENV['DATABASE'], filename: ENV['FILENAME'], logs: ENV['LOGS'].to_s.presence }
     keywords = ARGV.map { |a| a.split('=') if a.include?('=') }.compact.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
     args.with_defaults(defaults.compact.merge(env_keys.compact).merge(keywords))
 
@@ -181,11 +181,11 @@ namespace :pg do
 
     db.transform_values! { |v| v.respond_to?(:chomp) ? v.chomp : v }
 
-    puts "=== Saving local '#{db[:database]}' database to #{args.filename}"
-
-    exclude_table_data = "--exclude-table-data=logs" unless (args.logs == 'true')
+    exclude_table_data = "--exclude-table-data=logs --exclude-table-data=*_logs" unless (args.logs.to_s == 'true')
 
     command = "export PGPASSWORD=#{db[:password]}; pg_dump -Fc --no-acl --no-owner #{exclude_table_data} -h #{db[:host]} -p #{db[:port]} -U #{db[:username]} #{db[:database]} > #{args.filename}"
+
+    puts "=== Saving local '#{db[:database]}' database to #{args.filename} with#{'out' unless args.logs.to_s == 'true'} logs"
 
     if system(command)
       puts "Saving database completed"
@@ -202,7 +202,6 @@ namespace :pg do
       puts 'Need a source and target. Try: bundle exec rake "pg:clone[example,example-staging]"'
       exit
     end
-
 
     puts "=== Cloning remote '#{args.source}' to '#{args.target}'"
 
