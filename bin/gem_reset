@@ -39,7 +39,7 @@ class GemReset
           updated_gems << name
 
           public_path = ''
-          private_path = ", git: 'https://github.com/code-and-effect/#{name}.git'"
+          private_path = ", git: \"https://github.com/code-and-effect/#{name}.git\""
 
           if PRIVATE_GEMS.include?(name)
             w.replace index, line.sub(path, private_path)
