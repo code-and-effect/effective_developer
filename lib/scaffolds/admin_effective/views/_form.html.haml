@@ -1,5 +1,5 @@
 = tabs do
-  = tab '<%= resource.human_name.titleize %>' do
+  = tab(<%= resource.name %>) do
     = render '<%= resource.view_file_path("form_#{resource.name}").sub('effective/', '') %>', <%= resource.name %>: <%= resource.name %>
 
 <%- if resource.nested_resources.present? || resource.instance.respond_to?(:logs_datatable) %>
