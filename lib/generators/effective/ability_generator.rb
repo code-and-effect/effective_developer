@@ -53,9 +53,11 @@ module Effective
             abilities += non_crud_actions
           end
 
-          abilities = ['manage'] if abilities.blank? || abilities == (crud_actions - ['show'])
+          abilities = ['crud'] if abilities.blank? || abilities == (crud_actions - ['show'])
 
-          if abilities.length == 1
+          if abilities == ['crud']
+            abilities = "#{abilities.first}"
+          elsif abilities.length == 1
             abilities = ":#{abilities.first}"
           else
             abilities = '[' + abilities.map { |action| ':' + action }.join(', ') + ']'
@@ -67,7 +69,7 @@ module Effective
             resource.class_name
           end
 
-          "can #{abilities}, #{name}"
+          "can(#{abilities}, #{name})"
         )
       end
     end
