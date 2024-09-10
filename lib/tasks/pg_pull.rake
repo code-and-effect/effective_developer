@@ -42,7 +42,7 @@ namespace :pg do
       end
 
       # Download it to local
-      unless system("curl -o #{args.filename} `heroku pg:backups:public-url --remote #{args.remote}`")
+      unless system("curl -o #{args.filename} `heroku pg:backups:url --remote #{args.remote}`")
         abort("Error downloading database")
       end
 
@@ -210,10 +210,10 @@ namespace :pg do
         abort "Error capturing heroku backup"
       end
 
-      url = (`heroku pg:backups:public-url --app #{args.source}`).chomp
+      url = (`heroku pg:backups:url --app #{args.source}`).chomp
 
       unless (url || '').length > 0
-        abort "Error reading public-url from app #{args.source}"
+        abort "Error reading url from app #{args.source}"
       end
 
       unless system("heroku pg:backups:restore '#{url}' DATABASE_URL --app #{args.target}")
