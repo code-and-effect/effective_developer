@@ -449,6 +449,20 @@ You can do this:
 Region.update_all("snippets = REPLACE(snippets, 'ActionController::Parameters', 'ActiveSupport::HashWithIndifferentAccess')")
 ```
 
+## Content Replacer
+
+To find & replace content in the action_text_rich_texts body column:
+
+```
+Effective::ContentReplacer.new.count("foo")
+```
+
+and
+
+```
+Effective::ContentReplacer.new.replace!("foo", "bar")
+```
+
 ## License
 
 MIT License.  Copyright [Code and Effect Inc.](http://www.codeandeffect.com/)
