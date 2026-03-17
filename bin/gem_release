@@ -21,7 +21,7 @@
 # 4. gem build and gem push to rubygems
 
 class GemRelease
-  PRIVATE_GEMS = ['effective_article_editor', 'effective_memberships', 'effective_cpd', 'effective_idv']
+  PRIVATE_GEMS = ['effective_article_editor', 'effective_memberships', 'effective_cpd', 'effective_idv', 'effective_orders']
 
   def execute!(args)
     @args = args
