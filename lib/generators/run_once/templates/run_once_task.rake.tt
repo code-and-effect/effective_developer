@@ -1,0 +1,27 @@
+# rake run_once:<%= file_name %>
+#
+# <%= Time.now.utc.strftime('%Y-%m-%d') %>
+# TODO: describe what this task does and why it doesn't fit into a db migration.
+#
+# This task is run exactly once on production, after db:migrate, by
+# `rake upside:perform_run_once_tasks`. There are no rollbacks and failure aborts
+# the whole run, so it must be defensive and idempotent.
+#
+# - Guard the tenant and wrap work in a Tenant.as block.
+# - Never use a bang finder on an assumed id — use a non-raising lookup and `next`.
+# - Re-running must be a safe no-op (scope to the records still needing the change).
+# - `puts` found/fixed/skipped counts so the production run log shows what happened.
+#
+# See .claude/rules/run-once-tasks.md for the full pattern.
+
+namespace :run_once do
+  task <%= file_name %>: :environment do
+    next unless Tenant.engine_present?(:tenant)
+
+    Tenant.as(:tenant) do
+      # ... idempotent, scoped, validated mutation ...
+
+      puts "Done: <%= file_name %>"
+    end
+  end
+end
