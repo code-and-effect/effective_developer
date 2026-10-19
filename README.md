@@ -138,7 +138,9 @@ It truly resets you back to a fresh working copy.  Perfect for tweaking scaffold
 
 ## gitsweep
 
-A command line script to delete any git branch that has already been merged into master & develop
+Delete local branches and clean worktrees already merged into the current HEAD. Worktree removal uses Worktrunk (`wt`), including for detached HEAD worktrees.
+
+Keeps `main`, `master`, `develop`, `staging`, `hatchbox2`, the current worktree, and the primary worktree. Also keeps locked worktrees, worktrees with uncommitted or untracked files, and worktrees with a Git operation in progress. Without Worktrunk, only branches without worktrees are deleted. Remote branches and stashes are unchanged.
 
 ```console
 > gitsweep

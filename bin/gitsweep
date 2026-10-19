@@ -1,5 +1,82 @@
 #!/bin/bash
 
-# Deletes any branch that has already been merged into master & develop
+# Delete branches and clean worktrees already merged into HEAD.
 
-git branch --merged | grep -E -v '\*|master|develop|staging|hatchbox2' | xargs -n 1 git branch -d
+dry_run=false
+case "$*" in
+  '') ;;
+  --dry-run) dry_run=true ;;
+  *) echo 'Usage: gitsweep [--dry-run]' >&2; exit 1 ;;
+esac
+
+target=$(git rev-parse --verify HEAD) || exit 1
+current=$(git rev-parse --show-toplevel) || exit 1
+primary=''
+result=0
+
+while IFS= read -r -d '' field; do
+  case "$field" in
+    'worktree '*)
+      worktree=${field#worktree }
+      primary=${primary:-$worktree}
+      commit=''
+      branch=''
+      locked=false
+      ;;
+    'HEAD '*) commit=${field#HEAD } ;;
+    'branch refs/heads/'*) branch=${field#branch refs/heads/} ;;
+    locked*) locked=true ;;
+    '')
+      [ "$worktree" = "$primary" ] && continue
+      [ "$worktree" = "$current" ] && continue
+      case "$branch" in main|master|develop|staging|hatchbox2) continue ;; esac
+      if "$locked"; then
+        echo "Keeping $worktree: locked"
+        continue
+      fi
+      git merge-base --is-ancestor "$commit" "$target" || continue
+
+      git_dir=$(git -C "$worktree" rev-parse --absolute-git-dir) || { result=1; continue; }
+      for operation in rebase-merge rebase-apply MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_START sequencer; do
+        if [ -e "$git_dir/$operation" ]; then
+          echo "Keeping $worktree: git operation in progress"
+          continue 2
+        fi
+      done
+
+      if ! changes=$(git -C "$worktree" status --porcelain --untracked-files=all --ignore-submodules=none); then
+        echo "Keeping $worktree: cannot check worktree"
+        result=1
+        continue
+      fi
+      if [ -n "$changes" ]; then
+        echo "Keeping $worktree: uncommitted files"
+        continue
+      fi
+      if ! command -v wt >/dev/null 2>&1; then
+        echo "Keeping $worktree: install Worktrunk (wt) to remove it"
+        continue
+      fi
+      if "$dry_run"; then
+        echo "Would remove merged worktree: $worktree${branch:+ (branch: $branch)}"
+        [ -n "$branch" ] && echo "Would delete merged branch: $branch"
+      elif ! wt remove --foreground --no-delete-branch -- "$worktree"; then
+        result=1
+      fi
+      ;;
+  esac
+done < <(git worktree list --porcelain -z)
+
+while IFS= read -r branch; do
+  case "$branch" in main|master|develop|staging|hatchbox2) continue ;; esac
+  worktree=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$branch")
+  [ -n "$worktree" ] && continue
+
+  if "$dry_run"; then
+    echo "Would delete merged branch: $branch"
+  elif ! git branch -d -- "$branch"; then
+    result=1
+  fi
+done < <(git for-each-ref --merged="$target" --format='%(refname:short)' refs/heads/)
+
+exit "$result"
